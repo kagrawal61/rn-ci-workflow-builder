@@ -1,0 +1,25 @@
+{
+  "kind": "health-check",
+  "options": {
+    "name": "Basic React Native Workflow",
+    "triggers": {
+      "push": {
+        "branches": ["main", "develop"],
+        "ignorePaths": ["**.md"]
+      },
+      "pullRequest": {
+        "branches": ["main", "develop"]
+      },
+      "workflowDispatch": true
+    },
+    "env": {
+      "NODE_ENV": "test"
+    },
+    "runsOn": "ubuntu-latest",
+    "nodeVersions": [20],
+    "packageManager": "yarn",
+    "cache": {
+      "enabled": true
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "kind": "health-check",
+  "options": {
+    "name": "Health-check Pipeline",
+    "triggers": {
+      "push": {
+        "branches": ["main", "develop"],
+        "ignorePaths": ["docs/**", "**/*.md"]
+      },
+      "pullRequest": {
+        "branches": ["main", "develop"]
+      },
+      "workflowDispatch": true
+    },
+    "packageManager": "yarn",
+    "nodeVersions": [18, 20],
+    "skip": {
+      "commitMessageContains": "[skip ci]"
+    },
+    "secrets": [
+      "SLACK_WEBHOOK"
+    ],
+    "env": {
+      "CUSTOM_VAR": "demo"
+    }
+  }
+} 

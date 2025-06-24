@@ -1,0 +1,46 @@
+name: Basic React Native Workflow
+'on':
+  push:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch: {}
+env:
+  NODE_ENV: test
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - name: Get yarn cache dir
+        id: yarn-cache
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      - name: Setup cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+      - name: Install
+        run: yarn install --immutable
+      - name: TypeScript
+        run: yarn tsc --noEmit
+      - name: ESLint
+        run: yarn lint
+      - name: Prettier
+        run: yarn format:check
+      - name: Unit tests
+        run: yarn test --ci

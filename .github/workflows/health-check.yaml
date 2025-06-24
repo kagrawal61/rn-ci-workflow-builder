@@ -1,0 +1,61 @@
+name: React Native Health Check
+'on':
+  push:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - '**.md'
+      - LICENSE
+      - docs/**
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch: {}
+env:
+  NODE_OPTIONS: '--openssl-legacy-provider'
+  EXPO_TOKEN: __SECRET_EXPO_TOKEN__
+jobs:
+  check-skip:
+    name: Check Skip Conditions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip CI check
+        run: echo "Checking if workflow should be skipped..."
+    if: >-
+      !contains(format('{0}', github.event.head_commit.message), '[skip ci]') && !contains(format('{0}',
+      github.event.pull_request.title), '[skip-checks]') && !contains(format('{0}',
+      join(github.event.pull_request.labels.*.name, ',')), 'no-ci')
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs:
+      - check-skip
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - name: Get yarn cache dir
+        id: yarn-cache
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      - name: Setup cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+      - name: Install
+        run: yarn install --immutable
+      - name: TypeScript
+        run: yarn tsc --noEmit
+      - name: ESLint
+        run: yarn lint
+      - name: Prettier
+        run: yarn format:check
+      - name: Unit tests
+        run: yarn test --ci

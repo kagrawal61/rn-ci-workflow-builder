@@ -1,0 +1,29 @@
+{
+  "kind": "health-check",
+  "options": {
+    "name": "React Native Health Check",
+    "triggers": {
+      "push": {
+        "branches": ["main", "master"],
+        "ignorePaths": ["**.md", "LICENSE", "docs/**"]
+      },
+      "pullRequest": {
+        "branches": ["main", "master"]
+      },
+      "workflowDispatch": true
+    },
+    "env": {},
+    "secrets": ["EXPO_TOKEN"],
+    "skip": {
+      "commitMessageContains": "[skip ci]",
+      "prTitleContains": "[skip-checks]",
+      "prLabel": "no-ci"
+    },
+    "runsOn": "ubuntu-latest",
+    "nodeVersions": [20],
+    "packageManager": "yarn",
+    "cache": {
+      "enabled": true
+    }
+  }
+}
