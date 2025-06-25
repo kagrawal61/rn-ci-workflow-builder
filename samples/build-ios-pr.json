@@ -1,0 +1,38 @@
+{
+  "kind": "build",
+  "options": {
+    "name": "iOS PR Build Pipeline",
+    "triggers": {
+      "push": {
+        "branches": ["main", "develop", "feature/**"],
+        "ignorePaths": ["docs/**", "**/*.md"]
+      },
+      "pullRequest": {
+        "branches": ["main", "develop"]
+      },
+      "workflowDispatch": true
+    },
+    "packageManager": "yarn",
+    "nodeVersions": [20],
+    "runsOn": "ubuntu-latest",
+    "skip": {
+      "commitMessageContains": "[skip build]"
+    },
+    "secrets": [
+      "SLACK_WEBHOOK",
+      "FIREBASE_APP_ID_IOS",
+      "FIREBASE_SERVICE_ACCOUNT"
+    ],
+    "env": {
+      "CUSTOM_VAR": "demo"
+    },
+    "build": {
+      "platform": "ios",
+      "flavor": "develop",
+      "variant": "debug",
+      "storage": "github",
+      "notification": "pr-comment",
+      "includeHealthCheck": true
+    }
+  }
+}

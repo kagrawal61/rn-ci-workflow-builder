@@ -12,6 +12,10 @@
     "dev": "ts-node src/cli.ts generate health-check",
     "generate": "ts-node src/cli.ts generate",
     "generate:health": "ts-node src/cli.ts generate health-check",
+    "generate:build": "ts-node src/cli.ts generate build",
+    "generate:build:android": "ts-node src/cli.ts generate build --config samples/build-android-pr.json",
+    "generate:build:ios": "ts-node src/cli.ts generate build --config samples/build-ios-pr.json",
+    "generate:build:both": "ts-node src/cli.ts generate build --config samples/build-both-platforms.json",
     "list-presets": "ts-node src/cli.ts list-presets",
     "build": "tsc -p tsconfig.json",
     "lint": "eslint . --ext .ts",
@@ -25,12 +29,16 @@
     "@tabler/icons-react": "^3.34.0",
     "commander": "^11.1.0",
     "js-yaml": "^4.1.0",
-    "lucide-react": "^0.523.0"
+    "lucide-react": "^0.523.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.19.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
     "eslint": "^8.55.0",

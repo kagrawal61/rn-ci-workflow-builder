@@ -1,0 +1,201 @@
+name: Test Android Build with Skip
+'on':
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch: {}
+env:
+  NODE_ENV: ci
+jobs:
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node || 20 }}
+          cache: yarn
+      - name: Get yarn cache dir
+        id: yarn-cache
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      - name: Setup cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+      - name: Install
+        run: yarn install --immutable
+      - name: Determine Build Source
+        id: build-source
+        run: >
+
+          # Determine if this is a PR or a direct push
+
+          if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "pull_request_target" ]];
+          then
+            # This is a PR - use PR-specific variables
+            echo "is_pr=true" >> $GITHUB_OUTPUT
+            echo "source_branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+            echo "source_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "📌 Running on PR #${{ github.event.pull_request.number }} from branch ${{ github.head_ref }}"
+          else
+            # This is a direct push - use branch ref
+            echo "is_pr=false" >> $GITHUB_OUTPUT
+            echo "source_branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "source_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "📌 Running on branch ${{ github.ref_name }}"
+          fi
+      - name: Verify Android Environment
+        id: android-env-check
+        run: |
+
+          # Check for required directories and files
+          echo "🔍 Verifying Android project setup..."
+
+          if [ ! -d "android" ]; then
+            echo "❌ Error: Android directory not found"
+            echo "Make sure you're running this workflow from the root of a React Native project"
+            exit 1
+          fi
+
+          if [ ! -f "android/gradlew" ]; then
+            echo "⚠️ Warning: Gradle wrapper not found at android/gradlew"
+            echo "Build may fail if Gradle wrapper is not properly set up"
+          fi
+
+          echo "✅ Android environment looks good"
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Make Gradlew Executable
+        run: chmod +x android/gradlew
+      - name: Run Android Build
+        id: android-build
+        run: |
+
+          echo "🚀 Starting Android build for develop debug..."
+
+          # Run the build with error capture
+          echo "Building Android app using official React Native CLI..."
+
+          # Convert variant to lowercase for mode parameter
+          MODE=$(echo "debug" | tr '[:upper:]' '[:lower:]')
+          # This is a workaround - we need to use string value directly in MODE
+
+          # Using official React Native CLI for building Android app
+          npx react-native build-android --mode=$MODE || {
+            echo "❌ Android build failed"
+            echo "::error::Android build failed. Check logs for details."
+            exit 1
+          }
+
+          echo "✅ Android build completed successfully"
+
+          # Verify the expected outputs exist
+          if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+            echo "✅ APK files generated successfully"
+          else
+            echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
+          fi
+      - name: Store Android Build Artifacts
+        id: store-artifacts
+        if: always() && steps.android-build.outcome != 'skipped'
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-develop-debug-${{ github.head_ref || github.ref_name }}
+          path: android/app/build/outputs/apk/**/*.apk
+          retention-days: '14'
+      - name: Upload Android Artifact
+        id: artifact-upload-android
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-develop-debug-${{ github.head_ref || github.ref_name }}
+          path: android/app/build/outputs/apk/**/*.apk
+          retention-days: 30
+      - name: Add PR Comment
+        if: steps.build-source.outputs.is_pr == 'true'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |-
+            Android develop debug build completed!
+
+            Download: Available in GitHub Artifacts
+          comment_includes: Android develop debug build
+          mode: replace
+    needs:
+      - quality-check
+  quality-check:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node || 20 }}
+          cache: yarn
+      - name: Install
+        run: yarn install --immutable
+      - name: TypeScript
+        run: yarn tsc --noEmit
+      - name: ESLint
+        run: yarn lint
+      - name: Prettier
+        run: yarn format:check
+      - name: Unit tests
+        run: yarn test --ci
+    needs:
+      - check-skip
+    if: ${{ needs.check-skip.outputs.should-run == 'true' }}
+  check-skip:
+    name: Check Skip Conditions
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.skip-check.outputs.should-run }}
+    steps:
+      - name: Skip CI check
+        id: skip-check
+        run: |-
+          # Check for skip markers in commit messages
+          SHOULD_RUN="true"
+          SKIP_REASON=""
+          SKIP_MARKER="[skip ci]"
+
+          # Check commit message when available (push events)
+          if [[ "${{ github.event.head_commit.message || '' }}" == *"$SKIP_MARKER"* ]]; then
+            SHOULD_RUN="false"
+            SKIP_REASON="Skipping due to '$SKIP_MARKER' in commit message"
+          fi
+
+          # Check PR title when available (PR events)
+          if [[ "${{ github.event_name }}" == "pull_request" && "$SHOULD_RUN" == "true" ]]; then
+            if [[ "${{ github.event.pull_request.title || '' }}" == *"[skip android]"* ]]; then
+              SHOULD_RUN="false"
+              SKIP_REASON="Skipping due to PR title containing skip marker"
+            fi
+          fi
+
+          # Output the result
+          echo "should-run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+          echo "$SKIP_REASON"
+
+          if [ "$SHOULD_RUN" == "true" ]; then
+            echo "⏩ Workflow will proceed normally"
+          else
+            echo "⏭️ Workflow will be skipped: $SKIP_REASON"
+          fi

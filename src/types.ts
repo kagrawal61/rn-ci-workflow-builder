@@ -132,6 +132,8 @@ export interface GitHubJob {
   if?: string;
   /** Jobs this job depends on */
   needs?: string | string[];
+  /** Job outputs that can be used by other jobs */
+  outputs?: Record<string, string>;
 }
 
 /**
@@ -149,6 +151,9 @@ export interface GitHubWorkflow {
   /** Workflow jobs */
   jobs: Record<string, GitHubJob>;
 }
+
+// Import build options
+import { BuildOptions } from './presets/types';
 
 /**
  * Workflow generator options
@@ -174,6 +179,8 @@ export interface WorkflowOptions {
   packageManager?: PackageManager;
   /** Concurrency settings */
   concurrency?: ConcurrencyConfig;
+  /** Build-specific options (for build preset) */
+  build?: BuildOptions;
 }
 
 /**

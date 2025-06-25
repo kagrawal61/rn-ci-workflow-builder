@@ -1,0 +1,38 @@
+{
+  "kind": "build",
+  "options": {
+    "name": "React Native App Build Pipeline",
+    "triggers": {
+      "push": {
+        "branches": ["main", "develop", "release/**"],
+        "ignorePaths": ["docs/**", "**/*.md"]
+      },
+      "pullRequest": {
+        "branches": ["main", "develop", "release/**"]
+      },
+      "workflowDispatch": true
+    },
+    "packageManager": "yarn",
+    "nodeVersions": [20],
+    "skip": {
+      "commitMessageContains": "[skip build]",
+      "prLabel": "no-build"
+    },
+    "secrets": [
+      "SLACK_WEBHOOK",
+      "AWS_S3_BUCKET",
+      "AWS_ACCESS_KEY_ID",
+      "AWS_SECRET_ACCESS_KEY",
+      "AWS_REGION",
+      "S3_BASE_URL"
+    ],
+    "build": {
+      "platform": "both",
+      "flavor": "prod",
+      "variant": "release",
+      "storage": "s3",
+      "notification": "both",
+      "includeHealthCheck": true
+    }
+  }
+}

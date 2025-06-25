@@ -6,6 +6,8 @@ import * as jsYaml from 'js-yaml';
 
 import { generateWorkflow, writeWorkflowFile, getAvailablePresets } from './generator';
 import { WorkflowConfig } from './types';
+import { generateSecretsSummary } from './helpers/secretsManager';
+import { BuildOptions } from './presets/types';
 
 // Register built-in presets
 import { registerBuiltInPresets } from './presets';
@@ -26,6 +28,7 @@ program
   .option('-c, --config <path>', 'Path to config file (JSON or YAML)')
   .option('-o, --output <path>', 'Output file path')
   .option('-d, --dir <path>', 'Output directory (default: .github/workflows)')
+  .option('-v, --validate-only', 'Only validate the configuration without generating files')
   .action(async (preset = 'health-check', options) => {
     try {
       // Default config
@@ -34,6 +37,119 @@ program
       // Load config from file if provided
       if (options.config) {
         const configPath = path.resolve(options.config);
+        if (!fs.existsSync(configPath)) {
+          console.error(`Error: Config file not found: ${configPath}`);
+          process.exit(1);
+        }
+
+        try {
+          const configContent = fs.readFileSync(configPath, 'utf8');
+          
+          if (configPath.endsWith('.json')) {
+            config = JSON.parse(configContent);
+          } else if (configPath.endsWith('.yaml') || configPath.endsWith('.yml')) {
+            config = jsYaml.load(configContent) as WorkflowConfig;
+          } else {
+            throw new Error('Config file must be JSON or YAML');
+          }
+        } catch (error) {
+          console.error(`Error parsing config file: ${(error as Error).message}`);
+          process.exit(1);
+        }
+
+        // Override preset if specified in command
+        if (preset && preset !== 'health-check') {
+          config.kind = preset;
+        }
+      }
+
+      // Validate-only mode
+      if (options.validateOnly) {
+        try {
+          generateWorkflow(config);
+          console.log('✅ Validation successful! Configuration is valid.');
+          return;
+        } catch (error) {
+          console.error(`❌ Validation failed: ${(error as Error).message}`);
+          
+          // Show helpful documentation for specific error types
+          if ((error as Error).message.includes('required secret')) {
+            const buildOptions = (config.options as any)?.build as BuildOptions;
+            if (buildOptions) {
+              console.error('\n' + generateSecretsSummary(buildOptions));
+            }
+          }
+          
+          process.exit(1);
+        }
+      }
+
+      // Generate workflow
+      try {
+        const { yaml, secretsSummary } = generateWorkflow(config);
+
+        // Write to file or output to console
+        if (options.output) {
+          fs.writeFileSync(options.output, yaml, 'utf8');
+          console.log(`✅ Workflow written to ${options.output}`);
+        } else if (options.dir) {
+          const { filePath } = writeWorkflowFile(config, options.dir);
+          console.log(`✅ Workflow written to ${filePath}`);
+        } else {
+          const { filePath } = writeWorkflowFile(config);
+          console.log(`✅ Workflow written to ${filePath}`);
+        }
+        
+        // Display secrets summary if available
+        if (secretsSummary) {
+          console.log('\n' + secretsSummary);
+        }
+      } catch (error) {
+        console.error(`❌ Error generating workflow: ${(error as Error).message}`);
+        
+        // Print additional guidance for known error types
+        if ((error as Error).message.includes('required secret')) {
+          const buildOptions = (config.options as any)?.build as BuildOptions;
+          if (buildOptions) {
+            console.error('\n' + generateSecretsSummary(buildOptions));
+          } else {
+            console.error('\nHint: Make sure to include all required secrets for your configuration:');
+            console.error('  - For Firebase storage: FIREBASE_SERVICE_ACCOUNT and FIREBASE_APP_ID_* secrets');
+            console.error('  - For S3 storage: AWS_* secrets');
+            console.error('  - For Slack notifications: SLACK_WEBHOOK secret');
+          }
+        } else if ((error as Error).message.includes('undefined value')) {
+          console.error('\nHint: Check your configuration for undefined values or missing required fields');
+        }
+        
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error(`❌ Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+// Validate command
+program
+  .command('validate')
+  .description('Validate configuration without generating files')
+  .option('-c, --config <path>', 'Path to config file (JSON or YAML)')
+  .action(async (options) => {
+    try {
+      if (!options.config) {
+        console.error('Error: Config file path is required');
+        process.exit(1);
+      }
+
+      const configPath = path.resolve(options.config);
+      if (!fs.existsSync(configPath)) {
+        console.error(`Error: Config file not found: ${configPath}`);
+        process.exit(1);
+      }
+
+      let config: WorkflowConfig;
+      try {
         const configContent = fs.readFileSync(configPath, 'utf8');
         
         if (configPath.endsWith('.json')) {
@@ -43,31 +159,51 @@ program
         } else {
           throw new Error('Config file must be JSON or YAML');
         }
-
-        // Override preset if specified in command
-        if (preset && preset !== 'health-check') {
-          config.kind = preset;
-        }
+      } catch (error) {
+        console.error(`Error parsing config file: ${(error as Error).message}`);
+        process.exit(1);
       }
 
-      // Generate workflow
-      const yamlOutput = generateWorkflow(config);
-
-      // Write to file or output to console
-      if (options.output) {
-        fs.writeFileSync(options.output, yamlOutput, 'utf8');
-        console.log(`Workflow written to ${options.output}`);
-      } else if (options.dir) {
-        const filePath = writeWorkflowFile(config, options.dir);
-        console.log(`Workflow written to ${filePath}`);
-      } else {
-        const filePath = writeWorkflowFile(config);
-        console.log(`Workflow written to ${filePath}`);
+      try {
+        generateWorkflow(config);
+        console.log('✅ Validation successful! Configuration is valid.');
+      } catch (error) {
+        console.error(`❌ Validation failed: ${(error as Error).message}`);
+        
+        // Show helpful documentation for specific error types
+        if ((error as Error).message.includes('required secret')) {
+          const buildOptions = (config.options as any)?.build as BuildOptions;
+          if (buildOptions) {
+            console.error('\n' + generateSecretsSummary(buildOptions));
+          }
+        }
+        
+        process.exit(1);
       }
     } catch (error) {
-      console.error('Error generating workflow:', error);
+      console.error(`❌ Error: ${(error as Error).message}`);
       process.exit(1);
     }
+  });
+
+// Help command for required secrets
+program
+  .command('secrets [storage] [notification]')
+  .description('Show required secrets for a configuration')
+  .option('-p, --platform <platform>', 'Platform (ios, android, both)')
+  .action((storage = 'github', notification = 'none', options) => {
+    const platform = options.platform || 'both';
+    
+    const buildOptions: BuildOptions = {
+      platform: platform as any,
+      flavor: 'develop',
+      variant: 'debug',
+      storage: storage as any,
+      notification: notification as any,
+      includeHealthCheck: true,
+    };
+    
+    console.log(generateSecretsSummary(buildOptions));
   });
 
 // List available presets command

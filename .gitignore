@@ -34,3 +34,7 @@ next-env.d.ts
 
 # Turbo
 .turbo
+
+# GitHub folders
+.github/
+.github/workflows/*

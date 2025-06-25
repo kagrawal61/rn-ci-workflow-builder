@@ -7,6 +7,7 @@ import * as yaml from 'js-yaml';
 import { WorkflowConfig, WorkflowOptions } from '../../src/types';
 import { injectSecrets, validateWorkflowConfig } from '../../src/helpers';
 import { buildHealthCheckPipeline } from '../../src/presets/healthCheck';
+import { buildBuildPipeline } from '../../src/presets/buildPreset';
 
 // Map of pipeline builders (copied from generator.ts but without Node.js dependencies)
 const builders: Record<string, (opts: WorkflowOptions) => Record<string, any>> = {};
@@ -58,6 +59,7 @@ export function generateWorkflow(cfg: WorkflowConfig): string {
 
 // Register the built-in presets
 registerBuilder('health-check', buildHealthCheckPipeline);
+registerBuilder('build', buildBuildPipeline);
 
 // Export the types
 export type { 

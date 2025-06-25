@@ -1,0 +1,35 @@
+{
+  "kind": "build",
+  "options": {
+    "name": "Test Both Platforms Build",
+    "triggers": {
+      "push": {
+        "branches": ["main", "develop", "release/**"]
+      },
+      "pullRequest": {
+        "branches": ["main", "develop"]
+      },
+      "workflowDispatch": true
+    },
+    "packageManager": "yarn",
+    "nodeVersions": [20],
+    "runsOn": "ubuntu-latest",
+    "skip": {
+      "commitMessageContains": "[skip ci]"
+    },
+    "env": {
+      "BUILD_ENV": "test"
+    },
+    "cache": {
+      "enabled": true
+    },
+    "build": {
+      "platform": "both",
+      "flavor": "develop",
+      "variant": "debug",
+      "storage": "github",
+      "notification": "pr-comment",
+      "includeHealthCheck": true
+    }
+  }
+}

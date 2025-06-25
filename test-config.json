@@ -1,0 +1,26 @@
+{
+  "kind": "build",
+  "options": {
+    "name": "React Native Build Pipeline",
+    "triggers": {
+      "push": {
+        "branches": ["main"]
+      },
+      "pullRequest": {
+        "branches": ["main"]
+      },
+      "workflowDispatch": true
+    },
+    "nodeVersions": [18],
+    "packageManager": "yarn",
+    "runsOn": "ubuntu-latest",
+    "build": {
+      "platform": "android",
+      "flavor": "develop",
+      "variant": "debug",
+      "storage": "github",
+      "notification": "pr-comment",
+      "includeHealthCheck": true
+    }
+  }
+}

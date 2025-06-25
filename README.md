@@ -9,6 +9,8 @@ A powerful tool to generate GitHub Actions workflows for React Native CI/CD pipe
 - Configurable via CLI or programmatically 
 - TypeScript support with full type definitions
 - Customizable workflows for different CI/CD needs
+- Contextual secret management with inline tooltips
+- Automatic generation of required secrets summary
 
 ## Installation
 
@@ -37,7 +39,10 @@ When you run a command like `yarn generate:health`, this is what happens:
 5. The appropriate builder function for the preset is called (e.g., `buildHealthCheckPipeline`)
 6. The builder creates a GitHub Actions workflow object with jobs and steps
 7. The workflow object is converted to YAML
-8. The YAML is written to a file in the `.github/workflows` directory
+8. Required secrets are identified based on configuration choices
+9. Secret placeholders are replaced with GitHub Actions secret syntax
+10. A summary of required secrets is generated
+11. The YAML is written to a file in the `.github/workflows` directory
 
 ### CLI
 
@@ -54,6 +59,9 @@ rn-ci-workflow-builder generate
 
 # Generate specific preset
 rn-ci-workflow-builder generate health-check
+
+# Generate build workflow
+rn-ci-workflow-builder generate build
 ```
 
 #### Advanced CLI Options
@@ -99,12 +107,22 @@ const config = {
   }
 };
 
-// Generate YAML string
-const yaml = generateWorkflow(config);
+// Generate YAML string with secrets summary
+const { yaml, secretsSummary } = generateWorkflow(config);
 console.log(yaml);
 
+// Display secrets summary if available
+if (secretsSummary) {
+  console.log('Required secrets:')
+  console.log(secretsSummary);
+}
+
 // Or write directly to a file
-const filePath = writeWorkflowFile(config, '.github/workflows', 'custom-health-check.yml');
+const { filePath, secretsSummary: summary } = writeWorkflowFile(
+  config, 
+  '.github/workflows', 
+  'custom-health-check.yml'
+);
 console.log(`Workflow written to ${filePath}`);
 ```
 
@@ -171,6 +189,74 @@ The health-check preset creates a workflow that runs the following checks:
 }
 ```
 
+#### Build Workflow
+
+The build preset creates a workflow for building React Native apps for Android and/or iOS platforms:
+
+- Android build with Gradle
+- iOS build with CocoaPods/Xcode
+- Platform-specific artifact storage
+- Multiple artifact storage options (GitHub, Firebase, Google Drive, S3)
+- Notification options (Slack, PR comments)
+
+**Android Build Example:**
+
+```json
+{
+  "kind": "build",
+  "options": {
+    "name": "React Native Android Build",
+    "nodeVersions": [20],
+    "packageManager": "yarn",
+    "triggers": {
+      "push": {
+        "branches": ["main", "develop"]
+      },
+      "pullRequest": {
+        "branches": ["main"]
+      },
+      "workflowDispatch": true
+    },
+    "build": {
+      "platform": "android",
+      "flavor": "develop",
+      "variant": "debug",
+      "storage": "github",
+      "notification": "pr-comment",
+      "includeHealthCheck": true
+    }
+  }
+}
+```
+
+**iOS Build Example:**
+
+```json
+{
+  "kind": "build",
+  "options": {
+    "name": "React Native iOS Build",
+    "nodeVersions": [20],
+    "packageManager": "yarn",
+    "runsOn": "macos-latest",
+    "triggers": {
+      "pullRequest": {
+        "branches": ["main"]
+      },
+      "workflowDispatch": true
+    },
+    "build": {
+      "platform": "ios",
+      "flavor": "develop",
+      "variant": "debug",
+      "storage": "firebase",
+      "notification": "both",
+      "includeHealthCheck": true
+    }
+  }
+}
+```
+
 ## Development
 
 ### Setup
@@ -203,6 +289,26 @@ yarn dev
 npm run generate:health
 # or
 yarn generate:health
+
+# Generate workflow using build preset
+npm run generate:build
+# or
+yarn generate:build
+
+# Generate Android build workflow
+npm run generate:build:android
+# or
+yarn generate:build:android
+
+# Generate iOS build workflow
+npm run generate:build:ios
+# or
+yarn generate:build:ios
+
+# Generate multi-platform build workflow
+npm run generate:build:both
+# or
+yarn generate:build:both
 
 # List available presets
 npm run list-presets
@@ -288,6 +394,17 @@ Or programmatically:
 const config = { kind: 'my-custom', options: { /* ... */ } };
 const yaml = generateWorkflow(config);
 ```
+
+## Secret Management
+
+The workflow generator includes a contextual secret management system that identifies required secrets based on your configuration choices.
+
+- Auto-generates a list of required secrets based on storage and notification options
+- Shows tooltips explaining which options require which secrets
+- Replaces secret placeholders with GitHub Actions secret syntax
+- Groups secrets by context (storage, platform, notification)
+
+Learn more in the [Secret Management documentation](./docs/secret-management.md)
 
 ## License
 

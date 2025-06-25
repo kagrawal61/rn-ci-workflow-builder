@@ -1,0 +1,84 @@
+name: Test Improved Health Check
+'on':
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch: {}
+env:
+  NODE_ENV: test
+jobs:
+  check-skip:
+    name: Check Skip Conditions
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.skip-check.outputs.should-run }}
+    steps:
+      - name: Skip CI check
+        id: skip-check
+        run: |-
+          # Check for skip markers in commit messages
+          SHOULD_RUN="true"
+          SKIP_REASON=""
+          SKIP_MARKER="[skip ci]"
+
+          # Check commit message when available (push events)
+          if [[ "${{ github.event.head_commit.message || '' }}" == *"$SKIP_MARKER"* ]]; then
+            SHOULD_RUN="false"
+            SKIP_REASON="Skipping due to '$SKIP_MARKER' in commit message"
+          fi
+
+          # Check PR title when available (PR events)
+          if [[ "${{ github.event_name }}" == "pull_request" && "$SHOULD_RUN" == "true" ]]; then
+            if [[ "${{ github.event.pull_request.title || '' }}" == *"[skip tests]"* ]]; then
+              SHOULD_RUN="false"
+              SKIP_REASON="Skipping due to PR title containing skip marker"
+            fi
+          fi
+
+          # Output the result
+          echo "should-run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+          echo "$SKIP_REASON"
+
+          if [ "$SHOULD_RUN" == "true" ]; then
+            echo "⏩ Workflow will proceed normally"
+          else
+            echo "⏭️ Workflow will be skipped: $SKIP_REASON"
+          fi
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - name: Get yarn cache dir
+        id: yarn-cache
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      - name: Setup cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+      - name: Install
+        run: yarn install --immutable
+      - name: TypeScript
+        run: yarn tsc --noEmit
+      - name: ESLint
+        run: yarn lint
+      - name: Prettier
+        run: yarn format:check
+      - name: Unit tests
+        run: yarn test --ci
+    needs:
+      - check-skip
+    if: ${{ needs.check-skip.outputs.should-run == 'true' }}

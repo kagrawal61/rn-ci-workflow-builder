@@ -1,5 +1,5 @@
-import * as yaml from 'js-yaml';
 import { generateWorkflow, WorkflowConfig, WorkflowOptions } from './lib';
+import { BuildOptions } from '../../src/presets/types';
 
 // Helper to create a default health check configuration
 export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
@@ -19,7 +19,42 @@ export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
       },
       nodeVersions: [18],
       packageManager: 'yarn',
-      runsOn: 'ubuntu-latest'
+      runsOn: 'ubuntu-latest',
+      cache: { enabled: true },
+      skip: { commitMessageContains: '[skip ci]' }
+    }
+  };
+};
+
+// Helper to create a default build configuration
+export const createDefaultBuildConfig = (): WorkflowConfig => {
+  return {
+    kind: 'build',
+    options: {
+      name: 'React Native Build Pipeline',
+      triggers: {
+        push: {
+          branches: ['main'],
+          ignorePaths: ['docs/**', '*.md']
+        },
+        pullRequest: {
+          branches: ['main']
+        },
+        workflowDispatch: true
+      },
+      nodeVersions: [18],
+      packageManager: 'yarn',
+      runsOn: 'ubuntu-latest',
+      cache: { enabled: true },
+      skip: { commitMessageContains: '[skip ci]' },
+      build: {
+        platform: 'both',
+        flavor: 'develop',
+        variant: 'debug',
+        storage: 'github',
+        notification: 'pr-comment',
+        includeHealthCheck: true
+      }
     }
   };
 };
@@ -34,27 +69,18 @@ export const generateWorkflowYaml = (config: WorkflowConfig): string => {
   }
 };
 
-// Check if a config is valid
-export const validateConfig = (config: WorkflowConfig): boolean => {
-  try {
-    generateWorkflowYaml(config);
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
 
 // Helper to get all preset kinds
 export const getPresetKinds = (): string[] => {
-  // Currently, we only have health-check, but this could be expanded
-  return ['health-check'];
+  // Return available preset kinds
+  return ['health-check', 'build'];
 };
 
 // Create a config from form values
 export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   // Create a properly typed configuration object to avoid type errors
   const config: Required<WorkflowConfig> = {
-    kind: 'health-check',
+    kind: formValues.preset || 'health-check',
     options: {
       name: '',
       triggers: {},
@@ -71,7 +97,10 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   // Map form values to workflow options
   if (formValues.name) config.options.name = formValues.name;
   
-  // Triggers already initialized in options
+  // Initialize triggers if not already initialized
+  if (!config.options.triggers) {
+    config.options.triggers = {};
+  }
   
   if (formValues.enablePushTrigger) {
     config.options.triggers.push = {
@@ -107,28 +136,15 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   // Runner OS
   config.options.runsOn = formValues.runsOn || 'ubuntu-latest';
   
-  // Skip conditions
-  if (formValues.enableSkipConditions) {
-    config.options.skip = {};
-    if (formValues.skipCommitMessage) {
-      config.options.skip.commitMessageContains = formValues.skipCommitMessage;
-    }
-    if (formValues.skipPrTitle) {
-      config.options.skip.prTitleContains = formValues.skipPrTitle;
-    }
-    if (formValues.skipPrLabel) {
-      config.options.skip.prLabel = formValues.skipPrLabel;
-    }
-  }
+  // Skip configuration is enabled by default with [skip ci]
+  config.options.skip = { commitMessageContains: '[skip ci]' };
   
-  // Cache configuration
-  if (formValues.enableCache) {
-    config.options.cache = {
-      enabled: true,
-      paths: formValues.cachePaths?.split(',').map((p: string) => p.trim()) || undefined,
-      key: formValues.cacheKey || undefined
-    };
-  }
+  // Cache configuration is enabled by default
+  config.options.cache = {
+    enabled: true,
+    paths: formValues.cachePaths?.split(',').map((p: string) => p.trim()) || undefined,
+    key: formValues.cacheKey || undefined
+  };
   
   // Environment variables
   if (formValues.envVars && Object.keys(formValues.envVars).length > 0) {
@@ -138,6 +154,21 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   // Secrets
   if (formValues.secrets && formValues.secrets.length > 0) {
     config.options.secrets = formValues.secrets;
+  }
+  
+  // Add build configuration if this is a build preset
+  if (formValues.preset === 'build') {
+    const buildConfig: BuildOptions = {
+      platform: formValues.buildPlatform || 'both',
+      flavor: formValues.buildFlavor || 'develop',
+      variant: formValues.buildVariant || 'debug',
+      storage: formValues.buildStorage || 'github',
+      notification: formValues.buildNotification || 'pr-comment',
+      includeHealthCheck: formValues.includeHealthCheck !== undefined ? formValues.includeHealthCheck : true
+    };
+    
+    // Add the build config to options
+    config.options.build = buildConfig;
   }
   
   return config;

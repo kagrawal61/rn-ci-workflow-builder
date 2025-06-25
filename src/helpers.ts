@@ -65,6 +65,7 @@ export function injectSecrets(yamlStr: string): string {
 
 /**
  * Build conditional expression for skipping workflow/job execution
+ * This returns conditions where the workflow SHOULD run (opposite of skip)
  * @param skip Skip configuration
  * @returns Conditional expression string or undefined
  */
@@ -72,16 +73,19 @@ export function buildSkipCondition(skip?: SkipConfig): string | undefined {
   if (!skip) return undefined;
   const parts: string[] = [];
   
+  // Simplified commit message check - uses fallback for null check
   if (skip.commitMessageContains) {
-    parts.push(`!contains(format('{0}', github.event.head_commit.message), '${escapeString(skip.commitMessageContains)}')`);
+    parts.push(`!contains(github.event.head_commit.message || '', '${escapeString(skip.commitMessageContains)}')`);
   }
   
+  // Simplified PR title check - uses fallback for null check
   if (skip.prTitleContains) {
-    parts.push(`!contains(format('{0}', github.event.pull_request.title), '${escapeString(skip.prTitleContains)}')`);
+    parts.push(`!contains(github.event.pull_request.title || '', '${escapeString(skip.prTitleContains)}')`);
   }
   
+  // Simplified PR label check - uses fallback for null check
   if (skip.prLabel) {
-    parts.push(`!contains(format('{0}', join(github.event.pull_request.labels.*.name, ',')), '${escapeString(skip.prLabel)}')`);
+    parts.push(`!contains(join(github.event.pull_request.labels.*.name || '', ','), '${escapeString(skip.prLabel)}')`);
   }
   
   return parts.join(' && ');

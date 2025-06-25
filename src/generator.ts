@@ -3,7 +3,10 @@ import path from 'path';
 import * as yaml from 'js-yaml';
 
 import { WorkflowConfig, WorkflowOptions } from './types';
-import { injectSecrets, validateWorkflowConfig } from './helpers';
+import { injectSecrets } from './helpers';
+import { validateConfig } from './validation';
+import { validateGeneratedYaml } from './validation/yaml';
+import { generateSecretsSummary } from './helpers/secretsManager';
 
 // Map of pipeline builders
 const builders: Record<string, (opts: WorkflowOptions) => Record<string, any>> = {};
@@ -33,9 +36,9 @@ export function getAvailablePresets(): string[] {
  * @param cfg The workflow configuration
  * @returns Workflow YAML as string
  */
-export function generateWorkflow(cfg: WorkflowConfig): string {
+export function generateWorkflow(cfg: WorkflowConfig): { yaml: string, secretsSummary?: string } {
   // Validate the config before proceeding
-  const validatedConfig = validateWorkflowConfig(cfg);
+  const validatedConfig = validateConfig(cfg);
   
   const options: WorkflowOptions = validatedConfig.options ?? {};
   const builder = builders[validatedConfig.kind];
@@ -48,9 +51,26 @@ export function generateWorkflow(cfg: WorkflowConfig): string {
   }
   
   const obj = builder(options);
-  let yamlStr = yaml.dump(obj, { lineWidth: 120 });
+  // Disable YAML anchors/references which GitHub Actions doesn't support
+  let yamlStr = yaml.dump(obj, { 
+    lineWidth: 120,
+    noRefs: true  // Prevent the creation of anchors and references
+  });
   yamlStr = injectSecrets(yamlStr);
-  return yamlStr;
+  
+  // Validate the generated YAML
+  const validatedYaml = validateGeneratedYaml(yamlStr);
+  
+  // Generate secrets summary for build preset
+  let secretsSummary: string | undefined;
+  if (validatedConfig.kind === 'build' && validatedConfig.options) {
+    secretsSummary = generateSecretsSummary(validatedConfig.options as any);
+  }
+  
+  return {
+    yaml: validatedYaml,
+    secretsSummary
+  };
 }
 
 /**
@@ -64,12 +84,12 @@ export function writeWorkflowFile(
   cfg: WorkflowConfig, 
   destDir = '.github/workflows',
   fileName?: string
-): string {
-  const yamlStr = generateWorkflow(cfg);
+): { filePath: string, secretsSummary?: string } {
+  const { yaml, secretsSummary } = generateWorkflow(cfg);
   const outputFileName = fileName ?? `${cfg.kind}.yaml`;
   const filePath = path.join(destDir, outputFileName);
   
   fs.mkdirSync(destDir, { recursive: true });
-  fs.writeFileSync(filePath, yamlStr, 'utf8');
-  return filePath;
+  fs.writeFileSync(filePath, yaml, 'utf8');
+  return { filePath, secretsSummary };
 }

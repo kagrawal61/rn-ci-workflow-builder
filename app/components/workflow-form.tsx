@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Button } from "./ui/button";
 import { Info, Plus, Trash } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { 
   Card,
   CardContent,
@@ -97,6 +98,40 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
+                <Label htmlFor="preset">Workflow Preset</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                      <span className="sr-only">Info</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Select the type of workflow to generate
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Select 
+                value={values.preset || "health-check"}
+                onValueChange={(value) => handleInputChange("preset", value)}
+              >
+                <SelectTrigger id="preset">
+                  <SelectValue placeholder="Select workflow preset" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="health-check">Health Check</SelectItem>
+                  <SelectItem value="build">Build Pipeline</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {values.preset === "build" 
+                  ? "Generate a workflow for building Android/iOS apps" 
+                  : "Generate a workflow for code quality checks"}
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
                 <Label htmlFor="name">Workflow Name</Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -114,7 +149,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 id="name" 
                 value={values.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
-                placeholder="React Native Health Check"
+                placeholder={values.preset === "build" ? "React Native Build Pipeline" : "React Native Health Check"}
               />
             </div>
             
@@ -212,6 +247,197 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
           </CardContent>
         </Card>
         
+        {/* Build Settings - Only shown when build preset is selected */}
+        {values.preset === "build" && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="text-xl">Build Configuration</CardTitle>
+              <CardDescription>
+                Configure the build options for your React Native app
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Platform Selection */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="build-platform">Platform</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <span className="sr-only">Info</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Select which platform(s) to build
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <RadioGroup 
+                  value={values.buildPlatform || "both"} 
+                  onValueChange={(value) => handleInputChange("buildPlatform", value)}
+                  className="flex space-x-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="android" id="platform-android" />
+                    <Label htmlFor="platform-android">Android only</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="ios" id="platform-ios" />
+                    <Label htmlFor="platform-ios">iOS only</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="both" id="platform-both" />
+                    <Label htmlFor="platform-both">Both platforms</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Flavor */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="build-flavor">App Flavor</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <span className="sr-only">Info</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Select the app flavor to build
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Select 
+                  value={values.buildFlavor || "develop"}
+                  onValueChange={(value) => handleInputChange("buildFlavor", value)}
+                >
+                  <SelectTrigger id="build-flavor">
+                    <SelectValue placeholder="Select app flavor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="prod">Production</SelectItem>
+                    <SelectItem value="develop">Development</SelectItem>
+                    <SelectItem value="stage">Staging</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Variant */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="build-variant">Build Variant</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <span className="sr-only">Info</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Debug builds are faster but release builds are optimized
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Select 
+                  value={values.buildVariant || "debug"}
+                  onValueChange={(value) => handleInputChange("buildVariant", value)}
+                >
+                  <SelectTrigger id="build-variant">
+                    <SelectValue placeholder="Select build variant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="debug">Debug</SelectItem>
+                    <SelectItem value="release">Release</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Storage Solution */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="build-storage">Artifact Storage</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <span className="sr-only">Info</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Where to store build artifacts
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Select 
+                  value={values.buildStorage || "github"}
+                  onValueChange={(value) => handleInputChange("buildStorage", value)}
+                >
+                  <SelectTrigger id="build-storage">
+                    <SelectValue placeholder="Select storage solution" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="github">GitHub Artifacts</SelectItem>
+                    <SelectItem value="drive">Google Drive</SelectItem>
+                    <SelectItem value="firebase">Firebase App Distribution</SelectItem>
+                    <SelectItem value="s3">Amazon S3</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Notification */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="build-notification">Notifications</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <span className="sr-only">Info</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      How to notify about build results
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Select 
+                  value={values.buildNotification || "pr-comment"}
+                  onValueChange={(value) => handleInputChange("buildNotification", value)}
+                >
+                  <SelectTrigger id="build-notification">
+                    <SelectValue placeholder="Select notification method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pr-comment">PR Comment</SelectItem>
+                    <SelectItem value="slack">Slack</SelectItem>
+                    <SelectItem value="both">Both PR Comment & Slack</SelectItem>
+                    <SelectItem value="none">No Notifications</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Include Health Check */}
+              <div className="flex items-center space-x-2 pt-2">
+                <Checkbox 
+                  id="include-health-check"
+                  checked={values.includeHealthCheck}
+                  onCheckedChange={(checked) => handleInputChange("includeHealthCheck", checked)}
+                />
+                <div className="grid gap-1">
+                  <Label htmlFor="include-health-check">
+                    Include Health Check Steps
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Run linting, typechecking and tests before building
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Accordion type="multiple" defaultValue={["triggers"]}>
           <AccordionItem value="triggers">
             <AccordionTrigger>Trigger Settings</AccordionTrigger>
@@ -355,120 +581,6 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   </motion.div>
                 )}
               </div>
-            </AccordionContent>
-          </AccordionItem>
-          
-          <AccordionItem value="skip">
-            <AccordionTrigger>Skip Conditions</AccordionTrigger>
-            <AccordionContent className="space-y-6 pt-4">
-              <div className="flex items-center justify-between space-x-2">
-                <div className="flex flex-col space-y-1">
-                  <Label htmlFor="enable-skip">Enable Skip Conditions</Label>
-                  <span className="text-sm text-muted-foreground">
-                    Define conditions to skip workflow execution
-                  </span>
-                </div>
-                <Switch
-                  id="enable-skip"
-                  checked={values.enableSkipConditions}
-                  onCheckedChange={(checked) => handleInputChange("enableSkipConditions", checked)}
-                />
-              </div>
-              
-              {values.enableSkipConditions && (
-                <motion.div 
-                  className="space-y-4 rounded-md border p-4"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="skip-commit">Skip if Commit Message Contains</Label>
-                    <Input
-                      id="skip-commit"
-                      value={values.skipCommitMessage}
-                      onChange={(e) => handleInputChange("skipCommitMessage", e.target.value)}
-                      placeholder="[skip ci]"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="skip-pr-title">Skip if PR Title Contains</Label>
-                    <Input
-                      id="skip-pr-title"
-                      value={values.skipPrTitle}
-                      onChange={(e) => handleInputChange("skipPrTitle", e.target.value)}
-                      placeholder="[wip]"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="skip-pr-label">Skip if PR has Label</Label>
-                    <Input
-                      id="skip-pr-label"
-                      value={values.skipPrLabel}
-                      onChange={(e) => handleInputChange("skipPrLabel", e.target.value)}
-                      placeholder="skip-ci"
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-          
-          <AccordionItem value="cache">
-            <AccordionTrigger>Cache Configuration</AccordionTrigger>
-            <AccordionContent className="space-y-6 pt-4">
-              <div className="flex items-center justify-between space-x-2">
-                <div className="flex flex-col space-y-1">
-                  <Label htmlFor="enable-cache">Enable Caching</Label>
-                  <span className="text-sm text-muted-foreground">
-                    Cache dependencies to speed up workflow runs
-                  </span>
-                </div>
-                <Switch
-                  id="enable-cache"
-                  checked={values.enableCache}
-                  onCheckedChange={(checked) => handleInputChange("enableCache", checked)}
-                />
-              </div>
-              
-              {values.enableCache && (
-                <motion.div 
-                  className="space-y-4 rounded-md border p-4"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="cache-paths">Custom Cache Paths (Optional)</Label>
-                    <Input
-                      id="cache-paths"
-                      value={values.cachePaths}
-                      onChange={(e) => handleInputChange("cachePaths", e.target.value)}
-                      placeholder="node_modules/.cache, ~/.cache/yarn"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Comma-separated list of paths to cache. Leave empty for default package manager cache.
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="cache-key">Custom Cache Key (Optional)</Label>
-                    <Input
-                      id="cache-key"
-                      value={values.cacheKey}
-                      onChange={(e) => handleInputChange("cacheKey", e.target.value)}
-                      placeholder="${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Custom cache key expression. Leave empty for default key.
-                    </p>
-                  </div>
-                </motion.div>
-              )}
             </AccordionContent>
           </AccordionItem>
           

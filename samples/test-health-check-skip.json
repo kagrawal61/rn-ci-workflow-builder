@@ -1,0 +1,28 @@
+{
+  "kind": "health-check",
+  "options": {
+    "name": "Test Improved Health Check",
+    "triggers": {
+      "push": {
+        "branches": ["main", "develop"]
+      },
+      "pullRequest": {
+        "branches": ["main", "develop"]
+      },
+      "workflowDispatch": true
+    },
+    "packageManager": "yarn",
+    "nodeVersions": [20],
+    "runsOn": "ubuntu-latest",
+    "skip": {
+      "commitMessageContains": "[skip ci]",
+      "prTitleContains": "[skip tests]"
+    },
+    "env": {
+      "NODE_ENV": "test"
+    },
+    "cache": {
+      "enabled": true
+    }
+  }
+}

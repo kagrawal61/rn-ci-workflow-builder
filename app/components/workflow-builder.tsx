@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { Settings2, PlayCircle, ChevronRight, Database, Zap } from "lucide-react";
 import { 
   createConfigFromFormValues,
-  createDefaultHealthCheckConfig, 
+  createDefaultHealthCheckConfig,
+  createDefaultBuildConfig,
   generateWorkflowYaml 
 } from "@/utils/workflow-service";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -19,6 +20,9 @@ export function WorkflowBuilder() {
     const defaultConfig = createDefaultHealthCheckConfig();
     
     return {
+      // Preset selection
+      preset: "health-check",
+      
       // Basic settings
       name: defaultConfig.options?.name || "React Native Health Check",
       
@@ -44,20 +48,21 @@ export function WorkflowBuilder() {
       // Runner OS
       runsOn: defaultConfig.options?.runsOn || "ubuntu-latest",
       
-      // Skip conditions
-      enableSkipConditions: false,
-      skipCommitMessage: "[skip ci]",
-      skipPrTitle: "",
-      skipPrLabel: "skip-ci",
-      
       // Cache settings
-      enableCache: true,
       cachePaths: "",
       cacheKey: "",
       
       // Environment variables and secrets
       envVars: {},
       secrets: [],
+      
+      // Build-specific settings (initially empty)
+      buildPlatform: "both",
+      buildFlavor: "develop",
+      buildVariant: "debug",
+      buildStorage: "github",
+      buildNotification: "pr-comment",
+      includeHealthCheck: true
     };
   });
   
@@ -78,7 +83,26 @@ export function WorkflowBuilder() {
   }, [formValues]);
 
   const handleFormChange = (newValues: any) => {
-    setFormValues((prev: any) => ({ ...prev, ...newValues }));
+    // Check if preset changed
+    if (newValues.preset && newValues.preset !== formValues.preset) {
+      // Switch to new preset's defaults
+      const defaultConfig = newValues.preset === 'build' 
+        ? createDefaultBuildConfig() 
+        : createDefaultHealthCheckConfig();
+      
+      // Update form values with defaults from the selected preset
+      setFormValues((prev: any) => {
+        const baseValues = {
+          ...prev,
+          name: defaultConfig.options?.name || (newValues.preset === 'build' ? 'React Native Build Pipeline' : 'React Native Health Check'),
+        };
+        
+        return { ...baseValues, ...newValues };
+      });
+    } else {
+      // Regular form update
+      setFormValues((prev: any) => ({ ...prev, ...newValues }));
+    }
   };
 
   const handleGenerateClick = () => {

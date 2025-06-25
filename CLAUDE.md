@@ -77,3 +77,27 @@ To add new workflow types:
 2. Add the preset builder function to the `builders` map in `generator.ts`
 3. Define any new types needed in `types.ts`
 4. Create sample configuration files in `samples/`
+
+## GitHub Actions Workflow Best Practices
+
+When generating or modifying GitHub Actions workflow files, adhere to these guidelines:
+
+### Workflow Design Principles
+
+1. **Always ask clarifying questions** before creating a new workflow to ensure requirements are understood
+2. **Keep things simple and easy to understand** for end users - aim for clarity over complexity
+3. **Implement skip conditions as a separate job** at the start of the workflow that other jobs depend on
+4. **Extract common steps** into reusable components to avoid redundancy (e.g., unit tests, linting)
+5. **Analyze which steps can run in parallel** to optimize workflow execution time
+6. **Define secrets and environment variables separately** for better readability
+7. **Carefully evaluate third-party actions** before using them (consider popularity, maintenance, issues)
+
+### Implementation Guidelines
+
+- **Skip Conditions**: Implement as a dedicated job at the start of workflow that outputs a decision variable
+- **Common Steps**: Extract test/lint steps to run once instead of duplicating in platform-specific jobs
+- **Parallelization**: Use GitHub's `needs` parameter to define dependencies between jobs
+- **Secrets/Envs**: Define environment variables at the top level of the workflow
+- **Third-party Actions**: Evaluate actions based on popularity, maintenance history and community adoption
+
+See complete details in [WORKFLOW_BEST_PRACTICES.md](/WORKFLOW_BEST_PRACTICES.md)

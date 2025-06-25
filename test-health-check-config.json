@@ -1,0 +1,22 @@
+{
+  "kind": "health-check",
+  "options": {
+    "name": "React Native Health Check",
+    "triggers": {
+      "push": {
+        "branches": ["main"],
+        "ignorePaths": ["docs/**", "*.md"]
+      },
+      "pullRequest": {
+        "branches": ["main"]
+      },
+      "workflowDispatch": true
+    },
+    "nodeVersions": [18],
+    "packageManager": "yarn",
+    "runsOn": "ubuntu-latest",
+    "skip": {
+      "commitMessageContains": "[skip ci]"
+    }
+  }
+}
