@@ -22,50 +22,61 @@ const storageHelpers = {
         }
       }];
     } else if (build.storage === 'firebase') {
-      return [{
-        name: 'Upload to Firebase App Distribution',
-        id: 'firebase-distribution',
-        if: 'success()',
-        uses: 'wzieba/Firebase-Distribution-Github-Action@v1',
-        with: {
-          appId: '${{ secrets.FIREBASE_APP_ID_ANDROID }}',
-          serviceCredentialsFileContent: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
-          file: 'android/app/build/outputs/apk/**/*.apk',
-          releaseNotes: 'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}',
-          groups: 'testers',
+      return [
+        {
+          name: 'Find Android APK',
+          id: 'find-apk',
+          run: 'APK_PATH=$(find android/app/build/outputs/apk -name "*.apk" -type f | head -1) && echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT'
         },
-      }];
+        {
+          name: 'Upload to Firebase App Distribution',
+          id: 'firebase-distribution',
+          if: 'success()',
+          uses: 'wzieba/Firebase-Distribution-Github-Action@v1.4.0',
+          with: {
+            appId: '${{ secrets.FIREBASE_APP_ID_ANDROID }}',
+            serviceCredentialsFileContent: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
+            file: '${{ steps.find-apk.outputs.apk_path }}',
+            releaseNotes: 'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}\nBuild: ' + build.flavor + ' ' + build.variant,
+            groups: '${{ secrets.FIREBASE_TEST_GROUPS || \'testers\' }}',
+            debug: false
+          }
+        }
+      ];
     } else if (build.storage === 'drive') {
-      return [{
-        name: 'Upload to Google Drive',
-        id: 'drive-upload',
-        if: 'success()',
-        uses: 'adityak74/google-drive-upload-git-action@master',
-        with: {
-          credentials: '${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}',
-          filename: 'android/app/build/outputs/apk/**/*.apk',
-          folderId: '${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}',
-          name: 'android-' + build.flavor + '-' + build.variant + '-${{ github.head_ref || github.ref_name }}-${{ github.sha }}.apk',
+      return [
+        {
+          name: 'Create rclone config for Google Drive',
+          run: '\n# Create rclone config directory\nmkdir -p ~/.config/rclone\n\n# Check if we have a service account file\nif [ -n "${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}" ]; then\n  # Create temporary file for service account\n  echo "${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}" > ~/.config/rclone/service_account.json\n  \n  # Use service account authentication (preferred for CI)\n  cat > ~/.config/rclone/rclone.conf << EOF\n[gdrive]\ntype = drive\nscope = drive\nservice_account_file = ~/.config/rclone/service_account.json\nEOF\nelse\n  # Fall back to client_id/client_secret/token if service account not available\n  cat > ~/.config/rclone/rclone.conf << EOF\n[gdrive]\ntype = drive\ntoken = ${{ secrets.GDRIVE_REFRESH_TOKEN }}\nclient_id = ${{ secrets.GDRIVE_CLIENT_ID || "" }}\nclient_secret = ${{ secrets.GDRIVE_CLIENT_SECRET || "" }}\nEOF\nfi'
         },
-      }];
+        {
+          name: 'Setup rclone',
+          uses: 'AnimMouse/setup-rclone@v1'
+        },
+        {
+          name: 'Upload to Google Drive',
+          id: 'drive-upload',
+          if: 'success()',
+          run: '\n# Find the APK file\nAPK_FILE=$(find android/app/build/outputs/apk -name "*.apk" -type f | head -1)\n\n# Create remote filename\nREMOTE_NAME="android-' + build.flavor + '-' + build.variant + '-${{ github.head_ref || github.ref_name }}-${{ github.sha }}.apk"\n\n# Determine folder path to use (if provided)\nFOLDER_PATH="${GDRIVE_FOLDER_ID:-react-native-builds}"\nFOLDER_PARAM="${FOLDER_PATH}"\n\n# Upload to Google Drive\nrclone copy "$APK_FILE" "gdrive:${FOLDER_PARAM}/$REMOTE_NAME" --progress\n\necho "File uploaded to Google Drive folder ${FOLDER_PARAM}: $REMOTE_NAME"'
+        }
+      ];
     } else if (build.storage === 's3') {
-      return [{
-        name: 'Upload to S3',
-        id: 's3-upload',
-        if: 'success()',
-        uses: 'jakejarvis/s3-sync-action@master',
-        with: {
-          args: '--acl public-read',
+      return [
+        {
+          name: 'Create rclone config for S3',
+          run: '\n# Create rclone config directory\nmkdir -p ~/.config/rclone\n\n# Create rclone config file for S3\ncat > ~/.config/rclone/rclone.conf << EOF\n[s3]\ntype = s3\nprovider = AWS\nenv_auth = false\naccess_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}\nsecret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}\nEOF'
         },
-        env: {
-          SOURCE_DIR: 'android/app/build/outputs/apk',
-          AWS_S3_BUCKET: '${{ secrets.AWS_S3_BUCKET }}',
-          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}',
-          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}',
-          AWS_REGION: '${{ secrets.AWS_REGION }}',
-          DEST_DIR: 'android/' + build.flavor + '/' + build.variant + '/${{ github.head_ref || github.ref_name }}',
+        {
+          name: 'Setup rclone',
+          uses: 'AnimMouse/setup-rclone@v1'
         },
-      }];
+        {
+          name: 'Upload to S3',
+          id: 's3-upload',
+          if: 'success()',
+          run: '\n# Find the APK file\nAPK_FILE=$(find android/app/build/outputs/apk -name "*.apk" -type f | head -1)\n\n# Create remote path\nREMOTE_PATH="android/' + build.flavor + '/' + build.variant + '/${{ github.head_ref || github.ref_name }}/${{ github.sha }}.apk"\n\n# Get bucket name from environment or use default\nBUCKET_NAME="${AWS_S3_BUCKET:-rn-artifacts}"\n\n# Upload to S3\nrclone copy "$APK_FILE" "s3:${BUCKET_NAME}/$REMOTE_PATH" --progress\n\necho "File uploaded to S3 bucket ${BUCKET_NAME}: $REMOTE_PATH"'
+        }
+      ];
     }
     
     return [];
@@ -88,50 +99,61 @@ const storageHelpers = {
         }
       }];
     } else if (build.storage === 'firebase') {
-      return [{
-        name: 'Upload to Firebase App Distribution',
-        id: 'firebase-distribution',
-        if: 'success()',
-        uses: 'wzieba/Firebase-Distribution-Github-Action@v1',
-        with: {
-          appId: '${{ secrets.FIREBASE_APP_ID_IOS }}',
-          serviceCredentialsFileContent: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
-          file: 'ios/build/Build/Products/**/*.ipa',
-          releaseNotes: 'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}',
-          groups: 'testers',
+      return [
+        {
+          name: 'Find iOS IPA',
+          id: 'find-ipa',
+          run: 'IPA_PATH=$(find ios/build/Build/Products -name "*.ipa" -type f | head -1) && echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT'
         },
-      }];
+        {
+          name: 'Upload to Firebase App Distribution',
+          id: 'firebase-distribution',
+          if: 'success()',
+          uses: 'wzieba/Firebase-Distribution-Github-Action@v1.4.0',
+          with: {
+            appId: '${{ secrets.FIREBASE_APP_ID_IOS }}',
+            serviceCredentialsFileContent: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
+            file: '${{ steps.find-ipa.outputs.ipa_path }}',
+            releaseNotes: 'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}\nBuild: ' + build.flavor + ' ' + build.variant,
+            groups: '${{ secrets.FIREBASE_TEST_GROUPS || \'testers\' }}',
+            debug: false
+          }
+        }
+      ];
     } else if (build.storage === 'drive') {
-      return [{
-        name: 'Upload to Google Drive',
-        id: 'drive-upload',
-        if: 'success()',
-        uses: 'adityak74/google-drive-upload-git-action@master',
-        with: {
-          credentials: '${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}',
-          filename: 'ios/build/Build/Products/**/*.ipa',
-          folderId: '${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}',
-          name: 'ios-' + build.flavor + '-' + build.variant + '-${{ github.head_ref || github.ref_name }}-${{ github.sha }}.ipa',
+      return [
+        {
+          name: 'Create rclone config for Google Drive',
+          run: '\n# Create rclone config directory\nmkdir -p ~/.config/rclone\n\n# Check if we have a service account file\nif [ -n "${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}" ]; then\n  # Create temporary file for service account\n  echo "${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}" > ~/.config/rclone/service_account.json\n  \n  # Use service account authentication (preferred for CI)\n  cat > ~/.config/rclone/rclone.conf << EOF\n[gdrive]\ntype = drive\nscope = drive\nservice_account_file = ~/.config/rclone/service_account.json\nEOF\nelse\n  # Fall back to client_id/client_secret/token if service account not available\n  cat > ~/.config/rclone/rclone.conf << EOF\n[gdrive]\ntype = drive\ntoken = ${{ secrets.GDRIVE_REFRESH_TOKEN }}\nclient_id = ${{ secrets.GDRIVE_CLIENT_ID || "" }}\nclient_secret = ${{ secrets.GDRIVE_CLIENT_SECRET || "" }}\nEOF\nfi'
         },
-      }];
+        {
+          name: 'Setup rclone',
+          uses: 'AnimMouse/setup-rclone@v1'
+        },
+        {
+          name: 'Upload to Google Drive',
+          id: 'drive-upload',
+          if: 'success()',
+          run: '\n# Find the IPA file\nIPA_FILE=$(find ios/build/Build/Products -name "*.ipa" -type f | head -1)\n\n# Create remote filename\nREMOTE_NAME="ios-' + build.flavor + '-' + build.variant + '-${{ github.head_ref || github.ref_name }}-${{ github.sha }}.ipa"\n\n# Determine folder path to use (if provided)\nFOLDER_PATH="${GDRIVE_FOLDER_ID:-react-native-builds}"\nFOLDER_PARAM="${FOLDER_PATH}"\n\n# Upload to Google Drive\nrclone copy "$IPA_FILE" "gdrive:${FOLDER_PARAM}/$REMOTE_NAME" --progress\n\necho "File uploaded to Google Drive folder ${FOLDER_PARAM}: $REMOTE_NAME"'
+        }
+      ];
     } else if (build.storage === 's3') {
-      return [{
-        name: 'Upload to S3',
-        id: 's3-upload',
-        if: 'success()',
-        uses: 'jakejarvis/s3-sync-action@master',
-        with: {
-          args: '--acl public-read',
+      return [
+        {
+          name: 'Create rclone config for S3',
+          run: '\n# Create rclone config directory\nmkdir -p ~/.config/rclone\n\n# Create rclone config file for S3\ncat > ~/.config/rclone/rclone.conf << EOF\n[s3]\ntype = s3\nprovider = AWS\nenv_auth = false\naccess_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}\nsecret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}\nEOF'
         },
-        env: {
-          SOURCE_DIR: 'ios/build/Build/Products',
-          AWS_S3_BUCKET: '${{ secrets.AWS_S3_BUCKET }}',
-          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}',
-          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}',
-          AWS_REGION: '${{ secrets.AWS_REGION }}',
-          DEST_DIR: 'ios/' + build.flavor + '/' + build.variant + '/${{ github.head_ref || github.ref_name }}',
+        {
+          name: 'Setup rclone',
+          uses: 'AnimMouse/setup-rclone@v1'
         },
-      }];
+        {
+          name: 'Upload to S3',
+          id: 's3-upload',
+          if: 'success()',
+          run: '\n# Find the IPA file\nIPA_FILE=$(find ios/build/Build/Products -name "*.ipa" -type f | head -1)\n\n# Create remote path\nREMOTE_PATH="ios/' + build.flavor + '/' + build.variant + '/${{ github.head_ref || github.ref_name }}/${{ github.sha }}.ipa"\n\n# Get bucket name from environment or use default\nBUCKET_NAME="${AWS_S3_BUCKET:-rn-artifacts}"\n\n# Upload to S3\nrclone copy "$IPA_FILE" "s3:${BUCKET_NAME}/$REMOTE_PATH" --progress\n\necho "File uploaded to S3 bucket ${BUCKET_NAME}: $REMOTE_PATH"'
+        }
+      ];
     }
     
     return [];

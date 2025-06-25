@@ -35,9 +35,9 @@ export function getAvailablePresets(): string[] {
 /**
  * Generate a workflow YAML from config
  * @param cfg The workflow configuration
- * @returns Workflow YAML as string
+ * @returns Workflow YAML and secrets summary
  */
-export function generateWorkflow(cfg: WorkflowConfig): string {
+export function generateWorkflow(cfg: WorkflowConfig): { yaml: string, secretsSummary?: string } {
   // Validate the config before proceeding
   const validatedConfig = validateWorkflowConfig(cfg);
   
@@ -54,7 +54,26 @@ export function generateWorkflow(cfg: WorkflowConfig): string {
   const obj = builder(options);
   let yamlStr = yaml.dump(obj, { lineWidth: 120 });
   yamlStr = injectSecrets(yamlStr);
-  return yamlStr;
+  
+  // Generate secrets summary for build preset
+  let secretsSummary: string | undefined;
+  if (validatedConfig.kind === 'build' && validatedConfig.options && validatedConfig.options.build) {
+    try {
+      // Import from the src directory directly
+      // Note: This works in browser because we're using Next.js which bundles everything together
+      const { generateSecretsSummary } = require('../../src/helpers/secretsManager');
+      if (validatedConfig.options && validatedConfig.options.build) {
+        secretsSummary = generateSecretsSummary(validatedConfig.options.build);
+      }
+    } catch (err) {
+      console.error('Error generating secrets summary:', err);
+    }
+  }
+  
+  return {
+    yaml: yamlStr,
+    secretsSummary
+  };
 }
 
 // Register the built-in presets

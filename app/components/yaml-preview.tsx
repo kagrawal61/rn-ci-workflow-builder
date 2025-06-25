@@ -12,9 +12,10 @@ import { toast } from "sonner";
 interface YamlPreviewProps {
   yamlContent: string;
   fileName?: string;
+  secretsSummary?: string;
 }
 
-export function YamlPreview({ yamlContent, fileName = "workflow.yml" }: YamlPreviewProps) {
+export function YamlPreview({ yamlContent, fileName = "workflow.yml", secretsSummary }: YamlPreviewProps) {
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
   const [copied, setCopied] = useState(false);
@@ -132,6 +133,52 @@ export function YamlPreview({ yamlContent, fileName = "workflow.yml" }: YamlPrev
           {formattedYaml}
         </SyntaxHighlighter>
       </div>
+      
+      {secretsSummary && (
+        <div className="mt-6 border rounded-lg bg-card shadow-sm">
+          <div className="flex items-center gap-2 rounded-t-lg border-b bg-muted p-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span className="text-sm font-medium">Required Secrets</span>
+          </div>
+          <div className="p-4 text-sm">
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              {secretsSummary.split('\n').map((line, i) => {
+                // Format headings
+                if (line.startsWith('##')) {
+                  return <h2 key={i} className="text-lg font-medium mt-4 mb-2">{line.replace(/^##\s+/, '')}</h2>;
+                } else if (line.startsWith('###')) {
+                  return <h3 key={i} className="text-md font-medium mt-3 mb-1">{line.replace(/^###\s+/, '')}</h3>;
+                } 
+                // Format list items
+                else if (line.startsWith('-')) {
+                  const match = line.match(/^-\s+`([^`]+)`:\s+(.+)/);
+                  if (match) {
+                    return (
+                      <div key={i} className="flex mb-2">
+                        <span className="font-mono text-primary font-medium mr-2">{match[1]}:</span>
+                        <span>{match[2]}</span>
+                      </div>
+                    );
+                  }
+                  return <p key={i} className="mb-2">{line}</p>;
+                } 
+                // Regular paragraphs
+                else if (line.trim() !== '') {
+                  return <p key={i} className="mb-2">{line}</p>;
+                }
+                return null;
+              })}
+              
+              {secretsSummary === 'No secrets required for this configuration.' && (
+                <p>This workflow doesn't require any additional GitHub secrets.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

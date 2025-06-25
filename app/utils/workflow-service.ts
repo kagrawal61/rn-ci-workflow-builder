@@ -60,9 +60,10 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
 };
 
 // Generate workflow YAML
-export const generateWorkflowYaml = (config: WorkflowConfig): string => {
+export const generateWorkflowYaml = (config: WorkflowConfig): { yaml: string, secretsSummary?: string } => {
   try {
-    return generateWorkflow(config);
+    const result = generateWorkflow(config);
+    return result;
   } catch (error) {
     console.error('Error generating workflow:', error);
     throw new Error(`Failed to generate workflow: ${error instanceof Error ? error.message : 'Unknown error'}`);

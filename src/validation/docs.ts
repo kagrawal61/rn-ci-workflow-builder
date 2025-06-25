@@ -10,6 +10,10 @@ interface StorageSecretDocs {
     name: string;
     description: string;
   }>;
+  optionalSecrets?: Array<{
+    name: string;
+    description: string;
+  }>;
 }
 
 /**
@@ -46,23 +50,39 @@ export const STORAGE_SECRET_DOCS: Record<string, StorageSecretDocs> = {
         name: 'AWS_SECRET_ACCESS_KEY',
         description: 'AWS secret access key',
       },
-      {
-        name: 'AWS_REGION',
-        description: 'AWS region where the bucket is located',
-      },
+    ],
+    optionalSecrets: [
       {
         name: 'AWS_S3_BUCKET',
-        description: 'Name of the S3 bucket for artifacts',
+        description: 'Name of the S3 bucket for artifacts (defaults to "rn-artifacts" if not provided)',
       },
     ],
   },
   drive: {
     name: 'Google Drive',
-    description: 'Uploads artifacts to Google Drive',
+    description: 'Uploads artifacts to Google Drive via rclone',
     requiredSecrets: [
       {
-        name: 'GOOGLE_SERVICE_ACCOUNT',
-        description: 'The Google service account JSON (base64-encoded)',
+        name: 'GDRIVE_SERVICE_ACCOUNT_JSON',
+        description: 'Google service account JSON file content (recommended for CI)',
+      },
+      {
+        name: 'GDRIVE_REFRESH_TOKEN',
+        description: 'OAuth refresh token for authentication (alternative to service account)',
+      },
+    ],
+    optionalSecrets: [
+      {
+        name: 'GDRIVE_CLIENT_ID',
+        description: 'OAuth client ID (only needed with refresh token)',
+      },
+      {
+        name: 'GDRIVE_CLIENT_SECRET',
+        description: 'OAuth client secret (only needed with refresh token)',
+      },
+      {
+        name: 'GDRIVE_FOLDER_ID',
+        description: 'ID of the Google Drive folder (defaults to "react-native-builds")',
       },
     ],
   },

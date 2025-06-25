@@ -67,6 +67,7 @@ export function WorkflowBuilder() {
   });
   
   const [yamlContent, setYamlContent] = useState("");
+  const [secretsSummary, setSecretsSummary] = useState<string | undefined>(undefined);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState("configure");
 
@@ -74,8 +75,9 @@ export function WorkflowBuilder() {
   useEffect(() => {
     try {
       const config = createConfigFromFormValues(formValues);
-      const yaml = generateWorkflowYaml(config);
-      setYamlContent(yaml);
+      const result = generateWorkflowYaml(config);
+      setYamlContent(result.yaml);
+      setSecretsSummary(result.secretsSummary);
     } catch (error) {
       console.error("Error generating YAML:", error);
       // Keep the previous valid YAML
@@ -110,8 +112,9 @@ export function WorkflowBuilder() {
     
     try {
       const config = createConfigFromFormValues(formValues);
-      const yaml = generateWorkflowYaml(config);
-      setYamlContent(yaml);
+      const result = generateWorkflowYaml(config);
+      setYamlContent(result.yaml);
+      setSecretsSummary(result.secretsSummary);
       setActiveTab("preview");
     } catch (error) {
       console.error("Error generating YAML:", error);
@@ -192,6 +195,7 @@ export function WorkflowBuilder() {
             <YamlPreview 
               yamlContent={yamlContent} 
               fileName={`${formValues.name.toLowerCase().replace(/\s+/g, '-')}.yml`}
+              secretsSummary={secretsSummary}
             />
             
             <div className="rounded-lg border bg-card p-4 mt-8">

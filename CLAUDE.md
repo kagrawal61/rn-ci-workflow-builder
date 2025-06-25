@@ -100,4 +100,4 @@ When generating or modifying GitHub Actions workflow files, adhere to these guid
 - **Secrets/Envs**: Define environment variables at the top level of the workflow
 - **Third-party Actions**: Evaluate actions based on popularity, maintenance history and community adoption
 
-See complete details in [WORKFLOW_BEST_PRACTICES.md](/WORKFLOW_BEST_PRACTICES.md)
+See complete details in [docs/workflows/best-practices.md](/docs/workflows/best-practices.md)

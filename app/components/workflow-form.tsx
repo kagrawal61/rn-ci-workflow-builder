@@ -27,7 +27,7 @@ interface WorkflowFormProps {
 
 export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
   const nodeVersionOptions = [14, 16, 18, 20];
-  const runnerOptions = ["ubuntu-latest", "macos-latest", "windows-latest"];
+  const runnerOptions = ["ubuntu-latest", "macos-latest"];
   
   const [envVarKey, setEnvVarKey] = useState("");
   const [envVarValue, setEnvVarValue] = useState("");
@@ -360,7 +360,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                         <span className="sr-only">Info</span>
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-sm">
                       Where to store build artifacts
                     </TooltipContent>
                   </Tooltip>
@@ -374,11 +374,63 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="github">GitHub Artifacts</SelectItem>
-                    <SelectItem value="drive">Google Drive</SelectItem>
+                    <SelectItem value="drive">Google Drive (via rclone)</SelectItem>
                     <SelectItem value="firebase">Firebase App Distribution</SelectItem>
-                    <SelectItem value="s3">Amazon S3</SelectItem>
+                    <SelectItem value="s3">Amazon S3 (via rclone)</SelectItem>
                   </SelectContent>
                 </Select>
+                {/* Storage-specific help text */}
+                <div className="rounded-md bg-muted p-3 text-xs">
+                  {values.buildStorage === "github" && (
+                    <div>
+                      <p className="font-medium mb-1">GitHub Artifacts</p>
+                      <p className="text-muted-foreground">No additional secrets required. Artifacts will be stored directly in GitHub for 30 days.</p>
+                    </div>
+                  )}
+                  {values.buildStorage === "drive" && (
+                    <div>
+                      <p className="font-medium mb-1">Google Drive (via rclone)</p>
+                      <p className="text-muted-foreground mb-1">Required secrets (one of these authentication methods):</p>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li><code>GDRIVE_SERVICE_ACCOUNT_JSON</code>: Google service account JSON file content (Recommended for CI)</li>
+                        <li><strong>OR</strong></li>
+                        <li><code>GDRIVE_REFRESH_TOKEN</code>: OAuth refresh token for authentication</li>
+                      </ul>
+                      <p className="text-muted-foreground mt-2 mb-1">Optional secrets:</p>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li><code>GDRIVE_CLIENT_ID</code>: OAuth client ID (only needed if using refresh token)</li>
+                        <li><code>GDRIVE_CLIENT_SECRET</code>: OAuth client secret (only needed if using refresh token)</li>
+                        <li><code>GDRIVE_FOLDER_ID</code>: ID of the Google Drive folder (defaults to "react-native-builds")</li>
+                      </ul>
+                    </div>
+                  )}
+                  {values.buildStorage === "firebase" && (
+                    <div>
+                      <p className="font-medium mb-1">Firebase App Distribution</p>
+                      <p className="text-muted-foreground mb-1">Required secrets:</p>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li><code>FIREBASE_APP_ID_ANDROID</code>: Firebase Android app ID</li>
+                        <li><code>FIREBASE_APP_ID_IOS</code>: Firebase iOS app ID</li>
+                        <li><code>FIREBASE_SERVICE_ACCOUNT</code>: Firebase service account JSON (base64 encoded)</li>
+                        <li><code>FIREBASE_TEST_GROUPS</code>: (Optional) Test groups to distribute to (default: "testers")</li>
+                      </ul>
+                    </div>
+                  )}
+                  {values.buildStorage === "s3" && (
+                    <div>
+                      <p className="font-medium mb-1">Amazon S3 (via rclone)</p>
+                      <p className="text-muted-foreground mb-1">Required secrets:</p>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li><code>AWS_ACCESS_KEY_ID</code>: AWS access key with S3 permissions</li>
+                        <li><code>AWS_SECRET_ACCESS_KEY</code>: AWS secret access key</li>
+                      </ul>
+                      <p className="text-muted-foreground mt-2 mb-1">Optional secrets:</p>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li><code>AWS_S3_BUCKET</code>: Name of the S3 bucket (defaults to "rn-artifacts" if not provided)</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Notification */}
@@ -624,7 +676,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                           <span className="font-mono text-sm text-muted-foreground">
                             {typeof value === 'string' && value.length > 20
                               ? `${value.substring(0, 20)}...`
-                              : value}
+                              : String(value)}
                           </span>
                         </div>
                         <Button

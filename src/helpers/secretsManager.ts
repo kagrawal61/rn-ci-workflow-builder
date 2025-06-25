@@ -111,6 +111,16 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
     for (const secret of groups.storage) {
       summary += `- \`${secret.name}\`: ${secret.description}\n`;
     }
+    
+    // Add optional secrets if available
+    const optionalSecrets = STORAGE_SECRET_DOCS[buildOptions.storage].optionalSecrets;
+    if (optionalSecrets && optionalSecrets.length > 0) {
+      summary += '\n#### Optional Storage Secrets\n\n';
+      for (const secret of optionalSecrets) {
+        summary += `- \`${secret.name}\`: ${secret.description}\n`;
+      }
+    }
+    
     summary += '\n';
   }
   
@@ -150,8 +160,8 @@ export function getSecretRequirementMap() {
   return {
     storage: {
       firebase: ['FIREBASE_SERVICE_ACCOUNT'],
-      s3: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'AWS_S3_BUCKET'],
-      drive: ['GOOGLE_SERVICE_ACCOUNT'],
+      s3: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
+      drive: ['GDRIVE_SERVICE_ACCOUNT_JSON', 'GDRIVE_REFRESH_TOKEN'],
       github: []
     },
     notification: {
@@ -182,8 +192,8 @@ export function getSecretTooltips() {
   return {
     storage: {
       firebase: 'Requires FIREBASE_SERVICE_ACCOUNT and platform-specific FIREBASE_APP_ID',
-      s3: 'Requires AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, and AWS_S3_BUCKET',
-      drive: 'Requires GOOGLE_SERVICE_ACCOUNT',
+      s3: 'Requires AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY',
+      drive: 'Requires GDRIVE_SERVICE_ACCOUNT_JSON or GDRIVE_REFRESH_TOKEN',
       github: 'No additional secrets required'
     },
     notification: {
