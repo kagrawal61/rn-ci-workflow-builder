@@ -17,7 +17,7 @@ export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
         },
         workflowDispatch: true
       },
-      nodeVersions: [18],
+      nodeVersions: [20],
       packageManager: 'yarn',
       runsOn: 'ubuntu-latest',
       cache: { enabled: true },
@@ -42,7 +42,7 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
         },
         workflowDispatch: true
       },
-      nodeVersions: [18],
+      nodeVersions: [20],
       packageManager: 'yarn',
       runsOn: 'ubuntu-latest',
       cache: { enabled: true },
@@ -123,11 +123,11 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
     config.options.triggers.schedule = [{ cron: formValues.cronExpression }];
   }
   
-  // Handle Node.js versions
-  if (formValues.nodeVersions && formValues.nodeVersions.length > 0) {
-    config.options.nodeVersions = formValues.nodeVersions;
+  // Handle Node.js version (single version)
+  if (formValues.nodeVersion) {
+    config.options.nodeVersions = [formValues.nodeVersion];
   } else {
-    config.options.nodeVersions = [18];
+    config.options.nodeVersions = [20];
   }
   
   // Package manager

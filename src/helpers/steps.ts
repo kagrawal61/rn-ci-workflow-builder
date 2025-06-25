@@ -19,7 +19,7 @@ const commonSteps = {
         name: 'Setup Node',
         uses: 'actions/setup-node@v4',
         with: {
-          'node-version': '${{ matrix.node || 20 }}',
+          'node-version': '20',
           cache: packageManager === 'yarn' ? 'yarn' : 'npm',
         },
       },

@@ -7,8 +7,8 @@
   "ignoreCommand": "git diff --quiet HEAD^ HEAD ./",
   "git": {
     "deploymentEnabled": {
-      "main": true,
-      "preview": true
+      "main": false,
+      "preview": false
     }
   },
   "headers": [

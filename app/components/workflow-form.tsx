@@ -69,15 +69,9 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
     onChange({ secrets: updatedSecrets });
   };
   
-  const toggleNodeVersion = (version: number) => {
-    const updatedVersions = values.nodeVersions.includes(version)
-      ? values.nodeVersions.filter((v: number) => v !== version)
-      : [...values.nodeVersions, version];
-      
-    // Ensure at least one version is selected
-    if (updatedVersions.length === 0) return;
-    
-    onChange({ nodeVersions: updatedVersions });
+  // Single Node.js version selection handler
+  const handleNodeVersionChange = (version: string) => {
+    onChange({ nodeVersion: parseInt(version, 10) });
   };
 
   return (
@@ -216,7 +210,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
             
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Node.js Versions</Label>
+                <Label htmlFor="node-version">Node.js Version</Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
@@ -225,24 +219,25 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    Select one or more Node.js versions to test with
+                    Select the Node.js version to use
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {nodeVersionOptions.map((version) => (
-                  <Button
-                    key={version}
-                    type="button"
-                    variant={values.nodeVersions.includes(version) ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => toggleNodeVersion(version)}
-                    className="transition-all"
-                  >
-                    Node {version}
-                  </Button>
-                ))}
-              </div>
+              <Select 
+                value={values.nodeVersion?.toString() || "20"}
+                onValueChange={handleNodeVersionChange}
+              >
+                <SelectTrigger id="node-version">
+                  <SelectValue placeholder="Select Node.js version" />
+                </SelectTrigger>
+                <SelectContent>
+                  {nodeVersionOptions.map((version) => (
+                    <SelectItem key={version} value={version.toString()}>
+                      Node {version}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>

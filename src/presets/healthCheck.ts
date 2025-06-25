@@ -19,7 +19,7 @@ export function buildHealthCheckPipeline(opts: WorkflowOptions): Record<string, 
       name: 'Setup Node',
       uses: 'actions/setup-node@v4',
       with: {
-        'node-version': '${{ matrix.node }}',
+        'node-version': nodeVersions[0] || 20,
         cache: packageManager === 'yarn' ? 'yarn' : 'npm',
       },
     },
@@ -37,7 +37,6 @@ export function buildHealthCheckPipeline(opts: WorkflowOptions): Record<string, 
   const testJob: Record<string, any> = {
     name: 'Run Tests',
     'runs-on': runsOn,
-    strategy: nodeVersions.length > 1 ? { matrix: { node: nodeVersions } } : undefined,
     steps: testSteps,
   };
 

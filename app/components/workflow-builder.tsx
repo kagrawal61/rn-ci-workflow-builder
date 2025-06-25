@@ -39,8 +39,8 @@ export function WorkflowBuilder() {
       enableScheduleTrigger: false,
       cronExpression: "0 0 * * *", // Daily at midnight
       
-      // Node version settings
-      nodeVersions: defaultConfig.options?.nodeVersions || [18],
+      // Node version setting (single version)
+      nodeVersion: defaultConfig.options?.nodeVersions?.[0] || 20,
       
       // Package manager
       packageManager: defaultConfig.options?.packageManager || "yarn",

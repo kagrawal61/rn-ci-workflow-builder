@@ -66,7 +66,6 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
     jobs['build-android'] = {
       name: 'Build Android',
       'runs-on': runsOn,
-      strategy: nodeVersions.length > 1 ? { matrix: { node: nodeVersions } } : undefined,
       steps: androidBuildSteps,
     };
   }
@@ -94,7 +93,6 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
     jobs['build-ios'] = {
       name: 'Build iOS',
       'runs-on': 'macos-latest', // iOS builds require macOS
-      strategy: nodeVersions.length > 1 ? { matrix: { node: nodeVersions } } : undefined,
       steps: iosBuildSteps,
     };
   }
@@ -111,7 +109,7 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
           name: 'Setup Node',
           uses: 'actions/setup-node@v4',
           with: {
-            'node-version': '${{ matrix.node || 20 }}',
+            'node-version': nodeVersions[0] || 20,
             cache: packageManager === 'yarn' ? 'yarn' : 'npm',
           },
         },
