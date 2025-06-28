@@ -23,6 +23,9 @@ export function WorkflowBuilder() {
       // Preset selection
       preset: "health-check",
       
+      // Platform selection
+      platform: "github",
+      
       // Basic settings
       name: defaultConfig.options?.name || "React Native Health Check",
       
@@ -179,7 +182,7 @@ export function WorkflowBuilder() {
                 <div>
                   <h3 className="text-lg font-medium">Workflow YAML</h3>
                   <p className="text-sm text-muted-foreground">
-                    Your GitHub Actions workflow is ready. Copy it and add to your repository.
+                    Your {formValues.platform === 'bitrise' ? 'Bitrise' : 'GitHub Actions'} workflow is ready. Copy it and add to your repository.
                   </p>
                 </div>
               </div>
@@ -194,7 +197,7 @@ export function WorkflowBuilder() {
             
             <YamlPreview 
               yamlContent={yamlContent} 
-              fileName={`${formValues.name.toLowerCase().replace(/\s+/g, '-')}.yml`}
+              fileName={formValues.platform === 'bitrise' ? 'bitrise.yml' : `${formValues.name.toLowerCase().replace(/\s+/g, '-')}.yml`}
               secretsSummary={secretsSummary}
             />
             
