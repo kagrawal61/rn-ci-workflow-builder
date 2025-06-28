@@ -324,6 +324,46 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {/* Android Output Type - Only shown for Android builds */}
+              {(values.buildPlatform === 'android' || values.buildPlatform === 'both') && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="android-output-type">Android Output Type</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                          <span className="sr-only">Info</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        APK for direct installation or AAB for Play Store submission
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Select 
+                    value={values.androidOutputType || "apk"}
+                    onValueChange={(value) => handleInputChange("androidOutputType", value)}
+                  >
+                    <SelectTrigger id="android-output-type">
+                      <SelectValue placeholder="Select output type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="apk">APK (installable package)</SelectItem>
+                      <SelectItem value="aab">AAB (Android App Bundle)</SelectItem>
+                      <SelectItem value="both">Both APK and AAB</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {values.androidOutputType === 'aab' 
+                      ? "AAB files are used for Play Store submission and are more efficient."
+                      : values.androidOutputType === 'both'
+                      ? "Generate both APK for direct installation and AAB for Play Store submission."
+                      : "APK files can be directly installed on devices for testing."}
+                  </p>
+                </div>
+              )}
 
               {/* Storage Solution */}
               <div className="space-y-2">

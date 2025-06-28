@@ -16,6 +16,7 @@
     "generate:build:android": "ts-node src/cli.ts generate build --config samples/build-android-pr.json",
     "generate:build:ios": "ts-node src/cli.ts generate build --config samples/build-ios-pr.json",
     "generate:build:both": "ts-node src/cli.ts generate build --config samples/build-both-platforms.json",
+    "generate:build:android:both-formats": "ts-node src/cli.ts generate build --config samples/build-android-both-formats.json",
     "list-presets": "ts-node src/cli.ts list-presets",
     "build": "tsc -p tsconfig.json",
     "lint": "eslint . --ext .ts",

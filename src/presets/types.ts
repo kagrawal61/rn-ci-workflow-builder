@@ -21,6 +21,11 @@ export type NotificationType = 'slack' | 'pr-comment' | 'both' | 'none';
 
 
 /**
+ * Android build output type
+ */
+export type AndroidOutputType = 'apk' | 'aab' | 'both';
+
+/**
  * Build preset specific options
  */
 export interface BuildOptions {
@@ -48,5 +53,10 @@ export interface BuildOptions {
    * Include health check steps
    */
   includeHealthCheck?: boolean;
-
+  
+  /**
+   * Android build output type (apk or aab)
+   * Only applicable when platform is 'android' or 'both'
+   */
+  androidOutputType?: AndroidOutputType;
 }

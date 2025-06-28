@@ -199,10 +199,24 @@ The build preset creates a workflow for building React Native apps for Android a
 - Platform-specific artifact storage
 - Multiple artifact storage options (GitHub, Firebase, Google Drive, S3)
 - Notification options (Slack, PR comments)
+- Android build options (APK or AAB output formats using Gradle tasks)
 
-**Android Build Example:**
+**Android Output Types**
+
+For Android builds, you can specify the output type (`androidOutputType`) as:
+- `apk`: Generates an installable APK file (default)
+- `aab`: Generates an Android App Bundle for Play Store submission
+- `both`: Generates both APK and AAB formats simultaneously
+
+This uses the React Native CLI's `--tasks` flag to specify the appropriate Gradle task:
+- For APK: `assembleDebug` or `assembleRelease` depending on the `variant`
+- For AAB: `bundleDebug` or `bundleRelease` depending on the `variant`
+- For Both: Runs both tasks sequentially and uploads artifacts for both formats
+
+**Android Build Examples:**
 
 ```json
+// Example with APK output
 {
   "kind": "build",
   "options": {
@@ -224,6 +238,34 @@ The build preset creates a workflow for building React Native apps for Android a
       "storage": "github",
       "notification": "pr-comment",
       "includeHealthCheck": true,
+      "androidOutputType": "apk"
+    }
+  }
+}
+
+// Example with both APK and AAB outputs
+{
+  "kind": "build",
+  "options": {
+    "name": "React Native Android Build (APK + AAB)",
+    "nodeVersions": [20],
+    "packageManager": "yarn",
+    "triggers": {
+      "push": {
+        "branches": ["main", "develop"]
+      },
+      "pullRequest": {
+        "branches": ["main"]
+      },
+      "workflowDispatch": true
+    },
+    "build": {
+      "platform": "android",
+      "variant": "release",
+      "storage": "github",
+      "notification": "pr-comment",
+      "includeHealthCheck": true,
+      "androidOutputType": "both"
     }
   }
 }

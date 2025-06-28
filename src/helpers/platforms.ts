@@ -72,40 +72,140 @@ fi
 # Run the build with error capture
 echo "Building Android app using official React Native CLI..."
 
-# Convert variant to lowercase for mode parameter
-MODE=$(echo "${build.variant}" | tr '[:upper:]' '[:lower:]')
-# This is a workaround - we need to use string value directly in MODE
+# Using official React Native CLI with appropriate task based on variant and output type
+${
+  (() => {
+    // Determine the appropriate Gradle task based on variant and output type
+    const variant = build.variant;
+    const outputType = build.androidOutputType || 'apk'; // Default to APK if not specified
+    
+    if (outputType === 'both') {
+      // For both APK and AAB, run both tasks
+      const apkTask = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
+      const aabTask = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
+      
+      return `echo "Generating both APK and AAB formats for ${variant} build"
 
-# Using official React Native CLI for building Android app
-npx react-native build-android --mode=$MODE || {
+# First generate APK
+echo "Using Gradle task: ${apkTask} for ${variant} build with APK output format"
+npx react-native build-android --tasks=${apkTask} || {
+  echo "❌ Android APK build failed"
+  echo "::error::Android APK build failed. Check logs for details."
+  exit 1
+}
+
+# Then generate AAB
+echo "Using Gradle task: ${aabTask} for ${variant} build with AAB output format"
+npx react-native build-android --tasks=${aabTask} || {
+  echo "❌ Android AAB build failed"
+  echo "::error::Android AAB build failed. Check logs for details."
+  exit 1
+}`;
+    } else {
+      // For single output type (APK or AAB)
+      let task = '';
+      if (outputType === 'apk') {
+        task = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
+      } else {
+        // For AAB (Android App Bundle)
+        task = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
+      }
+      
+      return `echo "Using Gradle task: ${task} for ${variant} build with ${outputType} output format"
+
+# Using React Native CLI with --tasks flag
+npx react-native build-android --tasks=${task} || {
   echo "❌ Android build failed"
   echo "::error::Android build failed. Check logs for details."
   exit 1
+}`;
+    }
+  })()
 }
 
 echo "✅ Android build completed successfully"
 
-# Verify the expected outputs exist
+# Verify the expected outputs based on output type
+${
+  (() => {
+    const outputType = build.androidOutputType || 'apk';
+    
+    if (outputType === 'both') {
+      return `# Check for both APK and AAB files
 if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
   echo "✅ APK files generated successfully"
 else
   echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
 fi
+
+if ls android/app/build/outputs/bundle/**/*.aab 1> /dev/null 2>&1; then
+  echo "✅ AAB files generated successfully"
+else
+  echo "⚠️ Warning: Expected AAB files not found. Storage steps may fail."
+fi`;
+    } else if (outputType === 'apk') {
+      return `if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+  echo "✅ APK files generated successfully"
+else
+  echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
+fi`;
+    } else {
+      return `if ls android/app/build/outputs/bundle/**/*.aab 1> /dev/null 2>&1; then
+  echo "✅ AAB files generated successfully"
+else
+  echo "⚠️ Warning: Expected AAB files not found. Storage steps may fail."
+fi`;
+    }
+  })()
+}
 `
       },
       // Always attempt to store artifacts, even if build partially succeeded
-      {
-        name: 'Store Android Build Artifacts',
-        id: 'store-artifacts',
-        if: 'always() && steps.android-build.outcome != \'skipped\'',
-        'continue-on-error': true,
-        uses: 'actions/upload-artifact@v3',
-        with: {
-          name: 'android-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
-          path: 'android/app/build/outputs/apk/**/*.apk',
-          'retention-days': '14',
-        },
-      },
+      ...((() => {
+        if (build.androidOutputType === 'both') {
+          // If both output types are selected, create two artifact upload steps
+          return [
+            {
+              name: 'Store Android APK Artifacts',
+              id: 'store-apk-artifacts',
+              if: 'always() && steps.android-build.outcome != \'skipped\'',
+              'continue-on-error': true,
+              uses: 'actions/upload-artifact@v3',
+              with: {
+                name: 'android-' + build.variant + '-apk-${{ github.head_ref || github.ref_name }}',
+                path: 'android/app/build/outputs/apk/**/*.apk',
+                'retention-days': '14',
+              },
+            },
+            {
+              name: 'Store Android AAB Artifacts',
+              id: 'store-aab-artifacts',
+              if: 'always() && steps.android-build.outcome != \'skipped\'',
+              'continue-on-error': true,
+              uses: 'actions/upload-artifact@v3',
+              with: {
+                name: 'android-' + build.variant + '-aab-${{ github.head_ref || github.ref_name }}',
+                path: 'android/app/build/outputs/bundle/**/*.aab',
+                'retention-days': '14',
+              },
+            }
+          ];
+        } else {
+          // For single output type
+          return [{
+            name: 'Store Android Build Artifacts',
+            id: 'store-artifacts',
+            if: 'always() && steps.android-build.outcome != \'skipped\'',
+            'continue-on-error': true,
+            uses: 'actions/upload-artifact@v3',
+            with: {
+              name: 'android-' + build.variant + '-' + (build.androidOutputType || 'apk') + '-${{ github.head_ref || github.ref_name }}',
+              path: build.androidOutputType === 'aab' ? 'android/app/build/outputs/bundle/**/*.aab' : 'android/app/build/outputs/apk/**/*.apk',
+              'retention-days': '14',
+            },
+          }];
+        }
+      })()),
     ];
   },
   

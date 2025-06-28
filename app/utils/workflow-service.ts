@@ -50,7 +50,8 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
         variant: 'debug',
         storage: 'github',
         notification: 'pr-comment',
-        includeHealthCheck: true
+        includeHealthCheck: true,
+        androidOutputType: 'apk'
       }
     }
   };
@@ -158,7 +159,8 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
       variant: formValues.buildVariant || 'debug',
       storage: formValues.buildStorage || 'github',
       notification: formValues.buildNotification || 'pr-comment',
-      includeHealthCheck: formValues.includeHealthCheck !== undefined ? formValues.includeHealthCheck : true
+      includeHealthCheck: formValues.includeHealthCheck !== undefined ? formValues.includeHealthCheck : true,
+      androidOutputType: formValues.androidOutputType || 'apk' // 'apk', 'aab', or 'both'
     };
     
     // Add the build config to options
