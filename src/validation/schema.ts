@@ -171,35 +171,6 @@ function validateWorkflowOptionsSchema(options: WorkflowOptions): WorkflowOption
     }
   }
   
-  // Validate skip
-  if (options.skip !== undefined) {
-    if (typeof options.skip !== 'object' || options.skip === null) {
-      throw new Error('Skip configuration must be an object');
-    }
-    
-    validatedOptions.skip = {};
-    
-    if (options.skip.commitMessageContains !== undefined) {
-      if (typeof options.skip.commitMessageContains !== 'string') {
-        throw new Error('Commit message filter must be a string');
-      }
-      validatedOptions.skip.commitMessageContains = options.skip.commitMessageContains;
-    }
-    
-    if (options.skip.prTitleContains !== undefined) {
-      if (typeof options.skip.prTitleContains !== 'string') {
-        throw new Error('PR title filter must be a string');
-      }
-      validatedOptions.skip.prTitleContains = options.skip.prTitleContains;
-    }
-    
-    if (options.skip.prLabel !== undefined) {
-      if (typeof options.skip.prLabel !== 'string') {
-        throw new Error('PR label filter must be a string');
-      }
-      validatedOptions.skip.prLabel = options.skip.prLabel;
-    }
-  }
   
   // Validate concurrency
   if (options.concurrency !== undefined) {

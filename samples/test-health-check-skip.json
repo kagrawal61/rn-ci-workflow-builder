@@ -14,10 +14,6 @@
     "packageManager": "yarn",
     "nodeVersions": [20],
     "runsOn": "ubuntu-latest",
-    "skip": {
-      "commitMessageContains": "[skip ci]",
-      "prTitleContains": "[skip tests]"
-    },
     "env": {
       "NODE_ENV": "test"
     },

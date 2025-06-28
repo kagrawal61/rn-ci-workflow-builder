@@ -1,5 +1,5 @@
 import { WorkflowOptions, GitHubJob } from '../types';
-import { buildTriggers, buildEnv, buildSkipCondition } from '../helpers';
+import { buildTriggers, buildEnv } from '../helpers';
 import { BuildOptions } from './types';
 import commonSteps from '../helpers/steps';
 import platformHelpers from '../helpers/platforms';
@@ -17,7 +17,6 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
     env,
     secrets,
     cache = { enabled: true },
-    skip = { commitMessageContains: '[skip ci]' },
     runsOn = 'ubuntu-latest',
     nodeVersions = [20],
     packageManager = 'yarn',
@@ -123,103 +122,14 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
     };
   }
 
-  // Conditionally add skip check job if skip configuration is provided
-  if (skip && (skip.commitMessageContains || skip.prTitleContains || skip.prLabel)) {
-    // Create a dedicated skip check job with clear outputs
-    const checkSkipJob: GitHubJob = {
-      name: 'Check Skip Conditions',
-      'runs-on': runsOn,
-      // Define an output that other jobs can use
-      outputs: {
-        'should-run': '${{ steps.skip-check.outputs.should-run }}'
-      },
-      steps: [
-        {
-          name: 'Skip CI check',
-          id: 'skip-check',
-          // Using string concatenation to avoid template literal parsing issues with ${{ }}
-          run: '# Check for skip markers in commit messages\n' +
-               'SHOULD_RUN="true"\n' +
-               'SKIP_REASON=""\n' +
-               'SKIP_MARKER="' + (skip.commitMessageContains || '[skip ci]') + '"\n\n' +
-               '# Check commit message when available (push events)\n' +
-               'if [[ "$' + '{{ github.event.head_commit.message || \'\' }}" == *"$SKIP_MARKER"* ]]; then\n' +
-               '  SHOULD_RUN="false"\n' +
-               '  SKIP_REASON="Skipping due to \'$SKIP_MARKER\' in commit message"\n' +
-               'fi\n\n' +
-               '# Check PR title when available (PR events)\n' +
-               'if [[ "$' + '{{ github.event_name }}" == "pull_request" && "$SHOULD_RUN" == "true" ]]; then\n' +
-               '  if [[ "$' + '{{ github.event.pull_request.title || \'\' }}" == *"' + (skip.prTitleContains || '') + '"* ]]; then\n' +
-               '    SHOULD_RUN="false"\n' +
-               '    SKIP_REASON="Skipping due to PR title containing skip marker"\n' +
-               '  fi\n' +
-               'fi\n\n' +
-               '# Output the result\n' +
-               'echo "should-run=$SHOULD_RUN" >> $GITHUB_OUTPUT\n' +
-               'echo "$SKIP_REASON"\n\n' +
-               'if [ "$SHOULD_RUN" == "true" ]; then\n' +
-               '  echo "⏩ Workflow will proceed normally"\n' +
-               'else\n' +
-               '  echo "⏭️ Workflow will be skipped: $SKIP_REASON"\n' +
-               'fi'
-        }
-      ]
-    };
-
-    // Add the check-skip job
-    jobs['check-skip'] = checkSkipJob;
-    
-    // Set up dependencies between jobs
-    if (build.includeHealthCheck) {
-      // Quality check depends on skip check
-      jobs['quality-check'].needs = ['check-skip'];
-      jobs['quality-check'].if = '${{ needs.check-skip.outputs.should-run == \'true\' }}';
-      
-      // Build jobs depend on quality check
-      if (build.platform === 'ios' || build.platform === 'both') {
-        jobs['build-ios'].needs = ['quality-check'];
-      }
-      if (build.platform === 'android' || build.platform === 'both') {
-        jobs['build-android'].needs = ['quality-check'];
-      }
-    } else {
-      // Without quality check, build jobs depend directly on skip check
-      if (build.platform === 'ios' || build.platform === 'both') {
-        jobs['build-ios'].needs = ['check-skip'];
-        jobs['build-ios'].if = '${{ needs.check-skip.outputs.should-run == \'true\' }}';
-      }
-      if (build.platform === 'android' || build.platform === 'both') {
-        jobs['build-android'].needs = ['check-skip'];
-        jobs['build-android'].if = '${{ needs.check-skip.outputs.should-run == \'true\' }}';
-      }
+  // Set up dependencies between jobs
+  if (build.includeHealthCheck) {
+    // Build jobs depend on quality check
+    if (build.platform === 'ios' || build.platform === 'both') {
+      jobs['build-ios'].needs = ['quality-check'];
     }
-  } else {
-    // Without skip check, set up job dependencies based on health check setting
-    if (build.includeHealthCheck) {
-      // Build jobs depend on quality check
-      if (build.platform === 'ios' || build.platform === 'both') {
-        jobs['build-ios'].needs = ['quality-check'];
-      }
-      if (build.platform === 'android' || build.platform === 'both') {
-        jobs['build-android'].needs = ['quality-check'];
-      }
-      
-      // Apply skip condition directly to quality check job if needed
-      const skipCondition = buildSkipCondition(skip);
-      if (skipCondition) {
-        jobs['quality-check'].if = skipCondition;
-      }
-    } else {
-      // Apply skip condition directly to build jobs if needed
-      const skipCondition = buildSkipCondition(skip);
-      if (skipCondition) {
-        if (build.platform === 'ios' || build.platform === 'both') {
-          jobs['build-ios'].if = skipCondition;
-        }
-        if (build.platform === 'android' || build.platform === 'both') {
-          jobs['build-android'].if = skipCondition;
-        }
-      }
+    if (build.platform === 'android' || build.platform === 'both') {
+      jobs['build-android'].needs = ['quality-check'];
     }
   }
 

@@ -1,4 +1,4 @@
-import { CacheConfig, ConcurrencyConfig, GitHubStep, PackageManager, SkipConfig, TriggerOptions, WorkflowConfig } from './types';
+import { CacheConfig, ConcurrencyConfig, GitHubStep, PackageManager, TriggerOptions, WorkflowConfig } from './types';
 
 /**
  * Build GitHub Actions workflow triggers from configuration
@@ -63,33 +63,6 @@ export function injectSecrets(yamlStr: string): string {
   return yamlStr.replace(/"__SECRET_([A-Z0-9_]+)__"/g, (_, name) => '${{ secrets.' + name + ' }}');
 }
 
-/**
- * Build conditional expression for skipping workflow/job execution
- * This returns conditions where the workflow SHOULD run (opposite of skip)
- * @param skip Skip configuration
- * @returns Conditional expression string or undefined
- */
-export function buildSkipCondition(skip?: SkipConfig): string | undefined {
-  if (!skip) return undefined;
-  const parts: string[] = [];
-  
-  // Simplified commit message check - uses fallback for null check
-  if (skip.commitMessageContains) {
-    parts.push(`!contains(github.event.head_commit.message || '', '${escapeString(skip.commitMessageContains)}')`);
-  }
-  
-  // Simplified PR title check - uses fallback for null check
-  if (skip.prTitleContains) {
-    parts.push(`!contains(github.event.pull_request.title || '', '${escapeString(skip.prTitleContains)}')`);
-  }
-  
-  // Simplified PR label check - uses fallback for null check
-  if (skip.prLabel) {
-    parts.push(`!contains(join(github.event.pull_request.labels.*.name || '', ','), '${escapeString(skip.prLabel)}')`);
-  }
-  
-  return parts.join(' && ');
-}
 
 /**
  * Build concurrency configuration for GitHub Actions workflow

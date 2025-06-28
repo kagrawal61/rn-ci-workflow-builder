@@ -20,8 +20,7 @@ export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
       nodeVersions: [20],
       packageManager: 'yarn',
       runsOn: 'ubuntu-latest',
-      cache: { enabled: true },
-      skip: { commitMessageContains: '[skip ci]' }
+      cache: { enabled: true }
     }
   };
 };
@@ -46,7 +45,6 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
       packageManager: 'yarn',
       runsOn: 'ubuntu-latest',
       cache: { enabled: true },
-      skip: { commitMessageContains: '[skip ci]' },
       build: {
         platform: 'both',
         variant: 'debug',
@@ -87,7 +85,6 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
       nodeVersions: [],
       packageManager: 'yarn',
       runsOn: 'ubuntu-latest',
-      skip: {},
       cache: { enabled: false },
       env: {},
       secrets: []
@@ -136,8 +133,6 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   // Runner OS
   config.options.runsOn = formValues.runsOn || 'ubuntu-latest';
   
-  // Skip configuration is enabled by default with [skip ci]
-  config.options.skip = { commitMessageContains: '[skip ci]' };
   
   // Cache configuration is enabled by default
   config.options.cache = {

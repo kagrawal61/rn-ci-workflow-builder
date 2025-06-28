@@ -15,8 +15,5 @@
     "nodeVersions": [18],
     "packageManager": "yarn",
     "runsOn": "ubuntu-latest",
-    "skip": {
-      "commitMessageContains": "[skip ci]"
-    }
   }
 }

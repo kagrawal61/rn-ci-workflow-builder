@@ -56,17 +56,6 @@ export interface ConcurrencyConfig {
   cancelInProgress?: boolean;
 }
 
-/**
- * Configuration for conditional workflow skipping
- */
-export interface SkipConfig {
-  /** Skip if commit message contains this string */
-  commitMessageContains?: string;
-  /** Skip if PR title contains this string */
-  prTitleContains?: string;
-  /** Skip if PR has this label */
-  prLabel?: string;
-}
 
 /**
  * Supported package managers
@@ -169,8 +158,6 @@ export interface WorkflowOptions {
   secrets?: string[];
   /** Cache configuration */
   cache?: CacheConfig;
-  /** Skip conditions */
-  skip?: SkipConfig;
   /** Runner OS/platform */
   runsOn?: string;
   /** Node.js versions to test with */

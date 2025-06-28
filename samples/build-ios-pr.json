@@ -15,9 +15,6 @@
     "packageManager": "yarn",
     "nodeVersions": [20],
     "runsOn": "ubuntu-latest",
-    "skip": {
-      "commitMessageContains": "[skip build]"
-    },
     "secrets": [
       "SLACK_WEBHOOK",
       "FIREBASE_APP_ID_IOS",

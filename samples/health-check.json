@@ -14,9 +14,6 @@
     },
     "packageManager": "yarn",
     "nodeVersions": [18, 20],
-    "skip": {
-      "commitMessageContains": "[skip ci]"
-    },
     "secrets": [
       "SLACK_WEBHOOK"
     ],

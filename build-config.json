@@ -14,10 +14,6 @@
     },
     "packageManager": "yarn",
     "nodeVersions": [20],
-    "skip": {
-      "commitMessageContains": "[skip build]",
-      "prLabel": "no-build"
-    },
     "secrets": [
       "SLACK_WEBHOOK",
       "AWS_S3_BUCKET",

@@ -10,10 +10,6 @@
         "branches": ["main", "develop"]
       }
     },
-    "skip": {
-      "commitMessageContains": "[skip ci]",
-      "prTitleContains": "[skip checks]"
-    },
     "packageManager": "yarn",
     "nodeVersions": [20],
     "runsOn": "ubuntu-latest"

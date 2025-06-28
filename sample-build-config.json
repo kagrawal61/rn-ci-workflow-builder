@@ -16,7 +16,6 @@
     "packageManager": "yarn",
     "runsOn": "ubuntu-latest",
     "cache": { "enabled": true },
-    "skip": { "commitMessageContains": "[skip ci]" },
     "build": {
       "platform": "both",
       "variant": "debug",

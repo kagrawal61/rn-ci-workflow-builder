@@ -59,7 +59,7 @@ This project is a workflow generator for React Native CI/CD pipelines. It genera
    - Main types include:
      - `WorkflowConfig`: Top-level configuration with workflow kind and options
      - `WorkflowOptions`: Configuration options like name, triggers, environment, etc.
-     - `TriggerOptions`, `CacheConfig`, `SkipConfig`: Specialized configuration types
+     - `TriggerOptions`, `CacheConfig`: Specialized configuration types
 
 ### Workflow Generation Process
 
@@ -86,15 +86,13 @@ When generating or modifying GitHub Actions workflow files, adhere to these guid
 
 1. **Always ask clarifying questions** before creating a new workflow to ensure requirements are understood
 2. **Keep things simple and easy to understand** for end users - aim for clarity over complexity
-3. **Implement skip conditions as a separate job** at the start of the workflow that other jobs depend on
-4. **Extract common steps** into reusable components to avoid redundancy (e.g., unit tests, linting)
-5. **Analyze which steps can run in parallel** to optimize workflow execution time
-6. **Define secrets and environment variables separately** for better readability
-7. **Carefully evaluate third-party actions** before using them (consider popularity, maintenance, issues)
+3. **Extract common steps** into reusable components to avoid redundancy (e.g., unit tests, linting)
+4. **Analyze which steps can run in parallel** to optimize workflow execution time
+5. **Define secrets and environment variables separately** for better readability
+6. **Carefully evaluate third-party actions** before using them (consider popularity, maintenance, issues)
 
 ### Implementation Guidelines
 
-- **Skip Conditions**: Implement as a dedicated job at the start of workflow that outputs a decision variable
 - **Common Steps**: Extract test/lint steps to run once instead of duplicating in platform-specific jobs
 - **Parallelization**: Use GitHub's `needs` parameter to define dependencies between jobs
 - **Secrets/Envs**: Define environment variables at the top level of the workflow

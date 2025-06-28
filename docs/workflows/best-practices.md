@@ -32,35 +32,6 @@ This document outlines best practices and guidelines for creating GitHub Actions
 
 ## Specific Implementation Guidelines
 
-### Skip Condition Handling
-- **Always implement skip conditions as a separate job at the start** of the workflow
-- Make other jobs depend on this check-skip job
-- Use simple, clear conditional expressions that are easy to understand
-- Consider standard skip patterns like `[skip ci]`, `[ci skip]`, or specific PR labels
-- Example structure (with simple, clear conditions):
-  ```yaml
-  jobs:
-    check-skip:
-      name: Check Skip Conditions
-      runs-on: ubuntu-latest
-      outputs:
-        should-run: ${{ steps.skip-check.outputs.should-run }}
-      steps:
-        - name: Skip Check
-          id: skip-check
-          run: |
-            # Simple check for [skip ci] in commit message
-            if [[ "${{ github.event.head_commit.message }}" == *"[skip ci]"* ]]; then
-              echo "should-run=false" >> $GITHUB_OUTPUT
-            else
-              echo "should-run=true" >> $GITHUB_OUTPUT
-            fi
-      
-    main-job:
-      needs: [check-skip]
-      if: ${{ needs.check-skip.outputs.should-run == 'true' }}
-      # Job implementation
-  ```
 
 ### Code Reusability and DRY Principle
 - **Extract common steps into reusable workflows** or composite actions
@@ -104,21 +75,8 @@ env:
   CACHE_KEY: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
 jobs:
-  # Always check skip conditions first
-  check-skip:
-    name: Check Skip Conditions
-    runs-on: ubuntu-latest
-    outputs:
-      should-run: ${{ steps.skip-check.outputs.should-run }}
-    steps:
-      - name: Check for Skip CI
-        id: skip-check
-        # Skip logic implementation
-
   # Common quality checks that run once
   quality-checks:
-    needs: [check-skip]
-    if: ${{ needs.check-skip.outputs.should-run == 'true' }}
     name: Quality Checks
     runs-on: ubuntu-latest
     steps:
@@ -150,13 +108,12 @@ jobs:
 Before submitting/committing any workflow:
 
 1. ✅ Is the workflow clear, simple and easy to understand?
-2. ✅ Are skip conditions properly implemented?
-3. ✅ Have common steps been extracted to avoid redundancy?
-4. ✅ Is parallelization optimized (jobs that can run concurrently do so)?
-5. ✅ Are all secrets and variables properly defined and referenced?
-6. ✅ Have third-party actions been properly evaluated?
-7. ✅ Is caching implemented for dependencies?
-8. ✅ Are there appropriate timeout settings?
-9. ✅ Is error handling and notification in place?
+2. ✅ Have common steps been extracted to avoid redundancy?
+3. ✅ Is parallelization optimized (jobs that can run concurrently do so)?
+4. ✅ Are all secrets and variables properly defined and referenced?
+5. ✅ Have third-party actions been properly evaluated?
+6. ✅ Is caching implemented for dependencies?
+7. ✅ Are there appropriate timeout settings?
+8. ✅ Is error handling and notification in place?
 
 Always prioritize clarity and simplicity over clever or complex solutions. The best workflow is one that's easy to understand, maintain, and troubleshoot.
