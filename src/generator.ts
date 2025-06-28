@@ -9,8 +9,8 @@ import { validateGeneratedYaml } from './validation/yaml';
 import { generateSecretsSummary } from './helpers/secretsManager';
 import { BuildOptions } from './presets/types';
 
-// Map of pipeline builders
-const builders: Record<string, (opts: WorkflowOptions) => Record<string, unknown>> = {};
+// Map of pipeline builders - supports both GitHub Actions and Bitrise configurations
+const builders: Record<string, (opts: WorkflowOptions) => Record<string, unknown> | import('./types').BitriseConfig> = {};
 
 /**
  * Add spacing after each step in the workflow YAML for better readability
@@ -72,7 +72,7 @@ function addStepSpacing(yamlStr: string): string {
  */
 export function registerBuilder(
   kind: string,
-  builder: (opts: WorkflowOptions) => Record<string, unknown>
+  builder: (opts: WorkflowOptions) => Record<string, unknown> | import('./types').BitriseConfig
 ): void {
   builders[kind] = builder;
 }
@@ -139,14 +139,31 @@ export function generateWorkflow(cfg: WorkflowConfig): { yaml: string, secretsSu
  */
 export function writeWorkflowFile(
   cfg: WorkflowConfig, 
-  destDir = '.github/workflows',
+  destDir?: string,
   fileName?: string
 ): { filePath: string, secretsSummary?: string } {
   const { yaml, secretsSummary } = generateWorkflow(cfg);
-  const outputFileName = fileName ?? `${cfg.kind}.yaml`;
-  const filePath = path.join(destDir, outputFileName);
   
-  fs.mkdirSync(destDir, { recursive: true });
+  // Determine output directory and filename based on platform
+  const platform = cfg.options?.platform || 'github';
+  let outputDir = destDir;
+  let outputFileName = fileName;
+  
+  if (!outputDir) {
+    outputDir = platform === 'bitrise' ? '.' : '.github/workflows';
+  }
+  
+  if (!outputFileName) {
+    if (platform === 'bitrise') {
+      outputFileName = 'bitrise.yml';
+    } else {
+      outputFileName = `${cfg.kind}.yaml`;
+    }
+  }
+  
+  const filePath = path.join(outputDir, outputFileName);
+  
+  fs.mkdirSync(outputDir, { recursive: true });
   fs.writeFileSync(filePath, yaml, 'utf8');
   return { filePath, secretsSummary };
 }

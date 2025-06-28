@@ -23,7 +23,7 @@ export function validateBuildSchema(options: BuildOptions): BuildOptions {
     
     storage: validateEnum(
       options.storage,
-      ['github', 'drive', 'firebase', 's3'],
+      ['github', 'drive', 'firebase', 's3', 'bitrise'],
       'storage'
     ) as BuildOptions['storage'],
     
@@ -76,6 +76,15 @@ export function validateWorkflowSchema(config: WorkflowConfig): WorkflowConfig {
  */
 function validateWorkflowOptionsSchema(options: WorkflowOptions): WorkflowOptions {
   const validatedOptions: WorkflowOptions = {};
+  
+  // Validate platform
+  if (options.platform !== undefined) {
+    validatedOptions.platform = validateEnum(
+      options.platform,
+      ['github', 'bitrise'],
+      'platform'
+    ) as WorkflowOptions['platform'];
+  }
   
   // Validate name
   if (options.name !== undefined) {

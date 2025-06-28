@@ -27,12 +27,18 @@ program
   .description('Generate workflow YAML based on preset')
   .option('-c, --config <path>', 'Path to config file (JSON or YAML)')
   .option('-o, --output <path>', 'Output file path')
-  .option('-d, --dir <path>', 'Output directory (default: .github/workflows)')
+  .option('-d, --dir <path>', 'Output directory (default: .github/workflows for GitHub, . for Bitrise)')
+  .option('-p, --platform <platform>', 'CI platform (github or bitrise)', 'github')
   .option('-v, --validate-only', 'Only validate the configuration without generating files')
   .action(async (preset = 'health-check', options) => {
     try {
       // Default config
-      let config: WorkflowConfig = { kind: preset };
+      let config: WorkflowConfig = { 
+        kind: preset,
+        options: {
+          platform: options.platform as 'github' | 'bitrise'
+        }
+      };
 
       // Load config from file if provided
       if (options.config) {
@@ -60,6 +66,12 @@ program
         // Override preset if specified in command
         if (preset && preset !== 'health-check') {
           config.kind = preset;
+        }
+        
+        // Override platform if specified in command
+        if (options.platform) {
+          config.options = config.options || {};
+          config.options.platform = options.platform as 'github' | 'bitrise';
         }
       }
 
