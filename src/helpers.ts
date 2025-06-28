@@ -1,4 +1,4 @@
-import { CacheConfig, ConcurrencyConfig, GitHubAction, GitHubJob, GitHubStep, GitHubWorkflow, PackageManager, SkipConfig, TriggerOptions, WorkflowConfig } from './types';
+import { CacheConfig, ConcurrencyConfig, GitHubStep, PackageManager, SkipConfig, TriggerOptions, WorkflowConfig } from './types';
 
 /**
  * Build GitHub Actions workflow triggers from configuration
