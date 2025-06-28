@@ -23,7 +23,7 @@
     "build": {
       "platform": "both",
       "flavor": "develop",
-      "variant": "debug",
+      "variant": "release",
       "storage": "github",
       "notification": "pr-comment",
       "includeHealthCheck": true,

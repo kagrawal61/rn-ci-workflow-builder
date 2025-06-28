@@ -59,7 +59,7 @@ export function WorkflowBuilder() {
       // Build-specific settings (initially empty)
       buildPlatform: "both",
       buildFlavor: "develop",
-      buildVariant: "debug",
+      buildVariant: "release",
       buildStorage: "github",
       buildNotification: "pr-comment",
       includeHealthCheck: true

@@ -196,7 +196,7 @@ program
     
     const buildOptions: BuildOptions = {
       platform: platform as any,
-      variant: 'debug',
+      variant: 'release',
       storage: storage as any,
       notification: notification as any,
       includeHealthCheck: true,

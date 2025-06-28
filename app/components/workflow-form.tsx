@@ -307,12 +307,12 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      Debug builds are faster but release builds are optimized
+                      Release builds are optimized for production, while debug builds are faster to build
                     </TooltipContent>
                   </Tooltip>
                 </div>
                 <Select 
-                  value={values.buildVariant || "debug"}
+                  value={values.buildVariant || "release"}
                   onValueChange={(value) => handleInputChange("buildVariant", value)}
                 >
                   <SelectTrigger id="build-variant">

@@ -22,7 +22,7 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
     packageManager = 'yarn',
     build = {
       platform: 'android',
-      variant: 'debug',
+      variant: 'release',
       storage: 'github',
       notification: 'pr-comment',
       includeHealthCheck: true,

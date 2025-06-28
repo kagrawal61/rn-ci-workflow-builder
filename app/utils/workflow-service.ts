@@ -47,7 +47,7 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
       cache: { enabled: true },
       build: {
         platform: 'both',
-        variant: 'debug',
+        variant: 'release',
         storage: 'github',
         notification: 'pr-comment',
         includeHealthCheck: true,
@@ -156,7 +156,7 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   if (formValues.preset === 'build') {
     const buildConfig: BuildOptions = {
       platform: formValues.buildPlatform || 'both',
-      variant: formValues.buildVariant || 'debug',
+      variant: formValues.buildVariant || 'release',
       storage: formValues.buildStorage || 'github',
       notification: formValues.buildNotification || 'pr-comment',
       includeHealthCheck: formValues.includeHealthCheck !== undefined ? formValues.includeHealthCheck : true,
