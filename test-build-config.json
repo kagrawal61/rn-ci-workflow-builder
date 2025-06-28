@@ -1,0 +1,17 @@
+{
+  "kind": "build",
+  "options": {
+    "name": "Test Build Workflow",
+    "triggers": {
+      "workflowDispatch": true
+    },
+    "nodeVersions": [20],
+    "packageManager": "yarn",
+    "build": {
+      "platform": "android",
+      "variant": "release",
+      "storage": "github",
+      "notification": "none"
+    }
+  }
+}

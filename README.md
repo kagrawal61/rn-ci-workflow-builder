@@ -9,6 +9,7 @@ A powerful tool to generate GitHub Actions workflows for React Native CI/CD pipe
 - Configurable via CLI or programmatically 
 - TypeScript support with full type definitions
 - Customizable workflows for different CI/CD needs
+- Automatic detection and use of .env files
 - Contextual secret management with inline tooltips
 - Automatic generation of required secrets summary
 
@@ -219,11 +220,10 @@ The build preset creates a workflow for building React Native apps for Android a
     },
     "build": {
       "platform": "android",
-      "flavor": "develop",
       "variant": "debug",
       "storage": "github",
       "notification": "pr-comment",
-      "includeHealthCheck": true
+      "includeHealthCheck": true,
     }
   }
 }
@@ -247,11 +247,10 @@ The build preset creates a workflow for building React Native apps for Android a
     },
     "build": {
       "platform": "ios",
-      "flavor": "develop",
       "variant": "debug",
       "storage": "firebase",
       "notification": "both",
-      "includeHealthCheck": true
+      "includeHealthCheck": true,
     }
   }
 }
@@ -405,6 +404,17 @@ The workflow generator includes a contextual secret management system that ident
 - Groups secrets by context (storage, platform, notification)
 
 Learn more in the [Secret Management documentation](./docs/secret-management.md)
+
+## Environment Configuration
+
+The workflow builder supports environment-based configuration for React Native apps using `.env` files.
+
+- Supports popular libraries like `react-native-config` and `react-native-dotenv`
+- Automatically copies the correct environment file during build
+- Configurable environment names (development, staging, production)
+- Custom environment file paths
+
+Learn more in the [Environment Configuration documentation](./docs/env-config.md)
 
 ## License
 

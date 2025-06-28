@@ -16,7 +16,7 @@ const storageHelpers = {
         if: 'success()',
         uses: 'actions/upload-artifact@v3',
         with: {
-          name: 'android-' + build.flavor + '-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
+          name: 'android-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
           path: 'android/app/build/outputs/apk/**/*.apk',
           'retention-days': 30
         }
@@ -37,7 +37,7 @@ const storageHelpers = {
             appId: '${{ secrets.FIREBASE_APP_ID_ANDROID }}',
             serviceCredentialsFileContent: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
             file: '${{ steps.find-apk.outputs.apk_path }}',
-            releaseNotes: 'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}\nBuild: ' + build.flavor + ' ' + build.variant,
+            releaseNotes: 'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}\nBuild: ' + build.variant + ' build',
             groups: '${{ secrets.FIREBASE_TEST_GROUPS || \'testers\' }}',
             debug: false
           }
@@ -57,7 +57,7 @@ const storageHelpers = {
           name: 'Upload to Google Drive',
           id: 'drive-upload',
           if: 'success()',
-          run: '\n# Find the APK file\nAPK_FILE=$(find android/app/build/outputs/apk -name "*.apk" -type f | head -1)\n\n# Create remote filename\nREMOTE_NAME="android-' + build.flavor + '-' + build.variant + '-${{ github.head_ref || github.ref_name }}-${{ github.sha }}.apk"\n\n# Determine folder path to use (if provided)\nFOLDER_PATH="${GDRIVE_FOLDER_ID:-react-native-builds}"\nFOLDER_PARAM="${FOLDER_PATH}"\n\n# Upload to Google Drive\nrclone copy "$APK_FILE" "gdrive:${FOLDER_PARAM}/$REMOTE_NAME" --progress\n\necho "File uploaded to Google Drive folder ${FOLDER_PARAM}: $REMOTE_NAME"'
+          run: '\n# Find the APK file\nAPK_FILE=$(find android/app/build/outputs/apk -name "*.apk" -type f | head -1)\n\n# Create remote filename\nREMOTE_NAME="android-' + build.variant + '-${{ github.head_ref || github.ref_name }}-${{ github.sha }}.apk"\n\n# Determine folder path to use (if provided)\nFOLDER_PATH="${GDRIVE_FOLDER_ID:-react-native-builds}"\nFOLDER_PARAM="${FOLDER_PATH}"\n\n# Upload to Google Drive\nrclone copy "$APK_FILE" "gdrive:${FOLDER_PARAM}/$REMOTE_NAME" --progress\n\necho "File uploaded to Google Drive folder ${FOLDER_PARAM}: $REMOTE_NAME"'
         }
       ];
     } else if (build.storage === 's3') {
@@ -74,7 +74,7 @@ const storageHelpers = {
           name: 'Upload to S3',
           id: 's3-upload',
           if: 'success()',
-          run: '\n# Find the APK file\nAPK_FILE=$(find android/app/build/outputs/apk -name "*.apk" -type f | head -1)\n\n# Create remote path\nREMOTE_PATH="android/' + build.flavor + '/' + build.variant + '/${{ github.head_ref || github.ref_name }}/${{ github.sha }}.apk"\n\n# Get bucket name from environment or use default\nBUCKET_NAME="${AWS_S3_BUCKET:-rn-artifacts}"\n\n# Upload to S3\nrclone copy "$APK_FILE" "s3:${BUCKET_NAME}/$REMOTE_PATH" --progress\n\necho "File uploaded to S3 bucket ${BUCKET_NAME}: $REMOTE_PATH"'
+          run: '\n# Find the APK file\nAPK_FILE=$(find android/app/build/outputs/apk -name "*.apk" -type f | head -1)\n\n# Create remote path\nREMOTE_PATH="android/' + build.variant + '/${{ github.head_ref || github.ref_name }}/${{ github.sha }}.apk"\n\n# Get bucket name from environment or use default\nBUCKET_NAME="${AWS_S3_BUCKET:-rn-artifacts}"\n\n# Upload to S3\nrclone copy "$APK_FILE" "s3:${BUCKET_NAME}/$REMOTE_PATH" --progress\n\necho "File uploaded to S3 bucket ${BUCKET_NAME}: $REMOTE_PATH"'
         }
       ];
     }
@@ -93,7 +93,7 @@ const storageHelpers = {
         if: 'success()',
         uses: 'actions/upload-artifact@v3',
         with: {
-          name: 'ios-' + build.flavor + '-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
+          name: 'ios-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
           path: 'ios/build/Build/Products/**/*.ipa',
           'retention-days': 30
         }
@@ -114,7 +114,7 @@ const storageHelpers = {
             appId: '${{ secrets.FIREBASE_APP_ID_IOS }}',
             serviceCredentialsFileContent: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
             file: '${{ steps.find-ipa.outputs.ipa_path }}',
-            releaseNotes: 'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}\nBuild: ' + build.flavor + ' ' + build.variant,
+            releaseNotes: 'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}\nBuild: ' + build.variant + ' build',
             groups: '${{ secrets.FIREBASE_TEST_GROUPS || \'testers\' }}',
             debug: false
           }
@@ -134,7 +134,7 @@ const storageHelpers = {
           name: 'Upload to Google Drive',
           id: 'drive-upload',
           if: 'success()',
-          run: '\n# Find the IPA file\nIPA_FILE=$(find ios/build/Build/Products -name "*.ipa" -type f | head -1)\n\n# Create remote filename\nREMOTE_NAME="ios-' + build.flavor + '-' + build.variant + '-${{ github.head_ref || github.ref_name }}-${{ github.sha }}.ipa"\n\n# Determine folder path to use (if provided)\nFOLDER_PATH="${GDRIVE_FOLDER_ID:-react-native-builds}"\nFOLDER_PARAM="${FOLDER_PATH}"\n\n# Upload to Google Drive\nrclone copy "$IPA_FILE" "gdrive:${FOLDER_PARAM}/$REMOTE_NAME" --progress\n\necho "File uploaded to Google Drive folder ${FOLDER_PARAM}: $REMOTE_NAME"'
+          run: '\n# Find the IPA file\nIPA_FILE=$(find ios/build/Build/Products -name "*.ipa" -type f | head -1)\n\n# Create remote filename\nREMOTE_NAME="ios-' + build.variant + '-${{ github.head_ref || github.ref_name }}-${{ github.sha }}.ipa"\n\n# Determine folder path to use (if provided)\nFOLDER_PATH="${GDRIVE_FOLDER_ID:-react-native-builds}"\nFOLDER_PARAM="${FOLDER_PATH}"\n\n# Upload to Google Drive\nrclone copy "$IPA_FILE" "gdrive:${FOLDER_PARAM}/$REMOTE_NAME" --progress\n\necho "File uploaded to Google Drive folder ${FOLDER_PARAM}: $REMOTE_NAME"'
         }
       ];
     } else if (build.storage === 's3') {
@@ -151,7 +151,7 @@ const storageHelpers = {
           name: 'Upload to S3',
           id: 's3-upload',
           if: 'success()',
-          run: '\n# Find the IPA file\nIPA_FILE=$(find ios/build/Build/Products -name "*.ipa" -type f | head -1)\n\n# Create remote path\nREMOTE_PATH="ios/' + build.flavor + '/' + build.variant + '/${{ github.head_ref || github.ref_name }}/${{ github.sha }}.ipa"\n\n# Get bucket name from environment or use default\nBUCKET_NAME="${AWS_S3_BUCKET:-rn-artifacts}"\n\n# Upload to S3\nrclone copy "$IPA_FILE" "s3:${BUCKET_NAME}/$REMOTE_PATH" --progress\n\necho "File uploaded to S3 bucket ${BUCKET_NAME}: $REMOTE_PATH"'
+          run: '\n# Find the IPA file\nIPA_FILE=$(find ios/build/Build/Products -name "*.ipa" -type f | head -1)\n\n# Create remote path\nREMOTE_PATH="ios/' + build.variant + '/${{ github.head_ref || github.ref_name }}/${{ github.sha }}.ipa"\n\n# Get bucket name from environment or use default\nBUCKET_NAME="${AWS_S3_BUCKET:-rn-artifacts}"\n\n# Upload to S3\nrclone copy "$IPA_FILE" "s3:${BUCKET_NAME}/$REMOTE_PATH" --progress\n\necho "File uploaded to S3 bucket ${BUCKET_NAME}: $REMOTE_PATH"'
         }
       ];
     }

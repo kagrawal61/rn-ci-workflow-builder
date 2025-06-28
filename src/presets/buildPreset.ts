@@ -23,7 +23,6 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
     packageManager = 'yarn',
     build = {
       platform: 'android',
-      flavor: 'develop',
       variant: 'debug',
       storage: 'github',
       notification: 'pr-comment',
@@ -41,7 +40,7 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
   const determineBuildSourceStep = commonSteps.createSourceDetectionStep();
 
   // Common build parameters for both iOS and Android
-  const buildParams = `--flavor ${build.flavor} --variant ${build.variant}`;
+  const buildParams = `--variant ${build.variant}`;
 
   // Android build steps
   if (build.platform === 'android' || build.platform === 'both') {

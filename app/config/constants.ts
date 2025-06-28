@@ -7,7 +7,7 @@
 
 // Project metadata
 export const PROJECT_NAME = "React Native CI/CD Workflow Builder";
-export const PROJECT_DESCRIPTION = "Generate GitHub Actions workflows for your React Native projects";
+export const PROJECT_DESCRIPTION = "Streamline your React Native development with powerful, customizable CI/CD workflows that just work";
 
 // Repository information
 export const REPO_OWNER = "mobile-dev-ci";

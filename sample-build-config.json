@@ -1,0 +1,28 @@
+{
+  "kind": "build",
+  "options": {
+    "name": "React Native Build Pipeline",
+    "triggers": {
+      "push": {
+        "branches": ["main"],
+        "ignorePaths": ["docs/**", "*.md"]
+      },
+      "pullRequest": {
+        "branches": ["main"]
+      },
+      "workflowDispatch": true
+    },
+    "nodeVersions": [20],
+    "packageManager": "yarn",
+    "runsOn": "ubuntu-latest",
+    "cache": { "enabled": true },
+    "skip": { "commitMessageContains": "[skip ci]" },
+    "build": {
+      "platform": "both",
+      "variant": "debug",
+      "storage": "github",
+      "notification": "pr-comment",
+      "includeHealthCheck": true
+    }
+  }
+}

@@ -52,7 +52,10 @@ export function generateWorkflow(cfg: WorkflowConfig): { yaml: string, secretsSu
   }
   
   const obj = builder(options);
-  let yamlStr = yaml.dump(obj, { lineWidth: 120 });
+  let yamlStr = yaml.dump(obj, { 
+    lineWidth: 120,
+    noRefs: true  // Prevent the creation of anchors and references
+  });
   yamlStr = injectSecrets(yamlStr);
   
   // Generate secrets summary for build preset

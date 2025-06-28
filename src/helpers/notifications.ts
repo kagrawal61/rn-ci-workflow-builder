@@ -24,7 +24,7 @@ const notificationHelpers = {
           SLACK_ICON: 'https://github.com/rtCamp.png?size=48',
           SLACK_COLOR: '${{ job.status }}',
           SLACK_TITLE: 'Android Build Result',
-          SLACK_MESSAGE: 'Android ' + build.flavor + ' ' + build.variant + ' build for ${{ github.head_ref || github.ref_name }} completed with status: ${{ job.status }}',
+          SLACK_MESSAGE: 'Android ' + build.variant + ' build for ${{ github.head_ref || github.ref_name }} completed with status: ${{ job.status }}',
         },
       });
     }
@@ -36,13 +36,13 @@ const notificationHelpers = {
         if: 'steps.build-source.outputs.is_pr == \'true\'',
         uses: 'thollander/actions-comment-pull-request@v2',
         with: {
-          message: 'Android ' + build.flavor + ' ' + build.variant + ' build completed!\n\nDownload: ' 
+          message: 'Android ' + build.variant + ' build completed!\n\nDownload: ' 
             + (build.storage === 'github' ? 'Available in GitHub Artifacts' 
               : build.storage === 'firebase' ? 'Firebase App Distribution'
               : build.storage === 'drive' ? 'Google Drive'
-              : build.storage === 's3' ? '${{ secrets.S3_BASE_URL }}/android/' + build.flavor + '/' + build.variant + '/${{ github.head_ref || github.ref_name }}'
+              : build.storage === 's3' ? '${{ secrets.S3_BASE_URL }}/android/' + build.variant + '/${{ github.head_ref || github.ref_name }}'
               : 'Available in artifacts'),
-          comment_includes: 'Android ' + build.flavor + ' ' + build.variant + ' build',
+          comment_includes: 'Android ' + build.variant + ' build',
           mode: 'replace',
         },
       });
@@ -70,7 +70,7 @@ const notificationHelpers = {
           SLACK_ICON: 'https://github.com/rtCamp.png?size=48',
           SLACK_COLOR: '${{ job.status }}',
           SLACK_TITLE: 'iOS Build Result',
-          SLACK_MESSAGE: 'iOS ' + build.flavor + ' ' + build.variant + ' build for ${{ github.head_ref || github.ref_name }} completed with status: ${{ job.status }}',
+          SLACK_MESSAGE: 'iOS ' + build.variant + ' build for ${{ github.head_ref || github.ref_name }} completed with status: ${{ job.status }}',
         },
       });
     }
@@ -82,13 +82,13 @@ const notificationHelpers = {
         if: 'steps.build-source.outputs.is_pr == \'true\'',
         uses: 'thollander/actions-comment-pull-request@v2',
         with: {
-          message: 'iOS ' + build.flavor + ' ' + build.variant + ' build completed!\n\nDownload: ' 
+          message: 'iOS ' + build.variant + ' build completed!\n\nDownload: ' 
             + (build.storage === 'github' ? 'Available in GitHub Artifacts' 
               : build.storage === 'firebase' ? 'Firebase App Distribution'
               : build.storage === 'drive' ? 'Google Drive'
-              : build.storage === 's3' ? '${{ secrets.S3_BASE_URL }}/ios/' + build.flavor + '/' + build.variant + '/${{ github.head_ref || github.ref_name }}'
+              : build.storage === 's3' ? '${{ secrets.S3_BASE_URL }}/ios/' + build.variant + '/${{ github.head_ref || github.ref_name }}'
               : 'Available in artifacts'),
-          comment_includes: 'iOS ' + build.flavor + ' ' + build.variant + ' build',
+          comment_includes: 'iOS ' + build.variant + ' build',
           mode: 'replace',
         },
       });

@@ -60,7 +60,14 @@ echo "✅ Android environment looks good"
         name: 'Run Android Build',
         id: 'android-build',
         run: `
-echo "🚀 Starting Android build for ${build.flavor} ${build.variant}..."
+echo "🚀 Starting Android build for ${build.variant}..."
+
+# Check for .env file and use it if exists
+if [ -f ".env" ]; then
+  echo "✅ Found .env file, will be used for the build"
+else
+  echo "⚠️ No .env file found in project root"
+fi
 
 # Run the build with error capture
 echo "Building Android app using official React Native CLI..."
@@ -94,7 +101,7 @@ fi
         'continue-on-error': true,
         uses: 'actions/upload-artifact@v3',
         with: {
-          name: 'android-' + build.flavor + '-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
+          name: 'android-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
           path: 'android/app/build/outputs/apk/**/*.apk',
           'retention-days': '14',
         },
@@ -168,7 +175,14 @@ echo "✅ CocoaPods installation successful"
         name: 'Run iOS Build',
         id: 'ios-build',
         run: `
-echo "🚀 Starting iOS build..."
+echo "🚀 Starting iOS build for ${build.variant}..."
+
+# Check for .env file and use it if exists
+if [ -f ".env" ]; then
+  echo "✅ Found .env file, will be used for the build"
+else
+  echo "⚠️ No .env file found in project root"
+fi
 
 # Run the build with error capture
 echo "Building iOS app using official React Native CLI..."
@@ -202,7 +216,7 @@ fi
         'continue-on-error': true,
         uses: 'actions/upload-artifact@v3',
         with: {
-          name: 'ios-app-' + '${{ github.head_ref || github.ref_name }}',
+          name: 'ios-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
           path: 'ios/build/Build/Products/**/*.ipa',
           'retention-days': '14',
         },

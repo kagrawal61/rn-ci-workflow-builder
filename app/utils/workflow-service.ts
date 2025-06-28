@@ -49,7 +49,6 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
       skip: { commitMessageContains: '[skip ci]' },
       build: {
         platform: 'both',
-        flavor: 'develop',
         variant: 'debug',
         storage: 'github',
         notification: 'pr-comment',
@@ -161,7 +160,6 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   if (formValues.preset === 'build') {
     const buildConfig: BuildOptions = {
       platform: formValues.buildPlatform || 'both',
-      flavor: formValues.buildFlavor || 'develop',
       variant: formValues.buildVariant || 'debug',
       storage: formValues.buildStorage || 'github',
       notification: formValues.buildNotification || 'pr-comment',

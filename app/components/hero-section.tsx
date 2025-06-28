@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion";
-import { FileJson } from "lucide-react";
+import { FileJson, Zap, Code, Rocket } from "lucide-react";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { Button } from "./ui/button";
 import { PROJECT_NAME, PROJECT_DESCRIPTION, REPO_URL } from "@/config/constants";
@@ -13,19 +13,33 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <div className="flex items-center justify-center gap-2 rounded-full bg-muted px-4 py-1 text-sm text-muted-foreground">
-            <IconBrandGithub size={14} />
-            <span>Open Source</span>
+          <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-2 rounded-full bg-muted px-4 py-1 text-sm text-muted-foreground">
+              <div className="flex items-center justify-center h-3.5 w-3.5">
+                <IconBrandGithub size={14} stroke={1.5} />
+              </div>
+              <span>Open Source</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-sm text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
+              <Code className="h-3.5 w-3.5" />
+              <span>Built for Developers</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 rounded-full bg-amber-100 px-4 py-1 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+              <Zap className="h-3.5 w-3.5" />
+              <span>Fast & Reliable</span>
+            </div>
           </div>
         </motion.div>
         
         <motion.h1
-          className="mt-6 text-4xl font-bold tracking-tight md:text-6xl"
+          className="mt-6 text-4xl font-bold tracking-tight md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-600 dark:from-primary dark:to-indigo-400"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+          whileInView={{ scale: [0.95, 1] }}
+          viewport={{ once: true }}
         >
           {PROJECT_NAME}
         </motion.h1>
@@ -34,7 +48,9 @@ export function HeroSection() {
           className="mt-4 max-w-[42rem] text-xl text-muted-foreground"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          whileInView={{ scale: [0.98, 1] }}
+          viewport={{ once: true }}
         >
           {PROJECT_DESCRIPTION}
         </motion.p>
@@ -43,7 +59,9 @@ export function HeroSection() {
           className="mt-8 flex flex-wrap items-center justify-center gap-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+          whileInView={{ scale: [0.95, 1] }}
+          viewport={{ once: true }}
         >
           <Button
             size="lg"
@@ -62,7 +80,9 @@ export function HeroSection() {
             asChild
           >
             <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
-              <IconBrandGithub className="mr-2 h-5 w-5" />
+              <div className="mr-2 h-5 w-5 flex items-center justify-center">
+                <IconBrandGithub size={18} stroke={1.5} />
+              </div>
               View on GitHub
             </a>
           </Button>
@@ -73,21 +93,25 @@ export function HeroSection() {
           className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
         >
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}
-              className="rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md"
+              className="rounded-lg border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:scale-105 hover:border-primary/50"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.6 + i * 0.1 }}
+              transition={{ duration: 0.4, delay: 0.6 + i * 0.1, ease: "easeOut" }}
+              whileHover={{ y: -5 }}
             >
-              <div className="mb-3 rounded-full bg-primary/10 p-2 w-10 h-10 flex items-center justify-center">
-                <feature.icon className="h-5 w-5 text-primary" />
+              <div className="mb-4 rounded-lg bg-gradient-to-br from-primary/20 to-indigo-400/20 p-3 w-12 h-12 flex items-center justify-center">
+                {feature.icon === FileJson ? <FileJson className="h-6 w-6 text-primary" /> : 
+                 feature.icon === IconBrandGithub ? <div className="h-6 w-6 text-primary flex items-center justify-center"><IconBrandGithub size={20} stroke={1.5} /></div> : 
+                 <Rocket className="h-6 w-6 text-primary" />}
               </div>
               <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
               <p className="text-muted-foreground">{feature.description}</p>
+              <div className="mt-4 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-indigo-400"></div>
             </motion.div>
           ))}
         </motion.div>
@@ -99,17 +123,17 @@ export function HeroSection() {
 const features = [
   {
     title: "Optimized for React Native",
-    description: "Tailored workflows for React Native projects with best-practice defaults",
+    description: "Tailored workflows for React Native projects with best-practice defaults and optimized performance",
     icon: FileJson,
   },
   {
     title: "GitHub Actions Integration",
-    description: "Create workflows that run automatically on GitHub with full TypeScript support",
+    description: "Create workflows that run automatically on GitHub with full TypeScript support and real-time feedback",
     icon: IconBrandGithub,
   },
   {
     title: "Customizable Configuration",
-    description: "Tailor your CI/CD pipeline with flexible options, triggers, and environment settings",
-    icon: FileJson,
+    description: "Tailor your CI/CD pipeline with flexible options, triggers, and environment settings that scale with your team",
+    icon: Rocket,
   },
 ];

@@ -288,35 +288,11 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 </RadioGroup>
               </div>
 
-              {/* Flavor */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="build-flavor">App Flavor</Label>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                        <span className="sr-only">Info</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Select the app flavor to build
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <Select 
-                  value={values.buildFlavor || "develop"}
-                  onValueChange={(value) => handleInputChange("buildFlavor", value)}
-                >
-                  <SelectTrigger id="build-flavor">
-                    <SelectValue placeholder="Select app flavor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="prod">Production</SelectItem>
-                    <SelectItem value="develop">Development</SelectItem>
-                    <SelectItem value="stage">Staging</SelectItem>
-                  </SelectContent>
-                </Select>
+              {/* Environment Configuration Note */}
+              <div className="rounded-md bg-muted p-3 text-xs">
+                <p className="font-medium mb-1">Environment Configuration</p>
+                <p className="text-muted-foreground mb-1">The workflow will automatically detect and use .env files if they exist in your project root.</p>
+                <p className="text-muted-foreground">No additional configuration is needed for environment variables.</p>
               </div>
 
               {/* Variant */}

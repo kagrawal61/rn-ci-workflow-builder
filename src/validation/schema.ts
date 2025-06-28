@@ -14,11 +14,6 @@ export function validateBuildSchema(options: BuildOptions): BuildOptions {
       'platform'
     ) as BuildOptions['platform'],
     
-    flavor: validateEnum(
-      options.flavor,
-      ['prod', 'develop', 'stage'],
-      'flavor'
-    ) as BuildOptions['flavor'],
     
     variant: validateEnum(
       options.variant,
