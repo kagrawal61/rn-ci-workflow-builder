@@ -38,3 +38,5 @@ next-env.d.ts
 # GitHub folders
 .github/
 .github/workflows/*
+
+bitrise.yml

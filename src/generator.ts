@@ -163,7 +163,8 @@ export async function generateWorkflowForCli(cfg: WorkflowConfig): Promise<{ yam
   
   // Validate the generated YAML with CLI-specific enhancements
   // This will automatically run Bitrise CLI validation for Bitrise configs
-  const validationResult = validateGeneratedYaml(yamlStr, true);
+  // and yamllint validation for other platforms (like GitHub Actions)
+  const validationResult = validateGeneratedYaml(yamlStr, true, true);
   const validatedYaml = typeof validationResult === 'string' ? validationResult : await validationResult;
   
   // Generate secrets summary for build preset

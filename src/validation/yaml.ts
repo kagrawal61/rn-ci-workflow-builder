@@ -39,6 +39,19 @@ async function isBitriseCliInstalled(): Promise<boolean> {
 }
 
 /**
+ * Checks if yamllint is installed
+ * @returns Promise<boolean> - true if installed, false otherwise
+ */
+async function isYamllintInstalled(): Promise<boolean> {
+  try {
+    await execAsync('yamllint --version');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Attempts to install Bitrise CLI based on the operating system
  * @param autoInstall Whether to install automatically or just show instructions
  * @returns Promise that resolves if installation succeeds
@@ -160,13 +173,103 @@ async function installBitriseDirectly(): Promise<void> {
 }
 
 /**
+ * Attempts to install yamllint based on the operating system
+ * @param autoInstall Whether to install automatically or just show instructions
+ * @returns Promise that resolves if installation succeeds
+ */
+async function installYamllint(autoInstall: boolean = false): Promise<void> {
+  console.log('🔧 yamllint is not installed. Setting up yamllint...');
+
+  if (autoInstall) {
+    const osType = detectOS();
+    
+    try {
+      // Try system package manager first (as recommended in yamllint docs)
+      console.log('📦 Installing yamllint via system package manager...');
+      
+      if (osType === 'macos') {
+        // Check if Homebrew is installed
+        await execAsync('which brew');
+        await execAsync('brew install yamllint');
+        console.log('✅ yamllint installed successfully via Homebrew!');
+      } else if (osType === 'linux') {
+        // Try different package managers
+        try {
+          await execAsync('which dnf');
+          await execAsync('sudo dnf install yamllint');
+          console.log('✅ yamllint installed successfully via dnf!');
+        } catch (dnfError) {
+          await execAsync('which apt-get');
+          await execAsync('sudo apt-get update && sudo apt-get install yamllint');
+          console.log('✅ yamllint installed successfully via apt-get!');
+        }
+      } else {
+        throw new Error('Unsupported OS for system package manager'); // Fall through to pip installation
+      }
+      
+      // Verify installation
+      await execAsync('yamllint --version');
+      
+    } catch (systemError) {
+      // Fallback to pip installation
+      console.log('📦 Trying pip installation as fallback...');
+      
+      try {
+        // Try pip3 first, then pip
+        try {
+          await execAsync('pip3 install yamllint');
+          console.log('✅ yamllint installed successfully via pip3!');
+        } catch (pip3Error) {
+          console.log('⚠️  pip3 not found, trying pip...');
+          await execAsync('pip install yamllint');
+          console.log('✅ yamllint installed successfully via pip!');
+        }
+        
+        // Verify installation
+        await execAsync('yamllint --version');
+        
+      } catch (pipError) {
+        console.error('❌ Failed to install yamllint automatically');
+        throw new Error(`Installation failed: ${(pipError as Error).message}. Please install manually: pip install yamllint`);
+      }
+    }
+  } else {
+    console.log(`
+📋 To install yamllint, run one of these commands:
+
+Option 1 - pip3 (recommended):
+  pip3 install yamllint
+
+Option 2 - pip:
+  pip install yamllint
+
+Option 3 - System package manager:
+  # On macOS with Homebrew:
+  brew install yamllint
+  
+  # On Ubuntu/Debian:
+  sudo apt-get install yamllint
+  
+  # On CentOS/RHEL/Fedora:
+  sudo dnf install yamllint  # or: sudo yum install yamllint
+
+For more installation options, visit: https://yamllint.readthedocs.io/
+
+Then run the validation command again.
+`);
+    throw new Error('Please install yamllint and try again');
+  }
+}
+
+/**
  * Validates that the generated YAML is correctly structured and has no undefined values
  * @param yamlStr The YAML string to validate
  * @param enableBitriseCliValidation Whether to run Bitrise CLI validation (only works in CLI context, not browser)
+ * @param enableYamllintValidation Whether to run yamllint validation for non-Bitrise workflows (only works in CLI context, not browser)
  * @returns The same YAML string if valid (or Promise<string> if async validation is enabled)
  * @throws Error if the YAML is invalid
  */
-export function validateGeneratedYaml(yamlStr: string, enableBitriseCliValidation: boolean = false): string | Promise<string> {
+export function validateGeneratedYaml(yamlStr: string, enableBitriseCliValidation: boolean = false, enableYamllintValidation: boolean = false): string | Promise<string> {
   try {
     // Try to parse the YAML to make sure it's valid
     const parsedYaml = yaml.load(yamlStr);
@@ -179,6 +282,12 @@ export function validateGeneratedYaml(yamlStr: string, enableBitriseCliValidatio
     if (enableBitriseCliValidation && parsedYaml && typeof parsedYaml === 'object' && 'format_version' in parsedYaml) {
       // Return async validation for Bitrise configs when CLI validation is enabled
       return validateBitriseYamlAndReturn(yamlStr);
+    }
+    
+    // If yamllint validation is enabled and this is NOT a Bitrise config, validate with yamllint
+    if (enableYamllintValidation && parsedYaml && typeof parsedYaml === 'object' && !('format_version' in parsedYaml)) {
+      // Return async validation for non-Bitrise configs (like GitHub Actions) when yamllint validation is enabled
+      return validateYamllintAndReturn(yamlStr);
     }
     
     // If validation passes, return the original string (sync)
@@ -195,6 +304,16 @@ export function validateGeneratedYaml(yamlStr: string, enableBitriseCliValidatio
  */
 async function validateBitriseYamlAndReturn(yamlStr: string): Promise<string> {
   await validateBitriseYamlContent(yamlStr);
+  return yamlStr;
+}
+
+/**
+ * Helper function to validate YAML content with yamllint and return the original string
+ * @param yamlStr The YAML string to validate and return
+ * @returns Promise<string> The original YAML string if validation passes
+ */
+async function validateYamllintAndReturn(yamlStr: string): Promise<string> {
+  await validateYamlContentWithYamllint(yamlStr, 'temp.yml', true, 'relaxed');
   return yamlStr;
 }
 
@@ -271,6 +390,110 @@ export async function validateBitriseYamlContent(yamlContent: string, tempFileNa
   try {
     fs.writeFileSync(tempFilePath, yamlContent, 'utf8');
     await validateWithBitriseCli(tempFilePath, autoInstall);
+  } finally {
+    // Clean up temporary file
+    try {
+      fs.unlinkSync(tempFilePath);
+    } catch (cleanupError) {
+      // Ignore cleanup errors
+    }
+  }
+}
+
+/**
+ * Validates a YAML file using yamllint
+ * @param yamlFilePath Path to the YAML file to validate
+ * @param autoInstall Whether to automatically install yamllint if missing (defaults to true)
+ * @param config Optional yamllint configuration ('relaxed' or path to config file)
+ * @returns Promise that resolves if validation passes
+ * @throws Error if validation fails or yamllint is not available
+ */
+export async function validateWithYamllint(yamlFilePath: string, autoInstall: boolean = true, config?: string): Promise<void> {
+  try {
+    // Check if yamllint is installed
+    const isInstalled = await isYamllintInstalled();
+    
+    if (!isInstalled) {
+      await installYamllint(autoInstall);
+      
+      // Verify installation was successful
+      const isNowInstalled = await isYamllintInstalled();
+      if (!isNowInstalled) {
+        throw new Error('yamllint installation verification failed');
+      }
+    }
+
+    // Build yamllint command with parsable output for better error handling
+    let command = `yamllint -f parsable "${yamlFilePath}"`;
+    
+    if (config) {
+      if (config === 'relaxed' || config === 'default') {
+        command = `yamllint -f parsable -d ${config} "${yamlFilePath}"`;
+      } else {
+        // Assume it's a path to a config file
+        command = `yamllint -f parsable -c "${config}" "${yamlFilePath}"`;
+      }
+    }
+
+    // Run yamllint command
+    const { stdout, stderr } = await execAsync(command);
+    
+    // yamllint returns exit code 0 for valid YAML files
+    // If we reach here, validation passed
+    console.log('✅ yamllint validation passed');
+    
+    if (stdout.trim()) {
+      console.log('yamllint output:', stdout.trim());
+    }
+    
+    if (stderr.trim()) {
+      console.log('yamllint warnings:', stderr.trim());
+    }
+    
+  } catch (error: unknown) {
+    // Parse yamllint validation error for better error messages
+    let errorMessage = 'yamllint validation failed';
+    
+    if (error && typeof error === 'object' && 'stdout' in error) {
+      // Extract meaningful error from stdout (yamllint outputs errors to stdout)
+      const stdout = String((error as { stdout: unknown }).stdout);
+      if (stdout.trim()) {
+        errorMessage = `yamllint validation failed:\n${stdout}`;
+      }
+    } else if (error && typeof error === 'object' && 'stderr' in error) {
+      const stderr = String((error as { stderr: unknown }).stderr);
+      if (stderr.trim()) {
+        errorMessage = `yamllint validation failed:\n${stderr}`;
+      }
+    } else if (error && typeof error === 'object' && 'message' in error) {
+      const message = String((error as { message: unknown }).message);
+      if (!message.includes('Please install')) {
+        errorMessage = `yamllint validation failed: ${message}`;
+      } else {
+        // Re-throw installation-related errors as-is
+        throw error;
+      }
+    }
+    
+    throw new Error(errorMessage);
+  }
+}
+
+/**
+ * Convenience function to validate YAML content using yamllint
+ * @param yamlContent The YAML content as string
+ * @param tempFileName Optional temp file name (defaults to 'temp.yml')
+ * @param autoInstall Whether to automatically install yamllint if missing (defaults to true)
+ * @param config Optional yamllint configuration ('relaxed' or path to config file)
+ * @returns Promise that resolves if validation passes
+ */
+export async function validateYamlContentWithYamllint(yamlContent: string, tempFileName: string = 'temp.yml', autoInstall: boolean = true, config?: string): Promise<void> {
+  // Create a temporary file with the YAML content
+  const tempFilePath = path.join(os.tmpdir(), tempFileName);
+  
+  try {
+    fs.writeFileSync(tempFilePath, yamlContent, 'utf8');
+    await validateWithYamllint(tempFilePath, autoInstall, config);
   } finally {
     // Clean up temporary file
     try {
