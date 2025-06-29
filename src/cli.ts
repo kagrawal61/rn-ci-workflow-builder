@@ -30,6 +30,7 @@ program
   .option('-d, --dir <path>', 'Output directory (default: .github/workflows for GitHub, . for Bitrise)')
   .option('-p, --platform <platform>', 'CI platform (github or bitrise)', 'github')
   .option('-v, --validate-only', 'Only validate the configuration without generating files')
+  .option('--bitrise-validate', 'Use Bitrise CLI to validate generated Bitrise YAML (automatically installs CLI if needed)')
   .action(async (preset = 'health-check', options) => {
     try {
       // Default config
@@ -101,15 +102,32 @@ program
         const { yaml, secretsSummary } = generateWorkflow(config);
 
         // Write to file or output to console
+        let filePath: string;
         if (options.output) {
           fs.writeFileSync(options.output, yaml, 'utf8');
+          filePath = options.output;
           console.log(`✅ Workflow written to ${options.output}`);
         } else if (options.dir) {
-          const { filePath } = writeWorkflowFile(config, options.dir);
+          const result = writeWorkflowFile(config, options.dir);
+          filePath = result.filePath;
           console.log(`✅ Workflow written to ${filePath}`);
         } else {
-          const { filePath } = writeWorkflowFile(config);
+          const result = writeWorkflowFile(config);
+          filePath = result.filePath;
           console.log(`✅ Workflow written to ${filePath}`);
+        }
+        
+        // Run Bitrise validation if requested and platform is Bitrise
+        if (options.bitriseValidate && config.options?.platform === 'bitrise') {
+          try {
+            const { validateWithBitriseCli } = await import('./validation/yaml');
+            await validateWithBitriseCli(filePath, true);
+          } catch (validationError) {
+            console.error(`\n❌ ${(validationError as Error).message}`);
+            console.error('\n💡 Note: The YAML was generated successfully, but Bitrise validation failed.');
+            console.error('   You can still use the generated file, but you may need to fix the issues.');
+            process.exit(1);
+          }
         }
         
         // Display secrets summary if available
@@ -194,6 +212,27 @@ program
       }
     } catch (error) {
       console.error(`❌ Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+// Bitrise validate command
+program
+  .command('bitrise-validate [file]')
+  .description('Validate a Bitrise YAML file using Bitrise CLI (automatically installs CLI if needed)')
+  .action(async (file = 'bitrise.yml') => {
+    try {
+      const { validateWithBitriseCli } = await import('./validation/yaml');
+      
+      if (!fs.existsSync(file)) {
+        console.error(`❌ Error: File not found: ${file}`);
+        process.exit(1);
+      }
+      
+      await validateWithBitriseCli(file, true); // Always auto-install by default
+      console.log(`✅ ${file} is valid according to Bitrise CLI`);
+    } catch (error) {
+      console.error(`❌ ${(error as Error).message}`);
       process.exit(1);
     }
   });
