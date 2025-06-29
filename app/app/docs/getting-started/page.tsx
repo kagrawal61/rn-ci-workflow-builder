@@ -54,11 +54,15 @@ export default function GettingStartedPage() {
           </div>
           <div className="ml-10">
             <p className="text-muted-foreground">
-              Generate your GitHub Actions workflow using the configuration file
+              Generate your workflow using the configuration file. You can target GitHub Actions or Bitrise platforms.
             </p>
             <pre className="mt-4 overflow-x-auto rounded-lg bg-secondary p-4">
               <code className="text-sm">
-{`npx @your-org/rn-workflow-builder --config workflow-config.json --output .github/workflows/android-build.yml`}
+{`# Generate workflow from config file
+rn-ci-workflow-builder generate build --config workflow-config.json
+
+# Alternative: specify custom output location
+rn-ci-workflow-builder generate build --config workflow-config.json --output .github/workflows/android-build.yml`}
               </code>
             </pre>
           </div>
