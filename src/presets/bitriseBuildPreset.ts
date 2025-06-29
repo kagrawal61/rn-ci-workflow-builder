@@ -31,11 +31,11 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
     {
       'script@1': {
         title: 'Install Dependencies',
-        inputs: {
-          content: packageManager === 'yarn' 
+        inputs: [
+          { content: packageManager === 'yarn' 
             ? 'yarn install --immutable' 
-            : 'npm ci'
-        }
+            : 'npm ci' }
+        ]
       }
     }
   ];
@@ -45,31 +45,31 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
     {
       'script@1': {
         title: 'TypeScript Check',
-        inputs: {
-          content: packageManager === 'yarn' 
+        inputs: [
+          { content: packageManager === 'yarn' 
             ? 'yarn tsc --noEmit' 
-            : 'npm run tsc -- --noEmit'
-        }
+            : 'npm run tsc -- --noEmit' }
+        ]
       }
     },
     {
       'script@1': {
         title: 'ESLint',
-        inputs: {
-          content: packageManager === 'yarn' 
+        inputs: [
+          { content: packageManager === 'yarn' 
             ? 'yarn lint' 
-            : 'npm run lint'
-        }
+            : 'npm run lint' }
+        ]
       }
     },
     {
       'script@1': {
         title: 'Unit Tests',
-        inputs: {
-          content: packageManager === 'yarn' 
+        inputs: [
+          { content: packageManager === 'yarn' 
             ? 'yarn test --ci' 
-            : 'npm test -- --ci'
-        }
+            : 'npm test -- --ci' }
+        ]
       }
     }
   ] : [];
@@ -84,9 +84,9 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       {
         'script@1': {
           title: 'Bundle React Native',
-          inputs: {
-            content: 'npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res'
-          }
+          inputs: [
+            { content: 'npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res' }
+          ]
         }
       },
       {
@@ -148,9 +148,9 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       {
         'script@1': {
           title: 'Bundle React Native',
-          inputs: {
-            content: 'npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle --assets-dest ios'
-          }
+          inputs: [
+            { content: 'npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle --assets-dest ios' }
+          ]
         }
       },
       {

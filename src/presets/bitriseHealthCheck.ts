@@ -23,51 +23,51 @@ export function buildBitriseHealthCheckPipeline(opts: WorkflowOptions): BitriseC
     {
       'script@1': {
         title: 'Install Dependencies',
-        inputs: {
-          content: packageManager === 'yarn' 
+        inputs: [
+          { content: packageManager === 'yarn' 
             ? 'yarn install --immutable' 
-            : 'npm ci'
-        }
+            : 'npm ci' }
+        ]
       }
     },
     {
       'script@1': {
         title: 'TypeScript Check',
-        inputs: {
-          content: packageManager === 'yarn' 
+        inputs: [
+          { content: packageManager === 'yarn' 
             ? 'yarn tsc --noEmit' 
-            : 'npm run tsc -- --noEmit'
-        }
+            : 'npm run tsc -- --noEmit' }
+        ]
       }
     },
     {
       'script@1': {
         title: 'ESLint',
-        inputs: {
-          content: packageManager === 'yarn' 
+        inputs: [
+          { content: packageManager === 'yarn' 
             ? 'yarn lint' 
-            : 'npm run lint'
-        }
+            : 'npm run lint' }
+        ]
       }
     },
     {
       'script@1': {
         title: 'Prettier Check',
-        inputs: {
-          content: packageManager === 'yarn' 
+        inputs: [
+          { content: packageManager === 'yarn' 
             ? 'yarn format:check' 
-            : 'npm run format:check'
-        }
+            : 'npm run format:check' }
+        ]
       }
     },
     {
       'script@1': {
         title: 'Unit Tests',
-        inputs: {
-          content: packageManager === 'yarn' 
+        inputs: [
+          { content: packageManager === 'yarn' 
             ? 'yarn test --ci' 
-            : 'npm test -- --ci'
-        }
+            : 'npm test -- --ci' }
+        ]
       }
     }
   ];
