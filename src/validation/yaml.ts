@@ -162,11 +162,11 @@ async function installBitriseDirectly(): Promise<void> {
 /**
  * Validates that the generated YAML is correctly structured and has no undefined values
  * @param yamlStr The YAML string to validate
- * @param useBitriseValidation Whether to use Bitrise CLI validation for Bitrise configs
- * @returns The same YAML string if valid
+ * @param enableBitriseCliValidation Whether to run Bitrise CLI validation (only works in CLI context, not browser)
+ * @returns The same YAML string if valid (or Promise<string> if async validation is enabled)
  * @throws Error if the YAML is invalid
  */
-export function validateGeneratedYaml(yamlStr: string, useBitriseValidation: boolean = false): string {
+export function validateGeneratedYaml(yamlStr: string, enableBitriseCliValidation: boolean = false): string | Promise<string> {
   try {
     // Try to parse the YAML to make sure it's valid
     const parsedYaml = yaml.load(yamlStr);
@@ -175,17 +175,27 @@ export function validateGeneratedYaml(yamlStr: string, useBitriseValidation: boo
     validateNoUndefinedValues(parsedYaml);
     validateWorkflowStructure(parsedYaml);
     
-    // If this is a Bitrise config and Bitrise validation is requested, validate with Bitrise CLI
-    if (useBitriseValidation && parsedYaml && typeof parsedYaml === 'object' && 'format_version' in parsedYaml) {
-      // Note: Bitrise validation is async, but we'll handle this in a separate function
-      // for cases where async validation is needed
+    // If Bitrise CLI validation is enabled and this is a Bitrise config, validate with Bitrise CLI
+    if (enableBitriseCliValidation && parsedYaml && typeof parsedYaml === 'object' && 'format_version' in parsedYaml) {
+      // Return async validation for Bitrise configs when CLI validation is enabled
+      return validateBitriseYamlAndReturn(yamlStr);
     }
     
-    // If validation passes, return the original string
+    // If validation passes, return the original string (sync)
     return yamlStr;
   } catch (error) {
     throw new Error(`Invalid YAML generated: ${(error as Error).message}`);
   }
+}
+
+/**
+ * Helper function to validate Bitrise YAML content and return the original string
+ * @param yamlStr The YAML string to validate and return
+ * @returns Promise<string> The original YAML string if validation passes
+ */
+async function validateBitriseYamlAndReturn(yamlStr: string): Promise<string> {
+  await validateBitriseYamlContent(yamlStr);
+  return yamlStr;
 }
 
 /**

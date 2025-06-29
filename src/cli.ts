@@ -4,7 +4,7 @@ import path from 'path';
 import { Command } from 'commander';
 import * as jsYaml from 'js-yaml';
 
-import { generateWorkflow, writeWorkflowFile, getAvailablePresets } from './generator';
+import { generateWorkflow, generateWorkflowForCli, writeWorkflowFile, getAvailablePresets } from './generator';
 import { WorkflowConfig } from './types';
 import { generateSecretsSummary } from './helpers/secretsManager';
 import { BuildOptions } from './presets/types';
@@ -30,7 +30,6 @@ program
   .option('-d, --dir <path>', 'Output directory (default: .github/workflows for GitHub, . for Bitrise)')
   .option('-p, --platform <platform>', 'CI platform (github or bitrise)', 'github')
   .option('-v, --validate-only', 'Only validate the configuration without generating files')
-  .option('--bitrise-validate', 'Use Bitrise CLI to validate generated Bitrise YAML (automatically installs CLI if needed)')
   .action(async (preset = 'health-check', options) => {
     try {
       // Default config
@@ -79,7 +78,7 @@ program
       // Validate-only mode
       if (options.validateOnly) {
         try {
-          generateWorkflow(config);
+          await generateWorkflowForCli(config);
           console.log('✅ Validation successful! Configuration is valid.');
           return;
         } catch (error) {
@@ -99,7 +98,7 @@ program
 
       // Generate workflow
       try {
-        const { yaml, secretsSummary } = generateWorkflow(config);
+        const { yaml, secretsSummary } = await generateWorkflowForCli(config);
 
         // Write to file or output to console
         let filePath: string;
@@ -115,19 +114,6 @@ program
           const result = writeWorkflowFile(config);
           filePath = result.filePath;
           console.log(`✅ Workflow written to ${filePath}`);
-        }
-        
-        // Run Bitrise validation if requested and platform is Bitrise
-        if (options.bitriseValidate && config.options?.platform === 'bitrise') {
-          try {
-            const { validateWithBitriseCli } = await import('./validation/yaml');
-            await validateWithBitriseCli(filePath, true);
-          } catch (validationError) {
-            console.error(`\n❌ ${(validationError as Error).message}`);
-            console.error('\n💡 Note: The YAML was generated successfully, but Bitrise validation failed.');
-            console.error('   You can still use the generated file, but you may need to fix the issues.');
-            process.exit(1);
-          }
         }
         
         // Display secrets summary if available
