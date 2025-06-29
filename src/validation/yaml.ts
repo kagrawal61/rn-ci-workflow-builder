@@ -36,26 +36,66 @@ function validateWorkflowStructure(parsedYaml: any): void {
     throw new Error('Generated workflow is not a valid object');
   }
   
+  // Detect if this is a Bitrise configuration or GitHub Actions workflow
+  if (parsedYaml.format_version !== undefined) {
+    // This is a Bitrise configuration
+    validateBitriseStructure(parsedYaml);
+  } else {
+    // This is a GitHub Actions workflow
+    validateGitHubActionsStructure(parsedYaml);
+  }
+}
+
+/**
+ * Validates GitHub Actions workflow structure
+ * @param parsedYaml Parsed GitHub Actions workflow
+ */
+function validateGitHubActionsStructure(parsedYaml: any): void {
   if (!parsedYaml.name) {
-    throw new Error('Workflow must have a name');
+    throw new Error('GitHub Actions workflow must have a name');
   }
   
   if (!parsedYaml.on) {
-    throw new Error('Workflow must have triggers defined in the "on" field');
+    throw new Error('GitHub Actions workflow must have triggers defined in the "on" field');
   }
   
   if (!parsedYaml.jobs || typeof parsedYaml.jobs !== 'object' || Object.keys(parsedYaml.jobs).length === 0) {
-    throw new Error('Workflow must have at least one job');
+    throw new Error('GitHub Actions workflow must have at least one job');
   }
   
   // Validate each job
   Object.entries(parsedYaml.jobs).forEach(([jobId, job]: [string, any]) => {
     if (!job['runs-on']) {
-      throw new Error(`Job "${jobId}" must specify a runs-on property`);
+      throw new Error(`GitHub Actions job "${jobId}" must specify a runs-on property`);
     }
     
     if (!job.steps || !Array.isArray(job.steps) || job.steps.length === 0) {
-      throw new Error(`Job "${jobId}" must have at least one step`);
+      throw new Error(`GitHub Actions job "${jobId}" must have at least one step`);
+    }
+  });
+}
+
+/**
+ * Validates Bitrise configuration structure
+ * @param parsedYaml Parsed Bitrise configuration
+ */
+function validateBitriseStructure(parsedYaml: any): void {
+  if (!parsedYaml.format_version) {
+    throw new Error('Bitrise configuration must have a format_version');
+  }
+  
+  if (typeof parsedYaml.format_version !== 'number') {
+    throw new Error('Bitrise format_version must be a number');
+  }
+  
+  if (!parsedYaml.workflows || typeof parsedYaml.workflows !== 'object' || Object.keys(parsedYaml.workflows).length === 0) {
+    throw new Error('Bitrise configuration must have at least one workflow');
+  }
+  
+  // Validate each workflow
+  Object.entries(parsedYaml.workflows).forEach(([workflowId, workflow]: [string, any]) => {
+    if (!workflow.steps || !Array.isArray(workflow.steps)) {
+      throw new Error(`Bitrise workflow "${workflowId}" must have steps array`);
     }
   });
 }

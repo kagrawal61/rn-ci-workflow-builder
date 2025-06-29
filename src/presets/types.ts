@@ -12,7 +12,7 @@ export type Variant = 'debug' | 'release';
 /**
  * Storage solution options
  */
-export type StorageSolution = 'github' | 'drive' | 'firebase' | 's3';
+export type StorageSolution = 'github' | 'drive' | 'firebase' | 's3' | 'bitrise';
 
 /**
  * Notification options

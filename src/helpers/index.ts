@@ -7,7 +7,6 @@ export {
   buildTriggers,
   buildEnv,
   injectSecrets,
-  buildSkipCondition,
   buildConcurrency,
   escapeString,
   cacheSteps,

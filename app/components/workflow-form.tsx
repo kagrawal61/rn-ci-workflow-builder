@@ -86,10 +86,44 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
           <CardHeader>
             <CardTitle className="text-xl">Basic Settings</CardTitle>
             <CardDescription>
-              Configure the basic properties of your GitHub Actions workflow
+              Configure the basic properties of your CI/CD workflow
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="platform">CI Platform</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                      <span className="sr-only">Info</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Select the CI platform to generate workflow for
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Select 
+                value={values.platform || "github"}
+                onValueChange={(value) => handleInputChange("platform", value)}
+              >
+                <SelectTrigger id="platform">
+                  <SelectValue placeholder="Select CI platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="github">GitHub Actions</SelectItem>
+                  <SelectItem value="bitrise">Bitrise</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {values.platform === "bitrise" 
+                  ? "Generate a Bitrise workflow configuration (bitrise.yml)" 
+                  : "Generate a GitHub Actions workflow (.github/workflows/*.yml)"}
+              </p>
+            </div>
+            
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="preset">Workflow Preset</Label>
@@ -135,7 +169,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    Name that appears in GitHub Actions UI
+                    Name that appears in your CI platform UI
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -187,7 +221,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    The virtual environment to run the workflow
+                    {values.platform === "bitrise" ? "Build machine specification for Bitrise" : "The virtual environment to run the workflow"}
                   </TooltipContent>
                 </Tooltip>
               </div>

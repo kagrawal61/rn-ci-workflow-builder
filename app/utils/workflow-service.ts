@@ -82,6 +82,7 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
     kind: formValues.preset || 'health-check',
     options: {
       name: '',
+      platform: formValues.platform || 'github',
       triggers: {},
       nodeVersions: [],
       packageManager: 'yarn',

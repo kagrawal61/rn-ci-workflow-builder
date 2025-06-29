@@ -8,6 +8,11 @@
 export type PipelineKind = 'health-check' | string;
 
 /**
+ * Available CI platforms
+ */
+export type CIPlatform = 'github' | 'bitrise';
+
+/**
  * GitHub Actions workflow trigger configuration
  */
 export interface TriggerOptions {
@@ -107,7 +112,7 @@ export interface GitHubJob {
   /** Job strategy (matrix) */
   strategy?: {
     /** Matrix values for job variations */
-    matrix?: Record<string, any[]>;
+    matrix?: Record<string, unknown[]>;
     /** Whether to fail fast or continue on error */
     'fail-fast'?: boolean;
     /** Maximum number of parallel jobs */
@@ -132,7 +137,7 @@ export interface GitHubWorkflow {
   /** Workflow name */
   name: string;
   /** Workflow triggers */
-  on: Record<string, any>;
+  on: Record<string, unknown>;
   /** Workflow environment variables */
   env?: Record<string, string>;
   /** Workflow concurrency settings */
@@ -145,11 +150,78 @@ export interface GitHubWorkflow {
 import { BuildOptions } from './presets/types';
 
 /**
+ * Bitrise workflow step
+ */
+export interface BitriseStep {
+  /** Step identifier with version (e.g., 'script@1', 'git-clone@4') */
+  [stepId: string]: {
+    /** Step title/name */
+    title?: string;
+    /** Step inputs - can be object format or array format depending on the step */
+    inputs?: Record<string, string | boolean | number> | Array<Record<string, string | boolean | number>>;
+    /** Condition for step execution */
+    run_if?: string;
+    /** Whether to continue on error */
+    is_always_run?: boolean;
+  } | undefined;
+}
+
+/**
+ * Bitrise workflow definition
+ */
+export interface BitriseWorkflow {
+  /** Workflow title */
+  title?: string;
+  /** Workflow description */
+  description?: string;
+  /** Workflow steps */
+  steps: BitriseStep[];
+  /** Workflow environment variables */
+  envs?: Array<Record<string, string>>;
+  /** Before run workflows */
+  before_run?: string[];
+  /** After run workflows */
+  after_run?: string[];
+}
+
+/**
+ * Complete Bitrise configuration
+ */
+export interface BitriseConfig {
+  /** Format version */
+  format_version: number;
+  /** Default step library source */
+  default_step_lib_source?: string;
+  /** Project type */
+  project_type?: string;
+  /** App-level configuration */
+  app?: {
+    /** App-level environment variables */
+    envs?: Array<Record<string, string>>;
+  };
+  /** Workflows */
+  workflows: Record<string, BitriseWorkflow>;
+  /** Trigger map */
+  trigger_map?: Array<{
+    /** Push branch pattern */
+    push_branch?: string;
+    /** Pull request source branch pattern */
+    pull_request_source_branch?: string;
+    /** Pull request target branch pattern */
+    pull_request_target_branch?: string;
+    /** Workflow to run */
+    workflow: string;
+  }>;
+}
+
+/**
  * Workflow generator options
  */
 export interface WorkflowOptions {
   /** Workflow name */
   name?: string;
+  /** CI Platform to generate for */
+  platform?: CIPlatform;
   /** Workflow triggers configuration */
   triggers?: TriggerOptions;
   /** Workflow environment variables */

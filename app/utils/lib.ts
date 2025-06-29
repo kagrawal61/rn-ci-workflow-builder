@@ -8,9 +8,12 @@ import { WorkflowConfig, WorkflowOptions } from '../../src/types';
 import { injectSecrets, validateWorkflowConfig } from '../../src/helpers';
 import { buildHealthCheckPipeline } from '../../src/presets/healthCheck';
 import { buildBuildPipeline } from '../../src/presets/buildPreset';
+import { buildBitriseHealthCheckPipeline } from '../../src/presets/bitriseHealthCheck';
+import { buildBitriseBuildPipeline } from '../../src/presets/bitriseBuildPreset';
 
 // Map of pipeline builders (copied from generator.ts but without Node.js dependencies)
-const builders: Record<string, (opts: WorkflowOptions) => Record<string, any>> = {};
+// Support both GitHub Actions and Bitrise configurations
+const builders: Record<string, (opts: WorkflowOptions) => Record<string, any> | import('../../src/types').BitriseConfig> = {};
 
 /**
  * Register a new workflow builder
@@ -19,7 +22,7 @@ const builders: Record<string, (opts: WorkflowOptions) => Record<string, any>> =
  */
 export function registerBuilder(
   kind: string,
-  builder: (opts: WorkflowOptions) => Record<string, any>
+  builder: (opts: WorkflowOptions) => Record<string, any> | import('../../src/types').BitriseConfig
 ): void {
   builders[kind] = builder;
 }
@@ -79,9 +82,26 @@ export function generateWorkflow(cfg: WorkflowConfig): { yaml: string, secretsSu
   };
 }
 
-// Register the built-in presets
-registerBuilder('health-check', buildHealthCheckPipeline);
-registerBuilder('build', buildBuildPipeline);
+// Register the built-in presets with platform selection logic
+registerBuilder('health-check', (opts: WorkflowOptions) => {
+  // Default to GitHub Actions if no platform specified
+  if (!opts.platform || opts.platform === 'github') {
+    return buildHealthCheckPipeline(opts);
+  } else if (opts.platform === 'bitrise') {
+    return buildBitriseHealthCheckPipeline(opts);
+  }
+  throw new Error(`Unsupported platform: ${opts.platform}`);
+});
+
+registerBuilder('build', (opts: WorkflowOptions) => {
+  // Default to GitHub Actions if no platform specified
+  if (!opts.platform || opts.platform === 'github') {
+    return buildBuildPipeline(opts);
+  } else if (opts.platform === 'bitrise') {
+    return buildBitriseBuildPipeline(opts);
+  }
+  throw new Error(`Unsupported platform: ${opts.platform}`);
+});
 
 // Export the types
 export type { 
