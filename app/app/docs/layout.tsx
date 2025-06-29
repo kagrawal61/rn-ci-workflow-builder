@@ -1,0 +1,79 @@
+import { type ReactNode } from "react";
+import Link from "next/link";
+import { Header } from "@/components/header";
+
+interface DocsSidebarNavProps {
+  items: {
+    title: string;
+    href: string;
+  }[];
+}
+
+function DocsSidebarNav({ items }: DocsSidebarNavProps) {
+  return (
+    <nav className="flex flex-col space-y-1">
+      {items.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className="text-sm font-medium hover:text-primary hover:underline px-3 py-2 rounded-md hover:bg-accent"
+        >
+          {item.title}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+export default function DocsLayout({ children }: { children: ReactNode }) {
+  const sidebarNavItems = [
+    {
+      title: "Overview",
+      href: "/docs",
+    },
+    {
+      title: "Getting Started",
+      href: "/docs/getting-started",
+    },
+    {
+      title: "Core Concepts",
+      href: "/docs/core-concepts",
+    },
+    {
+      title: "Workflow Presets",
+      href: "/docs/workflow-presets",
+    },
+    {
+      title: "Configuration Reference",
+      href: "/docs/configuration",
+    },
+    {
+      title: "Storage Options",
+      href: "/docs/storage-options",
+    },
+    {
+      title: "Secrets Management",
+      href: "/docs/secrets-management",
+    },
+    {
+      title: "Examples & Recipes",
+      href: "/docs/examples",
+    },
+  ];
+
+  return (
+    <>
+      <Header />
+      <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
+        <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block border-r">
+          <div className="h-full py-6 pr-2 pl-8 overflow-y-auto">
+            <DocsSidebarNav items={sidebarNavItems} />
+          </div>
+        </aside>
+        <main className="relative py-6 md:py-8 lg:py-10">
+          {children}
+        </main>
+      </div>
+    </>
+  );
+}
