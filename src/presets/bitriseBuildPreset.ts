@@ -126,7 +126,7 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       }
     });
 
-    workflows.android = {
+    workflows['rn-android-build'] = {
       title: 'Build Android',
       description: 'Build React Native Android app',
       steps: androidSteps
@@ -173,7 +173,7 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       }
     ];
 
-    workflows.ios = {
+    workflows['rn-ios-build'] = {
       title: 'Build iOS',
       description: 'Build React Native iOS app',
       steps: iosSteps
@@ -182,17 +182,18 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
 
   // If building for both platforms, create a combined workflow
   if (build.platform === 'both') {
-    workflows.build = {
+    workflows['rn-build-all-platforms'] = {
       title: 'Build Both Platforms',
       description: 'Build React Native app for both Android and iOS',
       steps: [],
-      before_run: ['android', 'ios']
+      before_run: ['rn-android-build', 'rn-ios-build']
     };
   }
 
   // Build trigger map
   const triggerMap = [];
-  const primaryWorkflow = build.platform === 'both' ? 'build' : build.platform;
+  const primaryWorkflow = build.platform === 'both' ? 'rn-build-all-platforms' : 
+    build.platform === 'android' ? 'rn-android-build' : 'rn-ios-build';
   
   if (triggers?.push?.branches) {
     triggers.push.branches.forEach(branch => {
