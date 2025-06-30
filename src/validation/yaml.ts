@@ -351,25 +351,51 @@ export async function validateWithBitriseCli(yamlFilePath: string, autoInstall: 
   } catch (error: unknown) {
     // Parse Bitrise validation error for better error messages
     let errorMessage = 'Bitrise validation failed';
+    let detailedError = '';
     
-    if (error && typeof error === 'object' && 'stderr' in error) {
-      // Extract meaningful error from stderr
-      const stderr = String((error as { stderr: unknown }).stderr);
-      if (stderr.includes('invalid workflow')) {
-        errorMessage = `Bitrise validation failed: Invalid workflow configuration\n${stderr}`;
-      } else if (stderr.includes('required')) {
-        errorMessage = `Bitrise validation failed: Missing required fields\n${stderr}`;
-      } else {
-        errorMessage = `Bitrise validation failed: ${stderr}`;
+    if (error && typeof error === 'object') {
+      // Handle exec errors which have stdout, stderr, and other properties
+      const execError = error as { stdout?: unknown; stderr?: unknown; message?: unknown };
+      
+      // Try to get error output from stderr first, then stdout
+      if ('stderr' in execError && execError.stderr) {
+        detailedError = String(execError.stderr).trim();
+      } else if ('stdout' in execError && execError.stdout) {
+        detailedError = String(execError.stdout).trim();
+      } else if ('message' in execError) {
+        detailedError = String(execError.message).trim();
       }
-    } else if (error && typeof error === 'object' && 'message' in error) {
+      
+      // If we got detailed error output, format it nicely
+      if (detailedError) {
+        // Check for specific error types for better messages
+        if (detailedError.includes('invalid workflow') || detailedError.includes('Invalid workflow')) {
+          errorMessage = `Bitrise validation failed: Invalid workflow configuration`;
+        } else if (detailedError.includes('required') || detailedError.includes('Required')) {
+          errorMessage = `Bitrise validation failed: Missing required fields`;
+        } else if (detailedError.includes('Parse error') || detailedError.includes('parse error')) {
+          errorMessage = `Bitrise validation failed: YAML parse error`;
+        } else {
+          errorMessage = `Bitrise validation failed`;
+        }
+        
+        // Don't re-throw installation-related errors - format them properly
+        if (detailedError.includes('Please install') || detailedError.includes('not found')) {
+          throw error; // Re-throw installation errors as-is
+        }
+        
+        // Add the detailed error information
+        errorMessage += `\n\nDetailed error output:\n${detailedError}`;
+      }
+    }
+    
+    // If no detailed error was captured, show basic error
+    if (!detailedError && error && typeof error === 'object' && 'message' in error) {
       const message = String((error as { message: unknown }).message);
-      if (!message.includes('Please install')) {
-        errorMessage = `Bitrise validation failed: ${message}`;
-      } else {
-        // Re-throw installation-related errors as-is
-        throw error;
+      if (message.includes('Please install')) {
+        throw error; // Re-throw installation-related errors as-is
       }
+      errorMessage += `: ${message}`;
     }
     
     throw new Error(errorMessage);
@@ -453,26 +479,52 @@ export async function validateWithYamllint(yamlFilePath: string, autoInstall: bo
   } catch (error: unknown) {
     // Parse yamllint validation error for better error messages
     let errorMessage = 'yamllint validation failed';
+    let detailedError = '';
     
-    if (error && typeof error === 'object' && 'stdout' in error) {
-      // Extract meaningful error from stdout (yamllint outputs errors to stdout)
-      const stdout = String((error as { stdout: unknown }).stdout);
-      if (stdout.trim()) {
-        errorMessage = `yamllint validation failed:\n${stdout}`;
+    if (error && typeof error === 'object') {
+      // Handle exec errors which have stdout, stderr, and other properties
+      // Note: yamllint typically outputs errors to stdout with parsable format
+      const execError = error as { stdout?: unknown; stderr?: unknown; message?: unknown };
+      
+      // Try to get error output from stdout first (yamllint's default), then stderr
+      if ('stdout' in execError && execError.stdout) {
+        detailedError = String(execError.stdout).trim();
+      } else if ('stderr' in execError && execError.stderr) {
+        detailedError = String(execError.stderr).trim();
+      } else if ('message' in execError) {
+        detailedError = String(execError.message).trim();
       }
-    } else if (error && typeof error === 'object' && 'stderr' in error) {
-      const stderr = String((error as { stderr: unknown }).stderr);
-      if (stderr.trim()) {
-        errorMessage = `yamllint validation failed:\n${stderr}`;
+      
+      // If we got detailed error output, format it nicely
+      if (detailedError) {
+        // Check for specific error types for better messages
+        if (detailedError.includes('syntax error') || detailedError.includes('Syntax error')) {
+          errorMessage = `yamllint validation failed: YAML syntax error`;
+        } else if (detailedError.includes('indentation') || detailedError.includes('Indentation')) {
+          errorMessage = `yamllint validation failed: YAML indentation error`;
+        } else if (detailedError.includes('line too long') || detailedError.includes('Line too long')) {
+          errorMessage = `yamllint validation failed: Line length error`;
+        } else {
+          errorMessage = `yamllint validation failed`;
+        }
+        
+        // Don't re-throw installation-related errors - format them properly
+        if (detailedError.includes('Please install') || detailedError.includes('not found')) {
+          throw error; // Re-throw installation errors as-is
+        }
+        
+        // Add the detailed error information
+        errorMessage += `\n\nDetailed error output:\n${detailedError}`;
       }
-    } else if (error && typeof error === 'object' && 'message' in error) {
+    }
+    
+    // If no detailed error was captured, show basic error
+    if (!detailedError && error && typeof error === 'object' && 'message' in error) {
       const message = String((error as { message: unknown }).message);
-      if (!message.includes('Please install')) {
-        errorMessage = `yamllint validation failed: ${message}`;
-      } else {
-        // Re-throw installation-related errors as-is
-        throw error;
+      if (message.includes('Please install')) {
+        throw error; // Re-throw installation-related errors as-is
       }
+      errorMessage += `: ${message}`;
     }
     
     throw new Error(errorMessage);
