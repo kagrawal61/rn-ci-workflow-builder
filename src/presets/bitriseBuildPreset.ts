@@ -92,14 +92,14 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       {
         'gradle-runner@2': {
           title: 'Build Android',
-          inputs: {
-            gradle_task: (build as BuildOptions).androidOutputType === 'aab' 
+          inputs: [
+            { gradle_task: (build as BuildOptions).androidOutputType === 'aab' 
               ? 'bundleRelease' 
               : (build as BuildOptions).androidOutputType === 'both'
               ? 'assembleRelease bundleRelease'
-              : 'assembleRelease',
-            gradlew_path: './android/gradlew'
-          }
+              : 'assembleRelease' },
+            { gradlew_path: './android/gradlew' }
+          ]
         }
       }
     ];
@@ -109,9 +109,9 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       androidSteps.push({
         'sign-apk@1': {
           title: 'Sign APK',
-          inputs: {
-            android_app: '$BITRISE_APK_PATH'
-          }
+          inputs: [
+            { android_app: '$BITRISE_APK_PATH' }
+          ]
         }
       });
     }
@@ -120,9 +120,9 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
     androidSteps.push({
       'deploy-to-bitrise-io@2': {
         title: 'Deploy to Bitrise.io',
-        inputs: {
-          notify_user_groups: 'everyone'
-        }
+        inputs: [
+          { notify_user_groups: 'everyone' }
+        ]
       }
     });
 
@@ -140,9 +140,9 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       {
         'cocoapods-install@2': {
           title: 'Install CocoaPods',
-          inputs: {
-            source_root_path: './ios'
-          }
+          inputs: [
+            { source_root_path: './ios' }
+          ]
         }
       },
       {
@@ -156,19 +156,19 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       {
         'xcode-archive@4': {
           title: 'Build iOS',
-          inputs: {
-            project_path: './ios/*.xcworkspace',
-            scheme: '$BITRISE_SCHEME',
-            export_method: build.variant === 'release' ? 'app-store' : 'development'
-          }
+          inputs: [
+            { project_path: './ios/*.xcworkspace' },
+            { scheme: '$BITRISE_SCHEME' },
+            { export_method: build.variant === 'release' ? 'app-store' : 'development' }
+          ]
         }
       },
       {
         'deploy-to-bitrise-io@2': {
           title: 'Deploy to Bitrise.io',
-          inputs: {
-            notify_user_groups: 'everyone'
-          }
+          inputs: [
+            { notify_user_groups: 'everyone' }
+          ]
         }
       }
     ];
