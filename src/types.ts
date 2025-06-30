@@ -157,8 +157,8 @@ export interface BitriseStep {
   [stepId: string]: {
     /** Step title/name */
     title?: string;
-    /** Step inputs - can be object format or array format depending on the step */
-    inputs?: Record<string, string | boolean | number> | Array<Record<string, string | boolean | number>>;
+    /** Step inputs - must be array format for Bitrise CLI compatibility */
+    inputs?: Array<Record<string, string | boolean | number>>;
     /** Condition for step execution */
     run_if?: string;
     /** Whether to continue on error */
