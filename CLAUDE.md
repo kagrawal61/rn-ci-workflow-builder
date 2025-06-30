@@ -33,7 +33,7 @@ npm run generate [preset-name]
 
 ## Code Architecture
 
-This project is a workflow generator for React Native CI/CD pipelines. It generates GitHub Actions workflow YAML files based on preset configurations.
+This project is a workflow generator for React Native CI/CD pipelines. It generates GitHub Actions and Bitrise workflow YAML files based on preset configurations.
 
 ### Core Components
 
@@ -43,7 +43,9 @@ This project is a workflow generator for React Native CI/CD pipelines. It genera
 
 2. **Workflow Presets**:
    - Located in `src/presets/`.
-   - Currently includes `healthCheck.ts` which builds GitHub Actions workflow for running TypeScript checks, linting, formatting, and tests.
+   - Available presets: `health-check`, `build`
+   - Each preset supports both GitHub Actions and Bitrise platforms
+   - Platform-specific implementations: `healthCheck.ts`, `buildPreset.ts` (GitHub Actions), `bitriseHealthCheck.ts`, `bitriseBuildPreset.ts` (Bitrise)
    - Each preset is a function that takes `WorkflowOptions` and returns a workflow object structure.
 
 3. **Helper Functions**:
@@ -67,8 +69,9 @@ This project is a workflow generator for React Native CI/CD pipelines. It genera
 2. The generator selects the appropriate preset builder function
 3. The builder creates a workflow object with jobs, steps, and configurations
 4. The object is serialized to YAML
-5. Placeholders for secrets are replaced with GitHub Actions secret syntax
-6. The resulting YAML is either output to console or written to a file
+5. Placeholders for secrets are replaced with the appropriate secret syntax (GitHub Actions or Bitrise)
+6. The resulting YAML is validated (including Bitrise CLI validation for Bitrise workflows)
+7. The resulting YAML is either output to console or written to a file (.github/workflows for GitHub Actions, root for Bitrise)
 
 ### Extension Points
 

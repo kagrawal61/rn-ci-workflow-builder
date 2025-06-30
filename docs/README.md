@@ -37,12 +37,12 @@ When you run a command like `yarn generate:health`, this is what happens:
 3. It creates a workflow configuration object with the specified preset kind
 4. This configuration is passed to the `generateWorkflow` function
 5. The appropriate builder function for the preset is called (e.g., `buildHealthCheckPipeline`)
-6. The builder creates a GitHub Actions workflow object with jobs and steps
+6. The builder creates a GitHub Actions or Bitrise workflow object with jobs and steps
 7. The workflow object is converted to YAML
 8. Required secrets are identified based on configuration choices
-9. Secret placeholders are replaced with GitHub Actions secret syntax
+9. Secret placeholders are replaced with the appropriate secret syntax
 10. A summary of required secrets is generated
-11. The YAML is written to a file in the `.github/workflows` directory
+11. The YAML is written to a file (`.github/workflows` for GitHub Actions, root for Bitrise)
 
 ### CLI
 
@@ -78,6 +78,150 @@ rn-ci-workflow-builder generate --dir .github/custom-workflows
 
 # Specify output file
 rn-ci-workflow-builder generate --output my-workflow.yml
+
+# Generate for Bitrise platform
+rn-ci-workflow-builder generate build --platform bitrise
+
+# Validate configuration only (without generating files)
+rn-ci-workflow-builder generate --config path/to/config.json --validate-only
+
+# Validate configuration file only
+rn-ci-workflow-builder validate --config path/to/config.json
+
+# Validate existing Bitrise YAML file
+rn-ci-workflow-builder bitrise-validate bitrise.yml
+
+# Show required secrets for a configuration
+rn-ci-workflow-builder secrets firebase slack --platform android
+```
+
+## CLI Commands Reference
+
+### `generate [preset]`
+
+Generate workflow YAML based on preset configuration.
+
+**Arguments:**
+- `preset` - Workflow preset name (default: `health-check`)
+  - Available presets: `health-check`, `build`
+
+**Options:**
+- `-c, --config <path>` - Path to config file (JSON or YAML)
+- `-o, --output <path>` - Output file path
+- `-d, --dir <path>` - Output directory (default: `.github/workflows` for GitHub, `.` for Bitrise)
+- `-p, --platform <platform>` - CI platform (`github` or `bitrise`, default: `github`)
+- `-v, --validate-only` - Only validate the configuration without generating files
+
+**Examples:**
+```bash
+# Generate health-check workflow with default settings
+rn-ci-workflow-builder generate
+
+# Generate build workflow from config file
+rn-ci-workflow-builder generate build --config build-config.json
+
+# Generate Bitrise workflow
+rn-ci-workflow-builder generate build --platform bitrise --config bitrise-config.json
+
+# Validate configuration without generating files
+rn-ci-workflow-builder generate --config config.json --validate-only
+```
+
+### `validate`
+
+Validate configuration file without generating workflow files.
+
+**Options:**
+- `-c, --config <path>` - Path to config file (JSON or YAML) - **Required**
+
+**Examples:**
+```bash
+# Validate a JSON configuration file
+rn-ci-workflow-builder validate --config workflow-config.json
+
+# Validate a YAML configuration file  
+rn-ci-workflow-builder validate --config workflow-config.yml
+```
+
+### `bitrise-validate [file]`
+
+Validate a Bitrise YAML file using Bitrise CLI. Automatically installs Bitrise CLI if needed.
+
+**Arguments:**
+- `file` - Path to Bitrise YAML file (default: `bitrise.yml`)
+
+**Examples:**
+```bash
+# Validate default bitrise.yml file
+rn-ci-workflow-builder bitrise-validate
+
+# Validate specific Bitrise file
+rn-ci-workflow-builder bitrise-validate custom-bitrise.yml
+```
+
+### `secrets [storage] [notification]`
+
+Show required secrets for a specific build configuration.
+
+**Arguments:**
+- `storage` - Storage type (default: `github`)
+  - Available: `github`, `firebase`, `s3`, `drive`
+- `notification` - Notification type (default: `none`)
+  - Available: `none`, `slack`, `pr-comment`, `both`
+
+**Options:**
+- `-p, --platform <platform>` - Platform (`ios`, `android`, `both`)
+
+**Examples:**
+```bash
+# Show secrets for Firebase storage with Slack notifications on Android
+rn-ci-workflow-builder secrets firebase slack --platform android
+
+# Show secrets for S3 storage with no notifications
+rn-ci-workflow-builder secrets s3 none
+
+# Show secrets for default configuration
+rn-ci-workflow-builder secrets
+```
+
+### `list-presets`
+
+List all available workflow presets.
+
+**Examples:**
+```bash
+rn-ci-workflow-builder list-presets
+```
+
+**Output:**
+```
+Available workflow presets:
+- health-check
+- build
+```
+
+## Platform Support
+
+The CLI supports generating workflows for multiple CI/CD platforms:
+
+### GitHub Actions (default)
+- Generates workflows in `.github/workflows/` directory
+- Uses GitHub Actions syntax and features
+- Supports GitHub-specific secrets and environment variables
+
+### Bitrise
+- Generates `bitrise.yml` file in project root
+- Uses Bitrise workflow syntax
+- Includes automatic validation with Bitrise CLI
+- Supports Bitrise-specific steps and configurations
+
+**Platform Selection:**
+```bash
+# Generate for GitHub Actions (default)
+rn-ci-workflow-builder generate build
+
+# Generate for Bitrise
+rn-ci-workflow-builder generate build --platform bitrise
 ```
 
 ### Programmatic Usage
@@ -309,6 +453,11 @@ yarn generate:build:ios
 npm run generate:build:both
 # or
 yarn generate:build:both
+
+# Generate Android build workflow with both output formats (APK and AAB)
+npm run generate:build:android:both-formats
+# or
+yarn generate:build:android:both-formats
 
 # List available presets
 npm run list-presets

@@ -4,7 +4,7 @@ import path from 'path';
 import { Command } from 'commander';
 import * as jsYaml from 'js-yaml';
 
-import { generateWorkflow, writeWorkflowFile, getAvailablePresets } from './generator';
+import { generateWorkflow, generateWorkflowForCli, writeWorkflowFile, getAvailablePresets } from './generator';
 import { WorkflowConfig } from './types';
 import { generateSecretsSummary } from './helpers/secretsManager';
 import { BuildOptions } from './presets/types';
@@ -78,7 +78,7 @@ program
       // Validate-only mode
       if (options.validateOnly) {
         try {
-          generateWorkflow(config);
+          await generateWorkflowForCli(config);
           console.log('✅ Validation successful! Configuration is valid.');
           return;
         } catch (error) {
@@ -98,23 +98,22 @@ program
 
       // Generate workflow
       try {
-        const { yaml, secretsSummary } = generateWorkflow(config);
+        const { yaml } = await generateWorkflowForCli(config);
 
         // Write to file or output to console
+        let filePath: string;
         if (options.output) {
           fs.writeFileSync(options.output, yaml, 'utf8');
+          filePath = options.output;
           console.log(`✅ Workflow written to ${options.output}`);
         } else if (options.dir) {
-          const { filePath } = writeWorkflowFile(config, options.dir);
+          const result = writeWorkflowFile(config, options.dir);
+          filePath = result.filePath;
           console.log(`✅ Workflow written to ${filePath}`);
         } else {
-          const { filePath } = writeWorkflowFile(config);
+          const result = writeWorkflowFile(config);
+          filePath = result.filePath;
           console.log(`✅ Workflow written to ${filePath}`);
-        }
-        
-        // Display secrets summary if available
-        if (secretsSummary) {
-          console.log('\n' + secretsSummary);
         }
       } catch (error) {
         console.error(`❌ Error generating workflow: ${(error as Error).message}`);
@@ -194,6 +193,27 @@ program
       }
     } catch (error) {
       console.error(`❌ Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+// Bitrise validate command
+program
+  .command('bitrise-validate [file]')
+  .description('Validate a Bitrise YAML file using Bitrise CLI (automatically installs CLI if needed)')
+  .action(async (file = 'bitrise.yml') => {
+    try {
+      const { validateWithBitriseCli } = await import('./validation/yaml');
+      
+      if (!fs.existsSync(file)) {
+        console.error(`❌ Error: File not found: ${file}`);
+        process.exit(1);
+      }
+      
+      await validateWithBitriseCli(file, true); // Always auto-install by default
+      console.log(`✅ ${file} is valid according to Bitrise CLI`);
+    } catch (error) {
+      console.error(`❌ ${(error as Error).message}`);
       process.exit(1);
     }
   });

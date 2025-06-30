@@ -115,8 +115,57 @@ export function generateWorkflow(cfg: WorkflowConfig): { yaml: string, secretsSu
   // Add spacing after each step for better readability
   yamlStr = addStepSpacing(yamlStr);
   
-  // Validate the generated YAML
-  const validatedYaml = validateGeneratedYaml(yamlStr);
+  // Validate the generated YAML (sync - for web app compatibility)
+  const validatedYaml = validateGeneratedYaml(yamlStr, false) as string;
+  
+  // Generate secrets summary for build preset
+  let secretsSummary: string | undefined;
+  if (validatedConfig.kind === 'build' && validatedConfig.options) {
+    secretsSummary = generateSecretsSummary((validatedConfig.options as WorkflowOptions & { build?: BuildOptions }).build || {} as BuildOptions);
+  }
+  
+  return {
+    yaml: validatedYaml,
+    secretsSummary
+  };
+}
+
+/**
+ * Generate a workflow YAML from config with CLI-specific enhancements (async)
+ * This version automatically validates Bitrise YAML using Bitrise CLI when applicable
+ * @param cfg The workflow configuration
+ * @returns Promise resolving to workflow YAML and optional secrets summary
+ */
+export async function generateWorkflowForCli(cfg: WorkflowConfig): Promise<{ yaml: string, secretsSummary?: string }> {
+  // Validate the config before proceeding
+  const validatedConfig = validateConfig(cfg);
+  
+  const options: WorkflowOptions = validatedConfig.options ?? {};
+  const builder = builders[validatedConfig.kind];
+  
+  if (!builder) {
+    throw new Error(
+      `Unsupported pipeline kind: ${validatedConfig.kind}. ` +
+      `Available presets: ${getAvailablePresets().join(', ')}`
+    );
+  }
+  
+  const obj = builder(options);
+  // Disable YAML anchors/references which GitHub Actions doesn't support
+  let yamlStr = yaml.dump(obj, { 
+    lineWidth: 120,
+    noRefs: true  // Prevent the creation of anchors and references
+  });
+  yamlStr = injectSecrets(yamlStr);
+  
+  // Add spacing after each step for better readability
+  yamlStr = addStepSpacing(yamlStr);
+  
+  // Validate the generated YAML with CLI-specific enhancements
+  // This will automatically run Bitrise CLI validation for Bitrise configs
+  // and yamllint validation for other platforms (like GitHub Actions)
+  const validationResult = validateGeneratedYaml(yamlStr, true, true);
+  const validatedYaml = typeof validationResult === 'string' ? validationResult : await validationResult;
   
   // Generate secrets summary for build preset
   let secretsSummary: string | undefined;

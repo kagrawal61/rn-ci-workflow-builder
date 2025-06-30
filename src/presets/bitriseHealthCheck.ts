@@ -79,14 +79,14 @@ export function buildBitriseHealthCheckPipeline(opts: WorkflowOptions): BitriseC
     triggers.push.branches.forEach(branch => {
       triggerMap.push({
         push_branch: branch,
-        workflow: 'test'
+        workflow: 'rn-health-check'
       });
     });
   } else {
     // Default push trigger for main branch
     triggerMap.push({
       push_branch: 'main',
-      workflow: 'test'
+      workflow: 'rn-health-check'
     });
   }
 
@@ -94,14 +94,14 @@ export function buildBitriseHealthCheckPipeline(opts: WorkflowOptions): BitriseC
     triggers.pullRequest.branches.forEach(branch => {
       triggerMap.push({
         pull_request_target_branch: branch,
-        workflow: 'test'
+        workflow: 'rn-health-check'
       });
     });
   } else {
     // Default PR trigger for main branch
     triggerMap.push({
       pull_request_target_branch: 'main',
-      workflow: 'test'
+      workflow: 'rn-health-check'
     });
   }
 
@@ -113,7 +113,7 @@ export function buildBitriseHealthCheckPipeline(opts: WorkflowOptions): BitriseC
       envs: appEnvs.length > 0 ? appEnvs : undefined
     },
     workflows: {
-      test: {
+      'rn-health-check': {
         title: opts.name || 'React Native Health Check',
         description: 'Run health checks including TypeScript, ESLint, Prettier, and unit tests',
         steps: testSteps

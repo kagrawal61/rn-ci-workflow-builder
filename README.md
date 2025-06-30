@@ -38,12 +38,12 @@ When you run a command like `yarn generate:health`, this is what happens:
 3. It creates a workflow configuration object with the specified preset kind
 4. This configuration is passed to the `generateWorkflow` function
 5. The appropriate builder function for the preset is called (e.g., `buildHealthCheckPipeline`)
-6. The builder creates a GitHub Actions workflow object with jobs and steps
+6. The builder creates a GitHub Actions or Bitrise workflow object with jobs and steps
 7. The workflow object is converted to YAML
 8. Required secrets are identified based on configuration choices
-9. Secret placeholders are replaced with GitHub Actions secret syntax
+9. Secret placeholders are replaced with the appropriate secret syntax
 10. A summary of required secrets is generated
-11. The YAML is written to a file in the `.github/workflows` directory
+11. The YAML is written to a file (`.github/workflows` for GitHub Actions, root for Bitrise)
 
 ### CLI
 
@@ -79,6 +79,43 @@ rn-ci-workflow-builder generate --dir .github/custom-workflows
 
 # Specify output file
 rn-ci-workflow-builder generate --output my-workflow.yml
+
+# Generate for Bitrise platform
+rn-ci-workflow-builder generate build --platform bitrise
+
+# Validate configuration only (without generating files)
+rn-ci-workflow-builder generate --config path/to/config.json --validate-only
+
+# Validate configuration file only
+rn-ci-workflow-builder validate --config path/to/config.json
+
+# Validate existing Bitrise YAML file
+rn-ci-workflow-builder bitrise-validate bitrise.yml
+
+# Show required secrets for a configuration
+rn-ci-workflow-builder secrets firebase slack --platform android
+```
+
+#### Complete CLI Commands Reference
+
+See the [full CLI documentation](docs/README.md#cli-commands-reference) for detailed information about all available commands:
+
+- `generate [preset]` - Generate workflow YAML based on preset
+- `validate` - Validate configuration without generating files  
+- `bitrise-validate [file]` - Validate Bitrise YAML using Bitrise CLI
+- `secrets [storage] [notification]` - Show required secrets for a configuration
+- `list-presets` - List all available workflow presets
+
+#### Platform Support
+
+The CLI supports both **GitHub Actions** (default) and **Bitrise** platforms:
+
+```bash
+# Generate for GitHub Actions (default)
+rn-ci-workflow-builder generate build
+
+# Generate for Bitrise
+rn-ci-workflow-builder generate build --platform bitrise
 ```
 
 ### Programmatic Usage
