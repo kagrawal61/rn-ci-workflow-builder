@@ -60,7 +60,14 @@ export function buildEnv(env?: Record<string, string>, secrets?: string[]): Reco
  * @returns YAML string with GitHub secret references
  */
 export function injectSecrets(yamlStr: string): string {
-  return yamlStr.replace(/"__SECRET_([A-Z0-9_]+)__"/g, (_, name) => '${{ secrets.' + name + ' }}');
+  // Handle both quoted and unquoted secret placeholders
+  // Match quoted placeholders: "__SECRET_NAME__"
+  yamlStr = yamlStr.replace(/"__SECRET_([A-Z0-9_]+)__"/g, (_, name) => '${{ secrets.' + name + ' }}');
+  
+  // Match unquoted placeholders: __SECRET_NAME__
+  yamlStr = yamlStr.replace(/(?<!\w)__SECRET_([A-Z0-9_]+)__(?!\w)/g, (_, name) => '${{ secrets.' + name + ' }}');
+  
+  return yamlStr;
 }
 
 
