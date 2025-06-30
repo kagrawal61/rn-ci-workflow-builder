@@ -98,7 +98,7 @@ program
 
       // Generate workflow
       try {
-        const { yaml, secretsSummary } = await generateWorkflowForCli(config);
+        const { yaml } = await generateWorkflowForCli(config);
 
         // Write to file or output to console
         let filePath: string;
@@ -114,11 +114,6 @@ program
           const result = writeWorkflowFile(config);
           filePath = result.filePath;
           console.log(`✅ Workflow written to ${filePath}`);
-        }
-        
-        // Display secrets summary if available
-        if (secretsSummary) {
-          console.log('\n' + secretsSummary);
         }
       } catch (error) {
         console.error(`❌ Error generating workflow: ${(error as Error).message}`);
