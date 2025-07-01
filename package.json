@@ -2,6 +2,7 @@
   "name": "rn-ci-workflow-builder",
   "version": "0.1.0",
   "description": "CLI + library to generate GitHub Actions workflows for React-Native CI/CD pipelines (static-analysis, build, etc.)",
+  "license": "MIT",
   "type": "commonjs",
   "main": "dist/src/generator.js",
   "types": "dist/src/generator.d.ts",

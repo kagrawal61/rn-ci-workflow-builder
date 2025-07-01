@@ -94,8 +94,7 @@ Thumbs.db
 tmp/
 temp/
 
-# GitHub folders (if not needed in repo)
-.github/
+# GitHub folders
 .github/workflows/*
 
 # CI/CD artifacts
@@ -126,3 +125,7 @@ $RECYCLE.BIN/
 *.bak
 *.backup
 *.tmp
+
+# Local development files
+CLAUDE.md
+docs/workflows/*
