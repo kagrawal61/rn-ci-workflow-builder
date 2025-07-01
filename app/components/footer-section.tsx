@@ -1,7 +1,7 @@
 'use client';
 
-import { HeartHandshake } from 'lucide-react';
-import { PROJECT_NAME } from '@/config/constants';
+import { HeartHandshake, Github } from "lucide-react";
+import { PROJECT_NAME } from "@/config/constants";
 
 export function FooterSection() {
   return (
@@ -11,6 +11,15 @@ export function FooterSection() {
           &copy; {new Date().getFullYear()} {PROJECT_NAME}. All rights reserved.
         </p>
         <div className="flex items-center gap-4">
+          <a 
+            href="https://github.com/kagrawal61/rn-ci-workflow-builder"
+            target="_blank"
+            rel="noopener noreferrer" 
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Github className="h-4 w-4" />
+            <span>GitHub</span>
+          </a>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <span>Made with</span>
             <HeartHandshake className="h-4 w-4 text-red-500" />

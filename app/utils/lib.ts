@@ -99,7 +99,7 @@ export function generateWorkflow(cfg: WorkflowConfig): {
 }
 
 // Register the built-in presets with platform selection logic
-registerBuilder('health-check', (opts: WorkflowOptions) => {
+registerBuilder('static-analysis', (opts: WorkflowOptions) => {
   // Default to GitHub Actions if no platform specified
   if (!opts.platform || opts.platform === 'github') {
     return buildHealthCheckPipeline(opts);

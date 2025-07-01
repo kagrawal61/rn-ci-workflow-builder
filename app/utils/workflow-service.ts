@@ -1,4 +1,4 @@
-import { generateWorkflow, WorkflowConfig, WorkflowOptions } from './lib';
+import { generateWorkflow, WorkflowConfig, WorkflowOptions, getAvailablePresets } from './lib';
 import { BuildOptions, HealthCheckOptions } from '../../src/presets/types';
 
 // Helper to create a default static analysis configuration
@@ -87,7 +87,7 @@ export const generateWorkflowYaml = (
 // Helper to get all preset kinds
 export const getPresetKinds = (): string[] => {
   // Return available preset kinds
-  return ['static-analysis', 'build'];
+  return getAvailablePresets();
 };
 
 // Create a config from form values

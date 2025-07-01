@@ -8,7 +8,6 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/kagrawal61/rn-ci-workflow-builder/graphs/commit-activity)
 [![GitHub Issues](https://img.shields.io/github/issues/kagrawal61/rn-ci-workflow-builder.svg)](https://github.com/kagrawal61/rn-ci-workflow-builder/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kagrawal61/rn-ci-workflow-builder.svg)](https://github.com/kagrawal61/rn-ci-workflow-builder/pulls)
-[![Build CI](https://github.com/kagrawal61/rn-ci-workflow-builder/workflows/Build/badge.svg)](https://github.com/kagrawal61/rn-ci-workflow-builder/actions?query=workflow%3ABuild)
 
 **A powerful, flexible tool to generate GitHub Actions and Bitrise workflows for React Native CI/CD pipelines.**
 
