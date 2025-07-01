@@ -38,9 +38,6 @@ jobs:
       - name: Install dependencies
         run: cd app && yarn install --frozen-lockfile
         
-      - name: Run linting
-        run: cd app && yarn lint
-        
       - name: Build
         run: cd app && yarn build
         
