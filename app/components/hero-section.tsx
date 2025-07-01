@@ -1,9 +1,9 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { FileJson, Zap, Code, Rocket, Clock, LayoutGrid } from 'lucide-react';
-import { Button } from './ui/button';
-import { PROJECT_NAME, PROJECT_DESCRIPTION } from '@/config/constants';
+import { motion } from "framer-motion";
+import { FileJson, Zap, Code, Rocket, Clock, LayoutGrid, Github } from "lucide-react";
+import { Button } from "./ui/button";
+import { PROJECT_NAME, PROJECT_DESCRIPTION } from "@/config/constants";
 
 export function HeroSection() {
   return (
@@ -19,7 +19,7 @@ export function HeroSection() {
               <div className="flex h-3.5 w-3.5 items-center justify-center">
                 <Clock size={14} />
               </div>
-              <span>Open Source Coming Soon!</span>
+              <span>Open Source</span>
             </div>
             <div className="flex items-center justify-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-sm text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
               <Code className="h-3.5 w-3.5" />
@@ -81,6 +81,17 @@ export function HeroSection() {
             asChild
           >
             <a href="/docs">Read Documentation</a>
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            className="h-12 px-8 transition-all hover:scale-105 flex items-center gap-2"
+            asChild
+          >
+            <a href="https://github.com/kagrawal61/rn-ci-workflow-builder" target="_blank" rel="noopener noreferrer">
+              <Github className="h-4 w-4" />
+              <span>View on GitHub</span>
+            </a>
           </Button>
         </motion.div>
 
