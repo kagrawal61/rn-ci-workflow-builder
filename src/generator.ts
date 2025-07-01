@@ -1,18 +1,18 @@
 import fs from 'fs';
-import path from 'path';
 import * as yaml from 'js-yaml';
+import path from 'path';
 
-import {
-  WorkflowConfig,
-  WorkflowOptions,
-  GitHubWorkflow,
-  BitriseConfig,
-} from './types';
 import { injectSecrets } from './helpers';
-import { validateConfig } from './validation';
-import { validateGeneratedYaml } from './validation/yaml';
 import { generateSecretsSummary } from './helpers/secretsManager';
 import { BuildOptions } from './presets/types';
+import {
+  BitriseConfig,
+  GitHubWorkflow,
+  WorkflowConfig,
+  WorkflowOptions,
+} from './types';
+import { validateConfig } from './validation';
+import { validateGeneratedYaml } from './validation/yaml';
 
 // Map of pipeline builders - supports both GitHub Actions and Bitrise configurations
 const builders: Record<
@@ -97,6 +97,15 @@ export function registerBuilder(
  */
 export function getAvailablePresets(): string[] {
   return Object.keys(builders);
+}
+
+/**
+ * Clear all registered builders (for testing purposes)
+ */
+export function clearBuilders(): void {
+  Object.keys(builders).forEach(key => {
+    delete builders[key];
+  });
 }
 
 /**

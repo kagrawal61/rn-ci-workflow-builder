@@ -33,15 +33,7 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "SampleRNApp",
-    "app",
-    "examples",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ],
+  "exclude": ["node_modules", "dist", "SampleRNApp", "app", "examples"],
   "ts-node": {
     "esm": false,
     "compilerOptions": {
