@@ -1,6 +1,5 @@
-import { Check, CheckCircle2, ExternalLink } from "lucide-react";
+import { Check, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 
 export default function GettingStartedPage() {
   return (

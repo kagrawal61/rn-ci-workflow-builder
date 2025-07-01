@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { FileJson, Zap, Code, Rocket, Clock, LayoutGrid } from "lucide-react";
 import { Button } from "./ui/button";
-import { PROJECT_NAME, PROJECT_DESCRIPTION, REPO_URL } from "@/config/constants";
+import { PROJECT_NAME, PROJECT_DESCRIPTION } from "@/config/constants";
 
 export function HeroSection() {
   return (
