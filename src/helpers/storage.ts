@@ -10,17 +10,50 @@ const storageHelpers = {
    */
   createAndroidStorageSteps(build: BuildOptions): GitHubStep[] {
     if (build.storage === 'github') {
-      return [{
-        name: 'Upload Android Artifact',
-        id: 'artifact-upload-android',
-        if: 'success()',
-        uses: 'actions/upload-artifact@v4',
-        with: {
-          name: 'android-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
-          path: 'android/app/build/outputs/apk/**/*.apk',
-          'retention-days': 30
-        }
-      }];
+      // Handle different Android output types
+      if (build.androidOutputType === 'both') {
+        // If both output types are selected, create two artifact upload steps
+        return [
+          {
+            name: 'Upload Android APK Artifact',
+            id: 'artifact-upload-android-apk',
+            if: 'success()',
+            'continue-on-error': true,
+            uses: 'actions/upload-artifact@v3',
+            with: {
+              name: 'android-' + build.variant + '-apk-${{ github.head_ref || github.ref_name }}',
+              path: 'android/app/build/outputs/apk/**/*.apk',
+              'retention-days': 30
+            }
+          },
+          {
+            name: 'Upload Android AAB Artifact',
+            id: 'artifact-upload-android-aab',
+            if: 'success()',
+            'continue-on-error': true,
+            uses: 'actions/upload-artifact@v3',
+            with: {
+              name: 'android-' + build.variant + '-aab-${{ github.head_ref || github.ref_name }}',
+              path: 'android/app/build/outputs/bundle/**/*.aab',
+              'retention-days': 30
+            }
+          }
+        ];
+      } else {
+        // For single output type
+        return [{
+          name: 'Upload Android Artifact',
+          id: 'artifact-upload-android',
+          if: 'success()',
+          'continue-on-error': true,
+          uses: 'actions/upload-artifact@v3',
+          with: {
+            name: 'android-' + build.variant + '-' + (build.androidOutputType || 'apk') + '-${{ github.head_ref || github.ref_name }}',
+            path: build.androidOutputType === 'aab' ? 'android/app/build/outputs/bundle/**/*.aab' : 'android/app/build/outputs/apk/**/*.apk',
+            'retention-days': 30
+          }
+        }];
+      }
     } else if (build.storage === 'firebase') {
       return [
         {
@@ -91,7 +124,8 @@ const storageHelpers = {
         name: 'Upload iOS Artifact',
         id: 'artifact-upload-ios',
         if: 'success()',
-        uses: 'actions/upload-artifact@v4',
+        'continue-on-error': true,
+        uses: 'actions/upload-artifact@v3',
         with: {
           name: 'ios-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
           path: 'ios/build/Build/Products/**/*.ipa',

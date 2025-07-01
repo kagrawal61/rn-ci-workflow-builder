@@ -28,7 +28,8 @@ echo "🔍 Verifying Android project setup..."
 
 if [ ! -d "android" ]; then
   echo "❌ Error: Android directory not found"
-  echo "Make sure you're running this workflow from the root of a React Native project"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
   exit 1
 fi
 
@@ -160,52 +161,7 @@ fi`;
 }
 `
       },
-      // Always attempt to store artifacts, even if build partially succeeded
-      ...((() => {
-        if (build.androidOutputType === 'both') {
-          // If both output types are selected, create two artifact upload steps
-          return [
-            {
-              name: 'Store Android APK Artifacts',
-              id: 'store-apk-artifacts',
-              if: 'always() && steps.android-build.outcome != \'skipped\'',
-              'continue-on-error': true,
-              uses: 'actions/upload-artifact@v3',
-              with: {
-                name: 'android-' + build.variant + '-apk-${{ github.head_ref || github.ref_name }}',
-                path: 'android/app/build/outputs/apk/**/*.apk',
-                'retention-days': '14',
-              },
-            },
-            {
-              name: 'Store Android AAB Artifacts',
-              id: 'store-aab-artifacts',
-              if: 'always() && steps.android-build.outcome != \'skipped\'',
-              'continue-on-error': true,
-              uses: 'actions/upload-artifact@v3',
-              with: {
-                name: 'android-' + build.variant + '-aab-${{ github.head_ref || github.ref_name }}',
-                path: 'android/app/build/outputs/bundle/**/*.aab',
-                'retention-days': '14',
-              },
-            }
-          ];
-        } else {
-          // For single output type
-          return [{
-            name: 'Store Android Build Artifacts',
-            id: 'store-artifacts',
-            if: 'always() && steps.android-build.outcome != \'skipped\'',
-            'continue-on-error': true,
-            uses: 'actions/upload-artifact@v3',
-            with: {
-              name: 'android-' + build.variant + '-' + (build.androidOutputType || 'apk') + '-${{ github.head_ref || github.ref_name }}',
-              path: build.androidOutputType === 'aab' ? 'android/app/build/outputs/bundle/**/*.aab' : 'android/app/build/outputs/apk/**/*.apk',
-              'retention-days': '14',
-            },
-          }];
-        }
-      })()),
+      // Artifact storage is handled by the storage helper based on the storage configuration
     ];
   },
   
@@ -232,7 +188,8 @@ echo "🔍 Verifying iOS project setup..."
 
 if [ ! -d "ios" ]; then
   echo "❌ Error: iOS directory not found"
-  echo "Make sure you're running this workflow from the root of a React Native project"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
   exit 1
 fi
 
@@ -264,7 +221,8 @@ echo "📦 Installing CocoaPods dependencies..."
 cd ios
 pod install || {
   echo "❌ CocoaPods installation failed"
-  echo "::error::CocoaPods installation failed. Check for valid Podfile and Pod specs."
+  echo "::error::CocoaPods installation failed."
+  echo "Check for valid Podfile and Pod specs."
   exit 1
 }
 echo "✅ CocoaPods installation successful"
@@ -308,19 +266,7 @@ else
 fi
 `
       },
-      // Always attempt to store artifacts, even if build partially succeeded
-      {
-        name: 'Store iOS Build Artifacts',
-        id: 'store-artifacts',
-        if: 'always() && steps.ios-build.outcome != \'skipped\'',
-        'continue-on-error': true,
-        uses: 'actions/upload-artifact@v3',
-        with: {
-          name: 'ios-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
-          path: 'ios/build/Build/Products/**/*.ipa',
-          'retention-days': '14',
-        },
-      },
+      // Artifact storage is handled by the storage helper based on the storage configuration
     ];
   }
 };

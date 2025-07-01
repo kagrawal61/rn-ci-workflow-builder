@@ -33,7 +33,7 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
   const jobs: Record<string, GitHubJob> = {};
 
   // Create common setup steps using helper
-  const setupSteps = commonSteps.createSetupSteps(packageManager, cache, build);
+  const setupSteps = commonSteps.createSetupSteps(packageManager, cache);
   
   // Get PR source detection step
   const determineBuildSourceStep = commonSteps.createSourceDetectionStep();
