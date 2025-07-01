@@ -36,7 +36,6 @@ next-env.d.ts
 .turbo
 
 # GitHub folders
-.github/
 .github/workflows/*
 
 bitrise.yml
