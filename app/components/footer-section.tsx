@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { HeartHandshake } from "lucide-react";
-import { PROJECT_NAME } from "@/config/constants";
+import { HeartHandshake } from 'lucide-react';
+import { PROJECT_NAME } from '@/config/constants';
 
 export function FooterSection() {
   return (

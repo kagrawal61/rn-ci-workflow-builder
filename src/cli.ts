@@ -4,10 +4,20 @@ import path from 'path';
 import { Command } from 'commander';
 import * as jsYaml from 'js-yaml';
 
-import { generateWorkflow, generateWorkflowForCli, writeWorkflowFile, getAvailablePresets } from './generator';
+import {
+  generateWorkflow,
+  generateWorkflowForCli,
+  writeWorkflowFile,
+  getAvailablePresets,
+} from './generator';
 import { WorkflowConfig } from './types';
 import { generateSecretsSummary } from './helpers/secretsManager';
-import { BuildOptions } from './presets/types';
+import {
+  BuildOptions,
+  Platform,
+  StorageSolution,
+  NotificationType,
+} from './presets/types';
 
 // Register built-in presets
 import { registerBuiltInPresets } from './presets';
@@ -18,7 +28,9 @@ const program = new Command();
 
 program
   .name('rn-ci-workflow-builder')
-  .description('Generate GitHub Actions workflows for React Native CI/CD pipelines')
+  .description(
+    'Generate GitHub Actions workflows for React Native CI/CD pipelines'
+  )
   .version('0.1.0');
 
 // Generate command
@@ -27,17 +39,27 @@ program
   .description('Generate workflow YAML based on preset')
   .option('-c, --config <path>', 'Path to config file (JSON or YAML)')
   .option('-o, --output <path>', 'Output file path')
-  .option('-d, --dir <path>', 'Output directory (default: .github/workflows for GitHub, . for Bitrise)')
-  .option('-p, --platform <platform>', 'CI platform (github or bitrise)', 'github')
-  .option('-v, --validate-only', 'Only validate the configuration without generating files')
+  .option(
+    '-d, --dir <path>',
+    'Output directory (default: .github/workflows for GitHub, . for Bitrise)'
+  )
+  .option(
+    '-p, --platform <platform>',
+    'CI platform (github or bitrise)',
+    'github'
+  )
+  .option(
+    '-v, --validate-only',
+    'Only validate the configuration without generating files'
+  )
   .action(async (preset = 'build', options) => {
     try {
       // Default config
-      let config: WorkflowConfig = { 
+      let config: WorkflowConfig = {
         kind: preset,
         options: {
-          platform: options.platform as 'github' | 'bitrise'
-        }
+          platform: options.platform as 'github' | 'bitrise',
+        },
       };
 
       // Load config from file if provided
@@ -50,16 +72,21 @@ program
 
         try {
           const configContent = fs.readFileSync(configPath, 'utf8');
-          
+
           if (configPath.endsWith('.json')) {
             config = JSON.parse(configContent);
-          } else if (configPath.endsWith('.yaml') || configPath.endsWith('.yml')) {
+          } else if (
+            configPath.endsWith('.yaml') ||
+            configPath.endsWith('.yml')
+          ) {
             config = jsYaml.load(configContent) as WorkflowConfig;
           } else {
             throw new Error('Config file must be JSON or YAML');
           }
         } catch (error) {
-          console.error(`Error parsing config file: ${(error as Error).message}`);
+          console.error(
+            `Error parsing config file: ${(error as Error).message}`
+          );
           process.exit(1);
         }
 
@@ -67,7 +94,7 @@ program
         if (preset && preset !== 'build') {
           config.kind = preset;
         }
-        
+
         // Override platform if specified in command
         if (options.platform) {
           config.options = config.options || {};
@@ -83,15 +110,17 @@ program
           return;
         } catch (error) {
           console.error(`❌ Validation failed: ${(error as Error).message}`);
-          
+
           // Show helpful documentation for specific error types
           if ((error as Error).message.includes('required secret')) {
-            const buildOptions = (config.options as any)?.build as BuildOptions;
+            const buildOptions = config.options?.build as
+              | BuildOptions
+              | undefined;
             if (buildOptions) {
               console.error('\n' + generateSecretsSummary(buildOptions));
             }
           }
-          
+
           process.exit(1);
         }
       }
@@ -116,23 +145,33 @@ program
           console.log(`✅ Workflow written to ${filePath}`);
         }
       } catch (error) {
-        console.error(`❌ Error generating workflow: ${(error as Error).message}`);
-        
+        console.error(
+          `❌ Error generating workflow: ${(error as Error).message}`
+        );
+
         // Print additional guidance for known error types
         if ((error as Error).message.includes('required secret')) {
-          const buildOptions = (config.options as any)?.build as BuildOptions;
+          const buildOptions = config.options?.build as
+            | BuildOptions
+            | undefined;
           if (buildOptions) {
             console.error('\n' + generateSecretsSummary(buildOptions));
           } else {
-            console.error('\nHint: Make sure to include all required secrets for your configuration:');
-            console.error('  - For Firebase storage: FIREBASE_SERVICE_ACCOUNT and FIREBASE_APP_ID_* secrets');
+            console.error(
+              '\nHint: Make sure to include all required secrets for your configuration:'
+            );
+            console.error(
+              '  - For Firebase storage: FIREBASE_SERVICE_ACCOUNT and FIREBASE_APP_ID_* secrets'
+            );
             console.error('  - For S3 storage: AWS_* secrets');
             console.error('  - For Slack notifications: SLACK_WEBHOOK secret');
           }
         } else if ((error as Error).message.includes('undefined value')) {
-          console.error('\nHint: Check your configuration for undefined values or missing required fields');
+          console.error(
+            '\nHint: Check your configuration for undefined values or missing required fields'
+          );
         }
-        
+
         process.exit(1);
       }
     } catch (error) {
@@ -146,7 +185,7 @@ program
   .command('validate')
   .description('Validate configuration without generating files')
   .option('-c, --config <path>', 'Path to config file (JSON or YAML)')
-  .action(async (options) => {
+  .action(async options => {
     try {
       if (!options.config) {
         console.error('Error: Config file path is required');
@@ -162,10 +201,13 @@ program
       let config: WorkflowConfig;
       try {
         const configContent = fs.readFileSync(configPath, 'utf8');
-        
+
         if (configPath.endsWith('.json')) {
           config = JSON.parse(configContent);
-        } else if (configPath.endsWith('.yaml') || configPath.endsWith('.yml')) {
+        } else if (
+          configPath.endsWith('.yaml') ||
+          configPath.endsWith('.yml')
+        ) {
           config = jsYaml.load(configContent) as WorkflowConfig;
         } else {
           throw new Error('Config file must be JSON or YAML');
@@ -180,15 +222,17 @@ program
         console.log('✅ Validation successful! Configuration is valid.');
       } catch (error) {
         console.error(`❌ Validation failed: ${(error as Error).message}`);
-        
+
         // Show helpful documentation for specific error types
         if ((error as Error).message.includes('required secret')) {
-          const buildOptions = (config.options as any)?.build as BuildOptions;
+          const buildOptions = config.options?.build as
+            | BuildOptions
+            | undefined;
           if (buildOptions) {
             console.error('\n' + generateSecretsSummary(buildOptions));
           }
         }
-        
+
         process.exit(1);
       }
     } catch (error) {
@@ -200,16 +244,18 @@ program
 // Bitrise validate command
 program
   .command('bitrise-validate [file]')
-  .description('Validate a Bitrise YAML file using Bitrise CLI (automatically installs CLI if needed)')
+  .description(
+    'Validate a Bitrise YAML file using Bitrise CLI (automatically installs CLI if needed)'
+  )
   .action(async (file = 'bitrise.yml') => {
     try {
       const { validateWithBitriseCli } = await import('./validation/yaml');
-      
+
       if (!fs.existsSync(file)) {
         console.error(`❌ Error: File not found: ${file}`);
         process.exit(1);
       }
-      
+
       await validateWithBitriseCli(file, true); // Always auto-install by default
       console.log(`✅ ${file} is valid according to Bitrise CLI`);
     } catch (error) {
@@ -225,15 +271,15 @@ program
   .option('-p, --platform <platform>', 'Platform (ios, android, both)')
   .action((storage = 'github', notification = 'none', options) => {
     const platform = options.platform || 'both';
-    
+
     const buildOptions: BuildOptions = {
-      platform: platform as any,
+      platform: platform as Platform,
       variant: 'release',
-      storage: storage as any,
-      notification: notification as any,
+      storage: storage as StorageSolution,
+      notification: notification as NotificationType,
       includeHealthCheck: true, // Will be renamed to includeStaticAnalysis in the future
     };
-    
+
     console.log(generateSecretsSummary(buildOptions));
   });
 

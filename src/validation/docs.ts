@@ -54,7 +54,8 @@ export const STORAGE_SECRET_DOCS: Record<string, StorageSecretDocs> = {
     optionalSecrets: [
       {
         name: 'AWS_S3_BUCKET',
-        description: 'Name of the S3 bucket for artifacts (defaults to "rn-artifacts" if not provided)',
+        description:
+          'Name of the S3 bucket for artifacts (defaults to "rn-artifacts" if not provided)',
       },
     ],
   },
@@ -64,11 +65,13 @@ export const STORAGE_SECRET_DOCS: Record<string, StorageSecretDocs> = {
     requiredSecrets: [
       {
         name: 'GDRIVE_SERVICE_ACCOUNT_JSON',
-        description: 'Google service account JSON file content (recommended for CI)',
+        description:
+          'Google service account JSON file content (recommended for CI)',
       },
       {
         name: 'GDRIVE_REFRESH_TOKEN',
-        description: 'OAuth refresh token for authentication (alternative to service account)',
+        description:
+          'OAuth refresh token for authentication (alternative to service account)',
       },
     ],
     optionalSecrets: [
@@ -82,7 +85,8 @@ export const STORAGE_SECRET_DOCS: Record<string, StorageSecretDocs> = {
       },
       {
         name: 'GDRIVE_FOLDER_ID',
-        description: 'ID of the Google Drive folder (defaults to "react-native-builds")',
+        description:
+          'ID of the Google Drive folder (defaults to "react-native-builds")',
       },
     ],
   },
@@ -96,14 +100,17 @@ export const STORAGE_SECRET_DOCS: Record<string, StorageSecretDocs> = {
 /**
  * Documentation for notification types and their required secrets
  */
-export const NOTIFICATION_SECRET_DOCS: Record<string, {
-  name: string;
-  description: string;
-  requiredSecrets: Array<{
+export const NOTIFICATION_SECRET_DOCS: Record<
+  string,
+  {
     name: string;
     description: string;
-  }>;
-}> = {
+    requiredSecrets: Array<{
+      name: string;
+      description: string;
+    }>;
+  }
+> = {
   slack: {
     name: 'Slack',
     description: 'Sends notifications to Slack',
@@ -121,7 +128,8 @@ export const NOTIFICATION_SECRET_DOCS: Record<string, {
   },
   both: {
     name: 'Slack & PR Comment',
-    description: 'Sends notifications to Slack and posts comments on pull requests',
+    description:
+      'Sends notifications to Slack and posts comments on pull requests',
     requiredSecrets: [
       {
         name: 'SLACK_WEBHOOK',
@@ -157,13 +165,13 @@ export function getRequiredSecretsDocumentation(buildOptions: BuildOptions): {
     description: 'Unknown storage type',
     requiredSecrets: [],
   };
-  
+
   const notification = NOTIFICATION_SECRET_DOCS[buildOptions.notification] || {
     name: 'Unknown',
     description: 'Unknown notification type',
     requiredSecrets: [],
   };
-  
+
   return {
     storage,
     notification,
@@ -175,10 +183,12 @@ export function getRequiredSecretsDocumentation(buildOptions: BuildOptions): {
  * @param buildOptions Build preset options
  * @returns Documentation string with required secrets information
  */
-export function generateRequiredSecretsHelp(buildOptions: BuildOptions): string {
+export function generateRequiredSecretsHelp(
+  buildOptions: BuildOptions
+): string {
   const docs = getRequiredSecretsDocumentation(buildOptions);
   let result = 'Required secrets for your configuration:\n\n';
-  
+
   // Storage secrets
   result += `Storage (${docs.storage.name}):\n`;
   if (docs.storage.requiredSecrets.length === 0) {
@@ -186,8 +196,10 @@ export function generateRequiredSecretsHelp(buildOptions: BuildOptions): string 
   } else {
     docs.storage.requiredSecrets.forEach(secret => {
       if (
-        (buildOptions.platform === 'ios' && secret.name === 'FIREBASE_APP_ID_ANDROID') ||
-        (buildOptions.platform === 'android' && secret.name === 'FIREBASE_APP_ID_IOS')
+        (buildOptions.platform === 'ios' &&
+          secret.name === 'FIREBASE_APP_ID_ANDROID') ||
+        (buildOptions.platform === 'android' &&
+          secret.name === 'FIREBASE_APP_ID_IOS')
       ) {
         // Skip secrets not relevant to the current platform
         return;
@@ -195,7 +207,7 @@ export function generateRequiredSecretsHelp(buildOptions: BuildOptions): string 
       result += `  - ${secret.name}: ${secret.description}\n`;
     });
   }
-  
+
   // Notification secrets
   result += `\nNotification (${docs.notification.name}):\n`;
   if (docs.notification.requiredSecrets.length === 0) {
@@ -205,6 +217,6 @@ export function generateRequiredSecretsHelp(buildOptions: BuildOptions): string 
       result += `  - ${secret.name}: ${secret.description}\n`;
     });
   }
-  
+
   return result;
 }

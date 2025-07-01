@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { type ReactNode } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Header } from "@/components/header";
-import { cn } from "@/utils/cn";
+import { type ReactNode } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Header } from '@/components/header';
+import { cn } from '@/utils/cn';
 
 interface DocsSidebarNavProps {
   items: {
@@ -15,23 +15,23 @@ interface DocsSidebarNavProps {
 
 function DocsSidebarNav({ items }: DocsSidebarNavProps) {
   const pathname = usePathname();
-  
+
   return (
     <nav className="flex flex-col space-y-1">
-      {items.map((item) => {
-        const isActive = 
-          (pathname === item.href) || 
-          (item.href !== "/docs" && pathname?.startsWith(item.href));
-          
+      {items.map(item => {
+        const isActive =
+          pathname === item.href ||
+          (item.href !== '/docs' && pathname?.startsWith(item.href));
+
         return (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
-              "text-sm font-medium px-3 py-2 rounded-md transition-colors",
-              isActive 
-                ? "bg-primary/10 text-primary font-semibold border-l-2 border-primary" 
-                : "hover:text-primary hover:bg-accent"
+              'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+              isActive
+                ? 'border-l-2 border-primary bg-primary/10 font-semibold text-primary'
+                : 'hover:bg-accent hover:text-primary'
             )}
           >
             {item.title}
@@ -45,32 +45,32 @@ function DocsSidebarNav({ items }: DocsSidebarNavProps) {
 export default function DocsLayout({ children }: { children: ReactNode }) {
   const sidebarNavItems = [
     {
-      title: "Overview",
-      href: "/docs",
+      title: 'Overview',
+      href: '/docs',
     },
     {
-      title: "Getting Started",
-      href: "/docs/getting-started",
+      title: 'Getting Started',
+      href: '/docs/getting-started',
     },
     {
-      title: "Core Concepts",
-      href: "/docs/core-concepts",
+      title: 'Core Concepts',
+      href: '/docs/core-concepts',
     },
     {
-      title: "Workflow Presets",
-      href: "/docs/workflow-presets",
+      title: 'Workflow Presets',
+      href: '/docs/workflow-presets',
     },
     {
-      title: "Configuration Reference",
-      href: "/docs/configuration",
+      title: 'Configuration Reference',
+      href: '/docs/configuration',
     },
     {
-      title: "Storage Options",
-      href: "/docs/storage-options",
+      title: 'Storage Options',
+      href: '/docs/storage-options',
     },
     {
-      title: "Secrets Management",
-      href: "/docs/secrets-management",
+      title: 'Secrets Management',
+      href: '/docs/secrets-management',
     },
   ];
 
@@ -78,14 +78,12 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
     <>
       <Header />
       <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
-        <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block border-r">
-          <div className="h-full py-6 pr-2 pl-8 overflow-y-auto">
+        <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 border-r md:sticky md:block">
+          <div className="h-full overflow-y-auto py-6 pl-8 pr-2">
             <DocsSidebarNav items={sidebarNavItems} />
           </div>
         </aside>
-        <main className="relative py-6 md:py-8 lg:py-10">
-          {children}
-        </main>
+        <main className="relative py-6 md:py-8 lg:py-10">{children}</main>
       </div>
     </>
   );

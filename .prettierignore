@@ -1,0 +1,34 @@
+# Build artifacts
+dist/
+build/
+coverage/
+
+# Dependencies
+node_modules/
+
+# Generated files
+*.d.ts
+
+# Configuration files that shouldn't be formatted
+.eslintrc.js
+*.config.js
+*.config.mjs
+
+# Sample apps and examples
+SampleRNApp/
+app/
+
+# Logs
+*.log
+
+# Lock files
+package-lock.json
+yarn.lock
+
+# YAML files that should maintain specific formatting
+*.yml
+*.yaml
+
+# Documentation that might have specific formatting
+*.md
+CHANGELOG.md

@@ -8,7 +8,8 @@ import { BuildOptions } from '../presets/types';
 function createGitHubCLIInstallationStep(): GitHubStep {
   return {
     name: 'Setup GitHub CLI',
-    run: '# Check if gh CLI is installed\n' +
+    run:
+      '# Check if gh CLI is installed\n' +
       'if ! command -v gh &> /dev/null; then\n' +
       '  echo "GitHub CLI not found, installing via Homebrew..."\n' +
       '\n' +
@@ -55,7 +56,7 @@ function createGitHubCLIInstallationStep(): GitHubStep {
  */
 function getDownloadLocation(build: BuildOptions, platform: string): string {
   const platformPath = platform.toLowerCase();
-  
+
   switch (build.storage) {
     case 'github':
       return 'Available in GitHub Artifacts';
@@ -64,7 +65,11 @@ function getDownloadLocation(build: BuildOptions, platform: string): string {
     case 'drive':
       return 'Google Drive';
     case 's3': {
-      const s3Path = platformPath + '/' + build.variant + '/${{ github.head_ref || github.ref_name }}';
+      const s3Path =
+        platformPath +
+        '/' +
+        build.variant +
+        '/${{ github.head_ref || github.ref_name }}';
       return '${{ secrets.S3_BASE_URL }}/' + s3Path;
     }
     default:
@@ -75,18 +80,32 @@ function getDownloadLocation(build: BuildOptions, platform: string): string {
 /**
  * Creates a PR comment step using GitHub CLI
  */
-function createPRCommentStep(build: BuildOptions, platform: string): GitHubStep {
+function createPRCommentStep(
+  build: BuildOptions,
+  platform: string
+): GitHubStep {
   const downloadLocation = getDownloadLocation(build, platform);
-  
+
   return {
     name: 'Add PR Comment via GitHub CLI',
-    if: 'steps.build-source.outputs.is_pr == \'true\'',
-    run: '# Create comment message\n' +
-      'MESSAGE="' + platform + ' ' + build.variant + ' build completed!\n\n' +
-      'Download: ' + downloadLocation + '"\n\n' +
+    if: "steps.build-source.outputs.is_pr == 'true'",
+    run:
+      '# Create comment message\n' +
+      'MESSAGE="' +
+      platform +
+      ' ' +
+      build.variant +
+      ' build completed!\n\n' +
+      'Download: ' +
+      downloadLocation +
+      '"\n\n' +
       '# Check if comment already exists and update it\n' +
       'PR_NUM="${{ github.event.number }}"\n' +
-      'SEARCH_TEXT="' + platform + ' ' + build.variant + ' build"\n' +
+      'SEARCH_TEXT="' +
+      platform +
+      ' ' +
+      build.variant +
+      ' build"\n' +
       'JQ_SELECT=".comments[] | select(.body | contains(\\"$SEARCH_TEXT\\"))"\n' +
       'JQ_FILTER="$JQ_SELECT | .id"\n' +
       'EXISTING_COMMENT_ID=$(gh pr view $PR_NUM --json comments --jq "$JQ_FILTER" | head -1)\n\n' +
@@ -108,7 +127,10 @@ function createPRCommentStep(build: BuildOptions, platform: string): GitHubStep 
 /**
  * Creates a Slack notification step
  */
-function createSlackNotificationStep(build: BuildOptions, platform: string): GitHubStep {
+function createSlackNotificationStep(
+  build: BuildOptions,
+  platform: string
+): GitHubStep {
   return {
     name: 'Send Slack Notification',
     if: 'always()',
@@ -120,7 +142,11 @@ function createSlackNotificationStep(build: BuildOptions, platform: string): Git
       SLACK_ICON: 'https://github.com/rtCamp.png?size=48',
       SLACK_COLOR: '${{ job.status }}',
       SLACK_TITLE: platform + ' Build Result',
-      SLACK_MESSAGE: platform + ' ' + build.variant + ' build for ${{ github.head_ref || github.ref_name }} completed with status: ${{ job.status }}',
+      SLACK_MESSAGE:
+        platform +
+        ' ' +
+        build.variant +
+        ' build for ${{ github.head_ref || github.ref_name }} completed with status: ${{ job.status }}',
     },
   };
 }
@@ -134,50 +160,50 @@ const notificationHelpers = {
    */
   createAndroidNotificationSteps(build: BuildOptions): GitHubStep[] {
     const steps: GitHubStep[] = [];
-    
+
     // Add Slack notification if configured
     if (build.notification === 'slack' || build.notification === 'both') {
       steps.push(createSlackNotificationStep(build, 'Android'));
     }
-    
+
     // Add PR comment notification if configured
     if (build.notification === 'pr-comment' || build.notification === 'both') {
       // Add GitHub CLI installation step (platform-agnostic)
       const cliInstallStep = createGitHubCLIInstallationStep();
-      cliInstallStep.if = 'steps.build-source.outputs.is_pr == \'true\'';
+      cliInstallStep.if = "steps.build-source.outputs.is_pr == 'true'";
       steps.push(cliInstallStep);
 
       // Add PR comment step
       steps.push(createPRCommentStep(build, 'Android'));
     }
-    
+
     return steps;
   },
-  
+
   /**
    * Creates iOS notification steps based on the notification configuration
    */
   createIOSNotificationSteps(build: BuildOptions): GitHubStep[] {
     const steps: GitHubStep[] = [];
-    
+
     // Add Slack notification if configured
     if (build.notification === 'slack' || build.notification === 'both') {
       steps.push(createSlackNotificationStep(build, 'iOS'));
     }
-    
+
     // Add PR comment notification if configured
     if (build.notification === 'pr-comment' || build.notification === 'both') {
       // Add GitHub CLI installation step (platform-agnostic)
       const cliInstallStep = createGitHubCLIInstallationStep();
-      cliInstallStep.if = 'steps.build-source.outputs.is_pr == \'true\'';
+      cliInstallStep.if = "steps.build-source.outputs.is_pr == 'true'";
       steps.push(cliInstallStep);
 
       // Add PR comment step
       steps.push(createPRCommentStep(build, 'iOS'));
     }
-    
+
     return steps;
-  }
+  },
 };
 
 export default notificationHelpers;

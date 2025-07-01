@@ -5,12 +5,15 @@ import fs from 'fs';
 /**
  * Helper function to save workflow configuration to a file
  * Can be used to save user selections from the WorkflowBuilderComponent
- * 
+ *
  * @param config The workflow configuration object
  * @param filePath The path to save the configuration JSON file
  * @returns The saved file path
  */
-export function saveWorkflowConfig(config: WorkflowConfig, filePath: string): string {
+export function saveWorkflowConfig(
+  config: WorkflowConfig,
+  filePath: string
+): string {
   const configJson = JSON.stringify(config, null, 2);
   fs.writeFileSync(filePath, configJson, 'utf8');
   return filePath;
@@ -19,7 +22,7 @@ export function saveWorkflowConfig(config: WorkflowConfig, filePath: string): st
 /**
  * Helper function to load workflow configuration from a file
  * Can be used to load saved configurations into the WorkflowBuilderComponent
- * 
+ *
  * @param filePath The path to the configuration JSON file
  * @returns The loaded workflow configuration
  */
@@ -30,7 +33,7 @@ export function loadWorkflowConfig(filePath: string): WorkflowConfig {
 
 /**
  * Helper function to generate and save a workflow file from a configuration
- * 
+ *
  * @param config The workflow configuration
  * @param outputDir The directory to save the workflow YAML (default: .github/workflows)
  * @returns Object containing the file path and secrets summary
@@ -44,12 +47,13 @@ export function generateAndSaveWorkflow(
 
 /**
  * Helper function to preview workflow YAML without saving
- * 
+ *
  * @param config The workflow configuration
  * @returns Object containing the YAML string and secrets summary
  */
-export function previewWorkflow(
-  config: WorkflowConfig
-): { yaml: string; secretsSummary?: string } {
+export function previewWorkflow(config: WorkflowConfig): {
+  yaml: string;
+  secretsSummary?: string;
+} {
   return generateWorkflow(config);
 }

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { BookText } from "lucide-react";
-import { ThemeToggle } from "./theme-toggle";
-import { PROJECT_NAME } from "@/config/constants";
-import { IssueReportDialog } from "./issue-report-dialog";
+import Link from 'next/link';
+import { BookText } from 'lucide-react';
+import { ThemeToggle } from './theme-toggle';
+import { PROJECT_NAME } from '@/config/constants';
+import { IssueReportDialog } from './issue-report-dialog';
 
 export function Header() {
   return (
@@ -12,10 +12,15 @@ export function Header() {
       <div className="container flex h-14 items-center justify-between">
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center">
-            <span className="font-bold">{PROJECT_NAME.replace("React Native", "RN")}</span>
+            <span className="font-bold">
+              {PROJECT_NAME.replace('React Native', 'RN')}
+            </span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-4">
-            <Link href="/docs" className="text-sm font-medium hover:text-primary">
+          <nav className="hidden items-center space-x-4 md:flex">
+            <Link
+              href="/docs"
+              className="text-sm font-medium hover:text-primary"
+            >
               Documentation
             </Link>
           </nav>
@@ -23,10 +28,7 @@ export function Header() {
         <div className="flex items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
             <IssueReportDialog />
-            <Link
-              href="/docs"
-              className="md:hidden"
-            >
+            <Link href="/docs" className="md:hidden">
               <div className="h-8 w-8 rounded-md border border-input bg-background p-1 hover:bg-accent hover:text-accent-foreground">
                 <BookText className="h-full w-full" />
                 <span className="sr-only">Documentation</span>

@@ -8,7 +8,10 @@ const commonSteps = {
   /**
    * Creates common setup steps used across platforms
    */
-  createSetupSteps(packageManager: PackageManager, cache: CacheConfig | undefined): GitHubStep[] {
+  createSetupSteps(
+    packageManager: PackageManager,
+    cache: CacheConfig | undefined
+  ): GitHubStep[] {
     // Note: Static analysis steps are now moved to a separate job in the workflow
     // to avoid duplication and follow best practices
 
@@ -56,9 +59,9 @@ else
   echo "source_sha=\${{ github.sha }}" >> $GITHUB_OUTPUT
   echo "📌 Running on branch \${{ github.ref_name }}"
 fi
-`
+`,
     };
-  }
+  },
 };
 
 export default commonSteps;

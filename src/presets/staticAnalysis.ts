@@ -1,7 +1,14 @@
-import { WorkflowOptions } from '../types';
+import {
+  WorkflowOptions,
+  GitHubStep,
+  GitHubJob,
+  GitHubWorkflow,
+} from '../types';
 import { buildTriggers, buildEnv, cacheSteps } from '../helpers';
 
-export function buildStaticAnalysisPipeline(opts: WorkflowOptions): Record<string, any> {
+export function buildStaticAnalysisPipeline(
+  opts: WorkflowOptions
+): GitHubWorkflow {
   const {
     triggers,
     env,
@@ -18,7 +25,7 @@ export function buildStaticAnalysisPipeline(opts: WorkflowOptions): Record<strin
     },
   } = opts;
 
-  const testSteps: any[] = [
+  const testSteps: GitHubStep[] = [
     { name: 'Checkout', uses: 'actions/checkout@v4' },
     {
       name: 'Setup Node',
@@ -33,33 +40,51 @@ export function buildStaticAnalysisPipeline(opts: WorkflowOptions): Record<strin
       ? { name: 'Install', run: 'yarn install --immutable' }
       : { name: 'Install', run: 'npm ci' },
   ];
-  
+
   // Add configurable checks
   if (healthCheck.typescript !== false) {
-    testSteps.push({ name: 'TypeScript', run: packageManager === 'yarn' ? 'yarn tsc --noEmit' : 'npm run tsc -- --noEmit' });
+    testSteps.push({
+      name: 'TypeScript',
+      run:
+        packageManager === 'yarn'
+          ? 'yarn tsc --noEmit'
+          : 'npm run tsc -- --noEmit',
+    });
   }
-  
+
   if (healthCheck.eslint !== false) {
-    testSteps.push({ name: 'ESLint', run: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint' });
+    testSteps.push({
+      name: 'ESLint',
+      run: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
+    });
   }
-  
+
   if (healthCheck.prettier !== false) {
-    testSteps.push({ name: 'Prettier', run: packageManager === 'yarn' ? 'yarn format:check' : 'npm run format:check' });
+    testSteps.push({
+      name: 'Prettier',
+      run:
+        packageManager === 'yarn'
+          ? 'yarn format:check'
+          : 'npm run format:check',
+    });
   }
-  
+
   if (healthCheck.unitTests !== false) {
-    testSteps.push({ name: 'Unit tests', run: packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci' });
+    testSteps.push({
+      name: 'Unit tests',
+      run: packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
+    });
   }
-  
+
   // Test job configuration
-  const testJob: Record<string, any> = {
+  const testJob: GitHubJob = {
     name: 'Run Tests',
     'runs-on': runsOn,
     steps: testSteps,
   };
 
   // Jobs collection
-  const jobs: Record<string, any> = {};
+  const jobs: Record<string, GitHubJob> = {};
 
   // Add test job to jobs collection
   jobs.test = testJob;

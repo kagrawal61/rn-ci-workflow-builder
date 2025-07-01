@@ -1,7 +1,14 @@
-import { WorkflowOptions, BitriseConfig, BitriseStep, BitriseWorkflow } from '../types';
+import {
+  WorkflowOptions,
+  BitriseConfig,
+  BitriseStep,
+  BitriseWorkflow,
+} from '../types';
 import { BuildOptions } from './types';
 
-export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: BuildOptions }): BitriseConfig {
+export function buildBitriseBuildPipeline(
+  opts: WorkflowOptions & { build?: BuildOptions }
+): BitriseConfig {
   const {
     triggers,
     env,
@@ -26,53 +33,63 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
   // Common setup steps
   const setupSteps: BitriseStep[] = [
     {
-      'git-clone@8': {}
+      'git-clone@8': {},
     },
     {
       'script@1': {
         title: 'Install Dependencies',
         inputs: [
-          { content: packageManager === 'yarn' 
-            ? 'yarn install --immutable' 
-            : 'npm ci' }
-        ]
-      }
-    }
+          {
+            content:
+              packageManager === 'yarn' ? 'yarn install --immutable' : 'npm ci',
+          },
+        ],
+      },
+    },
   ];
 
   // Health check steps (optional)
-  const healthCheckSteps: BitriseStep[] = build.includeHealthCheck ? [
-    {
-      'script@1': {
-        title: 'TypeScript Check',
-        inputs: [
-          { content: packageManager === 'yarn' 
-            ? 'yarn tsc --noEmit' 
-            : 'npm run tsc -- --noEmit' }
-        ]
-      }
-    },
-    {
-      'script@1': {
-        title: 'ESLint',
-        inputs: [
-          { content: packageManager === 'yarn' 
-            ? 'yarn lint' 
-            : 'npm run lint' }
-        ]
-      }
-    },
-    {
-      'script@1': {
-        title: 'Unit Tests',
-        inputs: [
-          { content: packageManager === 'yarn' 
-            ? 'yarn test --ci' 
-            : 'npm test -- --ci' }
-        ]
-      }
-    }
-  ] : [];
+  const healthCheckSteps: BitriseStep[] = build.includeHealthCheck
+    ? [
+        {
+          'script@1': {
+            title: 'TypeScript Check',
+            inputs: [
+              {
+                content:
+                  packageManager === 'yarn'
+                    ? 'yarn tsc --noEmit'
+                    : 'npm run tsc -- --noEmit',
+              },
+            ],
+          },
+        },
+        {
+          'script@1': {
+            title: 'ESLint',
+            inputs: [
+              {
+                content:
+                  packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
+              },
+            ],
+          },
+        },
+        {
+          'script@1': {
+            title: 'Unit Tests',
+            inputs: [
+              {
+                content:
+                  packageManager === 'yarn'
+                    ? 'yarn test --ci'
+                    : 'npm test -- --ci',
+              },
+            ],
+          },
+        },
+      ]
+    : [];
 
   // Platform-specific build steps
   const workflows: Record<string, BitriseWorkflow> = {};
@@ -85,23 +102,29 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
         'script@1': {
           title: 'Bundle React Native',
           inputs: [
-            { content: 'npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res' }
-          ]
-        }
+            {
+              content:
+                'npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res',
+            },
+          ],
+        },
       },
       {
         'gradle-runner@2': {
           title: 'Build Android',
           inputs: [
-            { gradle_task: (build as BuildOptions).androidOutputType === 'aab' 
-              ? 'bundleRelease' 
-              : (build as BuildOptions).androidOutputType === 'both'
-              ? 'assembleRelease bundleRelease'
-              : 'assembleRelease' },
-            { gradlew_path: './android/gradlew' }
-          ]
-        }
-      }
+            {
+              gradle_task:
+                (build as BuildOptions).androidOutputType === 'aab'
+                  ? 'bundleRelease'
+                  : (build as BuildOptions).androidOutputType === 'both'
+                    ? 'assembleRelease bundleRelease'
+                    : 'assembleRelease',
+            },
+            { gradlew_path: './android/gradlew' },
+          ],
+        },
+      },
     ];
 
     // Add code signing if needed
@@ -109,10 +132,8 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       androidSteps.push({
         'sign-apk@1': {
           title: 'Sign APK',
-          inputs: [
-            { android_app: '$BITRISE_APK_PATH' }
-          ]
-        }
+          inputs: [{ android_app: '$BITRISE_APK_PATH' }],
+        },
       });
     }
 
@@ -120,16 +141,14 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
     androidSteps.push({
       'deploy-to-bitrise-io@2': {
         title: 'Deploy to Bitrise.io',
-        inputs: [
-          { notify_user_groups: 'everyone' }
-        ]
-      }
+        inputs: [{ notify_user_groups: 'everyone' }],
+      },
     });
 
     workflows['rn-android-build'] = {
       title: 'Build Android',
       description: 'Build React Native Android app',
-      steps: androidSteps
+      steps: androidSteps,
     };
   }
 
@@ -140,18 +159,19 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       {
         'cocoapods-install@2': {
           title: 'Install CocoaPods',
-          inputs: [
-            { source_root_path: './ios' }
-          ]
-        }
+          inputs: [{ source_root_path: './ios' }],
+        },
       },
       {
         'script@1': {
           title: 'Bundle React Native',
           inputs: [
-            { content: 'npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle --assets-dest ios' }
-          ]
-        }
+            {
+              content:
+                'npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle --assets-dest ios',
+            },
+          ],
+        },
       },
       {
         'xcode-archive@4': {
@@ -159,24 +179,25 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
           inputs: [
             { project_path: './ios/*.xcworkspace' },
             { scheme: '$BITRISE_SCHEME' },
-            { export_method: build.variant === 'release' ? 'app-store' : 'development' }
-          ]
-        }
+            {
+              export_method:
+                build.variant === 'release' ? 'app-store' : 'development',
+            },
+          ],
+        },
       },
       {
         'deploy-to-bitrise-io@2': {
           title: 'Deploy to Bitrise.io',
-          inputs: [
-            { notify_user_groups: 'everyone' }
-          ]
-        }
-      }
+          inputs: [{ notify_user_groups: 'everyone' }],
+        },
+      },
     ];
 
     workflows['rn-ios-build'] = {
       title: 'Build iOS',
       description: 'Build React Native iOS app',
-      steps: iosSteps
+      steps: iosSteps,
     };
   }
 
@@ -186,26 +207,30 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
       title: 'Build Both Platforms',
       description: 'Build React Native app for both Android and iOS',
       steps: [],
-      before_run: ['rn-android-build', 'rn-ios-build']
+      before_run: ['rn-android-build', 'rn-ios-build'],
     };
   }
 
   // Build trigger map
   const triggerMap = [];
-  const primaryWorkflow = build.platform === 'both' ? 'rn-build-all-platforms' : 
-    build.platform === 'android' ? 'rn-android-build' : 'rn-ios-build';
-  
+  const primaryWorkflow =
+    build.platform === 'both'
+      ? 'rn-build-all-platforms'
+      : build.platform === 'android'
+        ? 'rn-android-build'
+        : 'rn-ios-build';
+
   if (triggers?.push?.branches) {
     triggers.push.branches.forEach(branch => {
       triggerMap.push({
         push_branch: branch,
-        workflow: primaryWorkflow
+        workflow: primaryWorkflow,
       });
     });
   } else {
     triggerMap.push({
       push_branch: 'main',
-      workflow: primaryWorkflow
+      workflow: primaryWorkflow,
     });
   }
 
@@ -213,24 +238,25 @@ export function buildBitriseBuildPipeline(opts: WorkflowOptions & { build?: Buil
     triggers.pullRequest.branches.forEach(branch => {
       triggerMap.push({
         pull_request_target_branch: branch,
-        workflow: primaryWorkflow
+        workflow: primaryWorkflow,
       });
     });
   } else {
     triggerMap.push({
       pull_request_target_branch: 'main',
-      workflow: primaryWorkflow
+      workflow: primaryWorkflow,
     });
   }
 
   return {
     format_version: 11,
-    default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git',
+    default_step_lib_source:
+      'https://github.com/bitrise-io/bitrise-steplib.git',
     project_type: 'react-native',
     app: {
-      envs: appEnvs.length > 0 ? appEnvs : undefined
+      envs: appEnvs.length > 0 ? appEnvs : undefined,
     },
     workflows,
-    trigger_map: triggerMap
+    trigger_map: triggerMap,
   };
-} 
+}

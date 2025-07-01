@@ -9,10 +9,10 @@ const platformHelpers = {
    * Creates Android-specific build steps with improved error handling
    */
   createAndroidBuildSteps(
-    setupSteps: GitHubStep[], 
+    setupSteps: GitHubStep[],
     determineBuildSourceStep: GitHubStep,
     _packageManager: PackageManager, // Not used after switch to npx, kept for API compatibility
-    _buildParams: string, // Not used after switch to official CLI, kept for API compatibility 
+    _buildParams: string, // Not used after switch to official CLI, kept for API compatibility
     build: BuildOptions
   ): GitHubStep[] {
     return [
@@ -39,16 +39,16 @@ if [ ! -f "android/gradlew" ]; then
 fi
 
 echo "✅ Android environment looks good"
-`
+`,
       },
       // Setup Java with proper LTS version
       {
         name: 'Setup Java',
         uses: 'actions/setup-java@v3',
         with: {
-          'distribution': 'temurin', // Eclipse Temurin is the recommended distribution
-          'java-version': '17',      // Latest LTS version compatible with Android
-          'cache': 'gradle',
+          distribution: 'temurin', // Eclipse Temurin is the recommended distribution
+          'java-version': '17', // Latest LTS version compatible with Android
+          cache: 'gradle',
         },
       },
       // Make Gradlew executable (often forgotten in repositories)
@@ -74,18 +74,17 @@ fi
 echo "Building Android app using official React Native CLI..."
 
 # Using official React Native CLI with appropriate task based on variant and output type
-${
-  (() => {
-    // Determine the appropriate Gradle task based on variant and output type
-    const variant = build.variant;
-    const outputType = build.androidOutputType || 'apk'; // Default to APK if not specified
-    
-    if (outputType === 'both') {
-      // For both APK and AAB, run both tasks
-      const apkTask = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
-      const aabTask = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
-      
-      return `echo "Generating both APK and AAB formats for ${variant} build"
+${(() => {
+  // Determine the appropriate Gradle task based on variant and output type
+  const variant = build.variant;
+  const outputType = build.androidOutputType || 'apk'; // Default to APK if not specified
+
+  if (outputType === 'both') {
+    // For both APK and AAB, run both tasks
+    const apkTask = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
+    const aabTask = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
+
+    return `echo "Generating both APK and AAB formats for ${variant} build"
 
 # First generate APK
 echo "Using Gradle task: ${apkTask} for ${variant} build with APK output format"
@@ -102,17 +101,17 @@ npx react-native build-android --tasks=${aabTask} || {
   echo "::error::Android AAB build failed. Check logs for details."
   exit 1
 }`;
+  } else {
+    // For single output type (APK or AAB)
+    let task = '';
+    if (outputType === 'apk') {
+      task = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
     } else {
-      // For single output type (APK or AAB)
-      let task = '';
-      if (outputType === 'apk') {
-        task = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
-      } else {
-        // For AAB (Android App Bundle)
-        task = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
-      }
-      
-      return `echo "Using Gradle task: ${task} for ${variant} build with ${outputType} output format"
+      // For AAB (Android App Bundle)
+      task = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
+    }
+
+    return `echo "Using Gradle task: ${task} for ${variant} build with ${outputType} output format"
 
 # Using React Native CLI with --tasks flag
 npx react-native build-android --tasks=${task} || {
@@ -120,19 +119,17 @@ npx react-native build-android --tasks=${task} || {
   echo "::error::Android build failed. Check logs for details."
   exit 1
 }`;
-    }
-  })()
-}
+  }
+})()}
 
 echo "✅ Android build completed successfully"
 
 # Verify the expected outputs based on output type
-${
-  (() => {
-    const outputType = build.androidOutputType || 'apk';
-    
-    if (outputType === 'both') {
-      return `# Check for both APK and AAB files
+${(() => {
+  const outputType = build.androidOutputType || 'apk';
+
+  if (outputType === 'both') {
+    return `# Check for both APK and AAB files
 if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
   echo "✅ APK files generated successfully"
 else
@@ -144,32 +141,31 @@ if ls android/app/build/outputs/bundle/**/*.aab 1> /dev/null 2>&1; then
 else
   echo "⚠️ Warning: Expected AAB files not found. Storage steps may fail."
 fi`;
-    } else if (outputType === 'apk') {
-      return `if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+  } else if (outputType === 'apk') {
+    return `if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
   echo "✅ APK files generated successfully"
 else
   echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
 fi`;
-    } else {
-      return `if ls android/app/build/outputs/bundle/**/*.aab 1> /dev/null 2>&1; then
+  } else {
+    return `if ls android/app/build/outputs/bundle/**/*.aab 1> /dev/null 2>&1; then
   echo "✅ AAB files generated successfully"
 else
   echo "⚠️ Warning: Expected AAB files not found. Storage steps may fail."
 fi`;
-    }
-  })()
-}
-`
+  }
+})()}
+`,
       },
       // Artifact storage is handled by the storage helper based on the storage configuration
     ];
   },
-  
+
   /**
    * Creates iOS-specific build steps with improved error handling
    */
   createIOSBuildSteps(
-    setupSteps: GitHubStep[], 
+    setupSteps: GitHubStep[],
     determineBuildSourceStep: GitHubStep,
     _packageManager: PackageManager, // Not used after switch to npx, kept for API compatibility
     _buildParams: string, // Not used after switch to official CLI, kept for API compatibility
@@ -200,16 +196,16 @@ if [ ! -f "ios/Podfile" ]; then
 fi
 
 echo "✅ iOS environment looks good"
-`
+`,
       },
       // Setup Ruby with proper version for CocoaPods
       {
         name: 'Setup Ruby/CocoaPods',
         uses: 'ruby/setup-ruby@v1',
         with: {
-          'ruby-version': '3.0',        // Stable Ruby version for CocoaPods
-          'bundler-cache': 'true',      // Enable bundler cache
-          'working-directory': 'ios',   // Look for Gemfile in iOS directory
+          'ruby-version': '3.0', // Stable Ruby version for CocoaPods
+          'bundler-cache': 'true', // Enable bundler cache
+          'working-directory': 'ios', // Look for Gemfile in iOS directory
         },
       },
       // Install CocoaPods with error handling
@@ -226,7 +222,7 @@ pod install || {
   exit 1
 }
 echo "✅ CocoaPods installation successful"
-`
+`,
       },
       // Main build step with improved error handling
       {
@@ -264,11 +260,11 @@ if ls ios/build/Build/Products/**/*.ipa 1> /dev/null 2>&1; then
 else
   echo "⚠️ Warning: Expected IPA files not found. Storage steps may fail."
 fi
-`
+`,
       },
       // Artifact storage is handled by the storage helper based on the storage configuration
     ];
-  }
+  },
 };
 
 export default platformHelpers;

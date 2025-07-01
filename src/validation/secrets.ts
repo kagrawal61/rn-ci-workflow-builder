@@ -6,7 +6,12 @@ import { BuildOptions } from '../presets/types';
  */
 const REQUIRED_STORAGE_SECRETS: Record<string, string[]> = {
   firebase: ['FIREBASE_SERVICE_ACCOUNT'],
-  s3: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'AWS_S3_BUCKET'],
+  s3: [
+    'AWS_ACCESS_KEY_ID',
+    'AWS_SECRET_ACCESS_KEY',
+    'AWS_REGION',
+    'AWS_S3_BUCKET',
+  ],
   drive: ['GOOGLE_SERVICE_ACCOUNT'],
   github: [], // GitHub doesn't need special secrets, it uses the default GitHub token
 };
@@ -41,26 +46,29 @@ export function validateBuildSecrets(
 ): void {
   const configSecrets = options.secrets || [];
   const missingSecrets: string[] = [];
-  
+
   // Check storage-specific secrets
   if (buildOptions.storage) {
-    const requiredStorageSecrets = REQUIRED_STORAGE_SECRETS[buildOptions.storage] || [];
-    
+    const requiredStorageSecrets =
+      REQUIRED_STORAGE_SECRETS[buildOptions.storage] || [];
+
     // Add platform-specific Firebase secrets if using Firebase
     if (buildOptions.storage === 'firebase') {
-      const platformSecrets = FIREBASE_PLATFORM_SECRETS[buildOptions.platform] || [];
+      const platformSecrets =
+        FIREBASE_PLATFORM_SECRETS[buildOptions.platform] || [];
       requireSecrets(configSecrets, platformSecrets, missingSecrets);
     }
-    
+
     requireSecrets(configSecrets, requiredStorageSecrets, missingSecrets);
   }
-  
+
   // Check notification-specific secrets
   if (buildOptions.notification) {
-    const requiredNotificationSecrets = NOTIFICATION_SECRETS[buildOptions.notification] || [];
+    const requiredNotificationSecrets =
+      NOTIFICATION_SECRETS[buildOptions.notification] || [];
     requireSecrets(configSecrets, requiredNotificationSecrets, missingSecrets);
   }
-  
+
   // Throw error if any secrets are missing
   if (missingSecrets.length > 0) {
     throw new Error(
