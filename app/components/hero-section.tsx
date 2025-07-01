@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion";
-import { FileJson, Zap, Code, Rocket, Github } from "lucide-react";
+import { FileJson, Zap, Code, Rocket, Clock, LayoutGrid } from "lucide-react";
 import { Button } from "./ui/button";
 import { PROJECT_NAME, PROJECT_DESCRIPTION, REPO_URL } from "@/config/constants";
 
@@ -15,11 +15,11 @@ export function HeroSection() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <div className="flex items-center justify-center gap-4">
-            <div className="flex items-center justify-center gap-2 rounded-full bg-muted px-4 py-1 text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 rounded-full bg-blue-100 px-4 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
               <div className="flex items-center justify-center h-3.5 w-3.5">
-                <Github size={14} />
+                <Clock size={14} />
               </div>
-              <span>Open Source</span>
+              <span>Open Source Coming Soon!</span>
             </div>
             <div className="flex items-center justify-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-sm text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
               <Code className="h-3.5 w-3.5" />
@@ -82,19 +82,6 @@ export function HeroSection() {
               Read Documentation
             </a>
           </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="h-12 px-8 transition-all hover:scale-105"
-            asChild
-          >
-            <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
-              <div className="mr-2 h-5 w-5 flex items-center justify-center">
-                <Github size={18} />
-              </div>
-              View on GitHub
-            </a>
-          </Button>
         </motion.div>
 
         
@@ -115,7 +102,6 @@ export function HeroSection() {
             >
               <div className="mb-4 rounded-lg bg-gradient-to-br from-primary/20 to-indigo-400/20 p-3 w-12 h-12 flex items-center justify-center">
                 {feature.icon === FileJson ? <FileJson className="h-6 w-6 text-primary" /> : 
-                 feature.icon === Github ? <div className="h-6 w-6 text-primary flex items-center justify-center"><Github size={20} /></div> : 
                  <Rocket className="h-6 w-6 text-primary" />}
               </div>
               <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
@@ -136,9 +122,9 @@ const features = [
     icon: FileJson,
   },
   {
-    title: "GitHub Actions Integration",
-    description: "Create workflows that run automatically on GitHub with full TypeScript support and real-time feedback",
-    icon: Github,
+    title: "CI/CD Integration",
+    description: "Create workflows that run automatically with full TypeScript support and real-time feedback",
+    icon: LayoutGrid,
   },
   {
     title: "Customizable Configuration",

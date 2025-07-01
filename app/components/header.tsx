@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { BookText, Github } from "lucide-react";
+import { BookText } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
-import { PROJECT_NAME, REPO_URL } from "@/config/constants";
+import { PROJECT_NAME } from "@/config/constants";
+import { IssueReportDialog } from "./issue-report-dialog";
 
 export function Header() {
   return (
@@ -21,6 +22,7 @@ export function Header() {
         </div>
         <div className="flex items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
+            <IssueReportDialog />
             <Link
               href="/docs"
               className="md:hidden"
@@ -28,16 +30,6 @@ export function Header() {
               <div className="h-8 w-8 rounded-md border border-input bg-background p-1 hover:bg-accent hover:text-accent-foreground">
                 <BookText className="h-full w-full" />
                 <span className="sr-only">Documentation</span>
-              </div>
-            </Link>
-            <Link
-              href={REPO_URL}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <div className="h-8 w-8 rounded-md border border-input bg-background p-1 hover:bg-accent hover:text-accent-foreground">
-                <Github className="h-full w-full" />
-                <span className="sr-only">GitHub</span>
               </div>
             </Link>
             <ThemeToggle />

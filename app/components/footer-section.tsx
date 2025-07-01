@@ -1,7 +1,7 @@
 "use client"
 
-import { Github, HeartHandshake } from "lucide-react";
-import { PROJECT_NAME, REPO_URL } from "@/config/constants";
+import { HeartHandshake } from "lucide-react";
+import { PROJECT_NAME } from "@/config/constants";
 
 export function FooterSection() {
   return (
@@ -11,15 +11,6 @@ export function FooterSection() {
           &copy; {new Date().getFullYear()} {PROJECT_NAME}. All rights reserved.
         </p>
         <div className="flex items-center gap-4">
-          <a 
-            href={REPO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <Github className="h-5 w-5" />
-            <span className="sr-only">GitHub</span>
-          </a>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <span>Made with</span>
             <HeartHandshake className="h-4 w-4 text-red-500" />
