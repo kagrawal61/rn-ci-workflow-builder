@@ -61,7 +61,6 @@ export interface ConcurrencyConfig {
   cancelInProgress?: boolean;
 }
 
-
 /**
  * Supported package managers
  */
@@ -154,16 +153,18 @@ import { BuildOptions, HealthCheckOptions } from './presets/types';
  */
 export interface BitriseStep {
   /** Step identifier with version (e.g., 'script@1', 'git-clone@4') */
-  [stepId: string]: {
-    /** Step title/name */
-    title?: string;
-    /** Step inputs - must be array format for Bitrise CLI compatibility */
-    inputs?: Array<Record<string, string | boolean | number>>;
-    /** Condition for step execution */
-    run_if?: string;
-    /** Whether to continue on error */
-    is_always_run?: boolean;
-  } | undefined;
+  [stepId: string]:
+    | {
+        /** Step title/name */
+        title?: string;
+        /** Step inputs - must be array format for Bitrise CLI compatibility */
+        inputs?: Array<Record<string, string | boolean | number>>;
+        /** Condition for step execution */
+        run_if?: string;
+        /** Whether to continue on error */
+        is_always_run?: boolean;
+      }
+    | undefined;
 }
 
 /**

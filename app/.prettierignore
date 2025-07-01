@@ -1,0 +1,27 @@
+# Build artifacts
+.next/
+out/
+build/
+dist/
+
+# Dependencies
+node_modules/
+
+# Generated files
+next-env.d.ts
+*.d.ts
+
+# Configuration files that might need specific formatting
+*.config.js
+*.config.mjs
+*.config.ts
+
+# Logs
+*.log
+
+# Lock files
+package-lock.json
+yarn.lock
+
+# Public assets
+public/ 

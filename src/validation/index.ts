@@ -34,51 +34,59 @@ function validateWorkflowStructure(config: WorkflowConfig): WorkflowConfig {
   if (!config) {
     throw new Error('Workflow configuration is required');
   }
-  
+
   if (!config.kind) {
     throw new Error('Workflow kind is required');
   }
-  
+
   // Check if the preset exists
   const availablePresets = getAvailablePresets();
   if (!availablePresets.includes(config.kind)) {
-    throw new Error(`Invalid workflow kind: ${config.kind}. Available presets: ${availablePresets.join(', ')}`);
+    throw new Error(
+      `Invalid workflow kind: ${config.kind}. Available presets: ${availablePresets.join(', ')}`
+    );
   }
-  
+
   // Ensure options is an object
   if (config.options && typeof config.options !== 'object') {
     throw new Error('Workflow options must be an object');
   }
-  
+
   // Check triggers
   if (config.options?.triggers) {
     const { triggers } = config.options;
-    
+
     // Validate branches format if provided
     if (triggers.push?.branches && !Array.isArray(triggers.push.branches)) {
       throw new Error('Push branches must be an array');
     }
-    
-    if (triggers.pullRequest?.branches && !Array.isArray(triggers.pullRequest.branches)) {
+
+    if (
+      triggers.pullRequest?.branches &&
+      !Array.isArray(triggers.pullRequest.branches)
+    ) {
       throw new Error('Pull request branches must be an array');
     }
-    
-    if (triggers.pullRequestTarget?.branches && !Array.isArray(triggers.pullRequestTarget.branches)) {
+
+    if (
+      triggers.pullRequestTarget?.branches &&
+      !Array.isArray(triggers.pullRequestTarget.branches)
+    ) {
       throw new Error('Pull request target branches must be an array');
     }
-    
+
     // Validate schedule format if provided
     if (triggers.schedule) {
       if (!Array.isArray(triggers.schedule)) {
         throw new Error('Schedule must be an array');
       }
-      
+
       if (triggers.schedule.some(s => !s.cron)) {
         throw new Error('All schedule entries must have a cron expression');
       }
     }
   }
-  
+
   return config;
 }
 
@@ -87,9 +95,11 @@ function validateWorkflowStructure(config: WorkflowConfig): WorkflowConfig {
  * @param config The workflow configuration to validate
  */
 function validatePresetOptions(config: WorkflowConfig): void {
-  switch(config.kind) {
+  switch (config.kind) {
     case 'build':
-      validateBuildOptions(config.options as WorkflowOptions & { build?: BuildOptions });
+      validateBuildOptions(
+        config.options as WorkflowOptions & { build?: BuildOptions }
+      );
       break;
     case 'static-analysis':
       // Static analysis doesn't need extra validation currently
@@ -104,11 +114,13 @@ function validatePresetOptions(config: WorkflowConfig): void {
  * Validate build preset options
  * @param options The build workflow options to validate
  */
-function validateBuildOptions(options: WorkflowOptions & { build?: BuildOptions }): void {
+function validateBuildOptions(
+  options: WorkflowOptions & { build?: BuildOptions }
+): void {
   if (!options.build) {
     throw new Error('Build options are required for the build preset');
   }
-  
+
   // Validate using schema
   validateBuildSchema(options.build);
 }
@@ -119,8 +131,10 @@ function validateBuildOptions(options: WorkflowOptions & { build?: BuildOptions 
  */
 function validateSecretsAndEnv(config: WorkflowConfig): void {
   if (config.kind === 'build' && config.options) {
-    const buildOptions = (config.options as WorkflowOptions & { build?: BuildOptions }).build;
-    
+    const buildOptions = (
+      config.options as WorkflowOptions & { build?: BuildOptions }
+    ).build;
+
     if (buildOptions) {
       validateBuildSecrets(config.options, buildOptions);
     }

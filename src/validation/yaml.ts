@@ -58,7 +58,7 @@ async function isYamllintInstalled(): Promise<boolean> {
  */
 async function installBitriseCli(autoInstall: boolean = false): Promise<void> {
   const osType = detectOS();
-  
+
   console.log('🔧 Bitrise CLI is not installed. Setting up Bitrise CLI...');
 
   switch (osType) {
@@ -142,33 +142,34 @@ async function installBitriseDirectly(): Promise<void> {
   try {
     const osType = detectOS();
     const arch = os.arch();
-    
+
     // Map architecture names to Bitrise release naming
     const archMap: Record<string, string> = {
-      'x64': 'x86_64',
-      'arm64': 'arm64',
-      'arm': 'arm64'
+      x64: 'x86_64',
+      arm64: 'arm64',
+      arm: 'arm64',
     };
-    
+
     const mappedArch = archMap[arch] || arch;
     const osName = osType === 'macos' ? 'Darwin' : 'Linux';
-    
+
     const downloadUrl = `https://github.com/bitrise-io/bitrise/releases/download/1.53.0/bitrise-${osName}-${mappedArch}`;
     const installPath = '/usr/local/bin/bitrise';
-    
+
     console.log(`📥 Downloading Bitrise CLI from: ${downloadUrl}`);
-    
+
     // Download and install
     await execAsync(`curl -fL "${downloadUrl}" -o "${installPath}"`);
     await execAsync(`chmod +x "${installPath}"`);
-    
+
     // Verify installation
     await execAsync('bitrise --version');
     console.log('✅ Bitrise CLI installed successfully!');
-    
   } catch (error) {
     console.error('❌ Failed to install Bitrise CLI automatically');
-    throw new Error(`Installation failed: ${(error as Error).message}. Please install manually from: https://github.com/bitrise-io/bitrise/releases`);
+    throw new Error(
+      `Installation failed: ${(error as Error).message}. Please install manually from: https://github.com/bitrise-io/bitrise/releases`
+    );
   }
 }
 
@@ -182,11 +183,11 @@ async function installYamllint(autoInstall: boolean = false): Promise<void> {
 
   if (autoInstall) {
     const osType = detectOS();
-    
+
     try {
       // Try system package manager first (as recommended in yamllint docs)
       console.log('📦 Installing yamllint via system package manager...');
-      
+
       if (osType === 'macos') {
         // Check if Homebrew is installed
         await execAsync('which brew');
@@ -200,20 +201,21 @@ async function installYamllint(autoInstall: boolean = false): Promise<void> {
           console.log('✅ yamllint installed successfully via dnf!');
         } catch (dnfError) {
           await execAsync('which apt-get');
-          await execAsync('sudo apt-get update && sudo apt-get install yamllint');
+          await execAsync(
+            'sudo apt-get update && sudo apt-get install yamllint'
+          );
           console.log('✅ yamllint installed successfully via apt-get!');
         }
       } else {
         throw new Error('Unsupported OS for system package manager'); // Fall through to pip installation
       }
-      
+
       // Verify installation
       await execAsync('yamllint --version');
-      
     } catch (systemError) {
       // Fallback to pip installation
       console.log('📦 Trying pip installation as fallback...');
-      
+
       try {
         // Try pip3 first, then pip
         try {
@@ -224,13 +226,14 @@ async function installYamllint(autoInstall: boolean = false): Promise<void> {
           await execAsync('pip install yamllint');
           console.log('✅ yamllint installed successfully via pip!');
         }
-        
+
         // Verify installation
         await execAsync('yamllint --version');
-        
       } catch (pipError) {
         console.error('❌ Failed to install yamllint automatically');
-        throw new Error(`Installation failed: ${(pipError as Error).message}. Please install manually: pip install yamllint`);
+        throw new Error(
+          `Installation failed: ${(pipError as Error).message}. Please install manually: pip install yamllint`
+        );
       }
     }
   } else {
@@ -269,27 +272,41 @@ Then run the validation command again.
  * @returns The same YAML string if valid (or Promise<string> if async validation is enabled)
  * @throws Error if the YAML is invalid
  */
-export function validateGeneratedYaml(yamlStr: string, enableBitriseCliValidation: boolean = false, enableYamllintValidation: boolean = false): string | Promise<string> {
+export function validateGeneratedYaml(
+  yamlStr: string,
+  enableBitriseCliValidation: boolean = false,
+  enableYamllintValidation: boolean = false
+): string | Promise<string> {
   try {
     // Try to parse the YAML to make sure it's valid
     const parsedYaml = yaml.load(yamlStr);
-    
+
     // Perform additional validation on the parsed object
     validateNoUndefinedValues(parsedYaml);
     validateWorkflowStructure(parsedYaml);
-    
+
     // If Bitrise CLI validation is enabled and this is a Bitrise config, validate with Bitrise CLI
-    if (enableBitriseCliValidation && parsedYaml && typeof parsedYaml === 'object' && 'format_version' in parsedYaml) {
+    if (
+      enableBitriseCliValidation &&
+      parsedYaml &&
+      typeof parsedYaml === 'object' &&
+      'format_version' in parsedYaml
+    ) {
       // Return async validation for Bitrise configs when CLI validation is enabled
       return validateBitriseYamlAndReturn(yamlStr);
     }
-    
+
     // If yamllint validation is enabled and this is NOT a Bitrise config, validate with yamllint
-    if (enableYamllintValidation && parsedYaml && typeof parsedYaml === 'object' && !('format_version' in parsedYaml)) {
+    if (
+      enableYamllintValidation &&
+      parsedYaml &&
+      typeof parsedYaml === 'object' &&
+      !('format_version' in parsedYaml)
+    ) {
       // Return async validation for non-Bitrise configs (like GitHub Actions) when yamllint validation is enabled
       return validateYamllintAndReturn(yamlStr);
     }
-    
+
     // If validation passes, return the original string (sync)
     return yamlStr;
   } catch (error) {
@@ -324,14 +341,17 @@ async function validateYamllintAndReturn(yamlStr: string): Promise<string> {
  * @returns Promise that resolves if validation passes
  * @throws Error if validation fails or Bitrise CLI is not available
  */
-export async function validateWithBitriseCli(yamlFilePath: string, autoInstall: boolean = true): Promise<void> {
+export async function validateWithBitriseCli(
+  yamlFilePath: string,
+  autoInstall: boolean = true
+): Promise<void> {
   try {
     // Check if Bitrise CLI is installed
     const isInstalled = await isBitriseCliInstalled();
-    
+
     if (!isInstalled) {
       await installBitriseCli(autoInstall);
-      
+
       // Verify installation was successful
       const isNowInstalled = await isBitriseCliInstalled();
       if (!isNowInstalled) {
@@ -340,8 +360,10 @@ export async function validateWithBitriseCli(yamlFilePath: string, autoInstall: 
     }
 
     // Run bitrise validate command
-    const { stdout } = await execAsync(`bitrise validate --config ${yamlFilePath}`);
-    
+    const { stdout } = await execAsync(
+      `bitrise validate --config ${yamlFilePath}`
+    );
+
     // Bitrise validate command returns exit code 0 for valid configs
     // If we reach here, validation passed
     console.log('✅ Bitrise validation passed');
@@ -352,11 +374,15 @@ export async function validateWithBitriseCli(yamlFilePath: string, autoInstall: 
     // Parse Bitrise validation error for better error messages
     let errorMessage = 'Bitrise validation failed';
     let detailedError = '';
-    
+
     if (error && typeof error === 'object') {
       // Handle exec errors which have stdout, stderr, and other properties
-      const execError = error as { stdout?: unknown; stderr?: unknown; message?: unknown };
-      
+      const execError = error as {
+        stdout?: unknown;
+        stderr?: unknown;
+        message?: unknown;
+      };
+
       // Try to get error output from stderr first, then stdout
       if ('stderr' in execError && execError.stderr) {
         detailedError = String(execError.stderr).trim();
@@ -365,39 +391,56 @@ export async function validateWithBitriseCli(yamlFilePath: string, autoInstall: 
       } else if ('message' in execError) {
         detailedError = String(execError.message).trim();
       }
-      
+
       // If we got detailed error output, format it nicely
       if (detailedError) {
         // Check for specific error types for better messages
-        if (detailedError.includes('invalid workflow') || detailedError.includes('Invalid workflow')) {
+        if (
+          detailedError.includes('invalid workflow') ||
+          detailedError.includes('Invalid workflow')
+        ) {
           errorMessage = `Bitrise validation failed: Invalid workflow configuration`;
-        } else if (detailedError.includes('required') || detailedError.includes('Required')) {
+        } else if (
+          detailedError.includes('required') ||
+          detailedError.includes('Required')
+        ) {
           errorMessage = `Bitrise validation failed: Missing required fields`;
-        } else if (detailedError.includes('Parse error') || detailedError.includes('parse error')) {
+        } else if (
+          detailedError.includes('Parse error') ||
+          detailedError.includes('parse error')
+        ) {
           errorMessage = `Bitrise validation failed: YAML parse error`;
         } else {
           errorMessage = `Bitrise validation failed`;
         }
-        
+
         // Don't re-throw installation-related errors - format them properly
-        if (detailedError.includes('Please install') || detailedError.includes('not found')) {
+        if (
+          detailedError.includes('Please install') ||
+          detailedError.includes('not found')
+        ) {
           throw error; // Re-throw installation errors as-is
         }
-        
+
         // Add the detailed error information
         errorMessage += `\n\nDetailed error output:\n${detailedError}`;
       }
     }
-    
+
     // If no detailed error was captured, show basic error
-    if (!detailedError && error && typeof error === 'object' && 'message' in error) {
+    if (
+      !detailedError &&
+      error &&
+      typeof error === 'object' &&
+      'message' in error
+    ) {
       const message = String((error as { message: unknown }).message);
       if (message.includes('Please install')) {
         throw error; // Re-throw installation-related errors as-is
       }
       errorMessage += `: ${message}`;
     }
-    
+
     throw new Error(errorMessage);
   }
 }
@@ -409,10 +452,14 @@ export async function validateWithBitriseCli(yamlFilePath: string, autoInstall: 
  * @param autoInstall Whether to automatically install Bitrise CLI if missing (defaults to true)
  * @returns Promise that resolves if validation passes
  */
-export async function validateBitriseYamlContent(yamlContent: string, tempFileName: string = 'temp-bitrise.yml', autoInstall: boolean = true): Promise<void> {
+export async function validateBitriseYamlContent(
+  yamlContent: string,
+  tempFileName: string = 'temp-bitrise.yml',
+  autoInstall: boolean = true
+): Promise<void> {
   // Create a temporary file with the YAML content
   const tempFilePath = path.join(os.tmpdir(), tempFileName);
-  
+
   try {
     fs.writeFileSync(tempFilePath, yamlContent, 'utf8');
     await validateWithBitriseCli(tempFilePath, autoInstall);
@@ -434,14 +481,18 @@ export async function validateBitriseYamlContent(yamlContent: string, tempFileNa
  * @returns Promise that resolves if validation passes
  * @throws Error if validation fails or yamllint is not available
  */
-export async function validateWithYamllint(yamlFilePath: string, autoInstall: boolean = true, config?: string): Promise<void> {
+export async function validateWithYamllint(
+  yamlFilePath: string,
+  autoInstall: boolean = true,
+  config?: string
+): Promise<void> {
   try {
     // Check if yamllint is installed
     const isInstalled = await isYamllintInstalled();
-    
+
     if (!isInstalled) {
       await installYamllint(autoInstall);
-      
+
       // Verify installation was successful
       const isNowInstalled = await isYamllintInstalled();
       if (!isNowInstalled) {
@@ -451,7 +502,7 @@ export async function validateWithYamllint(yamlFilePath: string, autoInstall: bo
 
     // Build yamllint command with parsable output for better error handling
     let command = `yamllint -f parsable "${yamlFilePath}"`;
-    
+
     if (config) {
       if (config === 'relaxed' || config === 'default') {
         command = `yamllint -f parsable -d ${config} "${yamlFilePath}"`;
@@ -463,29 +514,32 @@ export async function validateWithYamllint(yamlFilePath: string, autoInstall: bo
 
     // Run yamllint command
     const { stdout, stderr } = await execAsync(command);
-    
+
     // yamllint returns exit code 0 for valid YAML files
     // If we reach here, validation passed
     console.log('✅ yamllint validation passed');
-    
+
     if (stdout.trim()) {
       console.log('yamllint output:', stdout.trim());
     }
-    
+
     if (stderr.trim()) {
       console.log('yamllint warnings:', stderr.trim());
     }
-    
   } catch (error: unknown) {
     // Parse yamllint validation error for better error messages
     let errorMessage = 'yamllint validation failed';
     let detailedError = '';
-    
+
     if (error && typeof error === 'object') {
       // Handle exec errors which have stdout, stderr, and other properties
       // Note: yamllint typically outputs errors to stdout with parsable format
-      const execError = error as { stdout?: unknown; stderr?: unknown; message?: unknown };
-      
+      const execError = error as {
+        stdout?: unknown;
+        stderr?: unknown;
+        message?: unknown;
+      };
+
       // Try to get error output from stdout first (yamllint's default), then stderr
       if ('stdout' in execError && execError.stdout) {
         detailedError = String(execError.stdout).trim();
@@ -494,39 +548,56 @@ export async function validateWithYamllint(yamlFilePath: string, autoInstall: bo
       } else if ('message' in execError) {
         detailedError = String(execError.message).trim();
       }
-      
+
       // If we got detailed error output, format it nicely
       if (detailedError) {
         // Check for specific error types for better messages
-        if (detailedError.includes('syntax error') || detailedError.includes('Syntax error')) {
+        if (
+          detailedError.includes('syntax error') ||
+          detailedError.includes('Syntax error')
+        ) {
           errorMessage = `yamllint validation failed: YAML syntax error`;
-        } else if (detailedError.includes('indentation') || detailedError.includes('Indentation')) {
+        } else if (
+          detailedError.includes('indentation') ||
+          detailedError.includes('Indentation')
+        ) {
           errorMessage = `yamllint validation failed: YAML indentation error`;
-        } else if (detailedError.includes('line too long') || detailedError.includes('Line too long')) {
+        } else if (
+          detailedError.includes('line too long') ||
+          detailedError.includes('Line too long')
+        ) {
           errorMessage = `yamllint validation failed: Line length error`;
         } else {
           errorMessage = `yamllint validation failed`;
         }
-        
+
         // Don't re-throw installation-related errors - format them properly
-        if (detailedError.includes('Please install') || detailedError.includes('not found')) {
+        if (
+          detailedError.includes('Please install') ||
+          detailedError.includes('not found')
+        ) {
           throw error; // Re-throw installation errors as-is
         }
-        
+
         // Add the detailed error information
         errorMessage += `\n\nDetailed error output:\n${detailedError}`;
       }
     }
-    
+
     // If no detailed error was captured, show basic error
-    if (!detailedError && error && typeof error === 'object' && 'message' in error) {
+    if (
+      !detailedError &&
+      error &&
+      typeof error === 'object' &&
+      'message' in error
+    ) {
       const message = String((error as { message: unknown }).message);
       if (message.includes('Please install')) {
         throw error; // Re-throw installation-related errors as-is
       }
       errorMessage += `: ${message}`;
     }
-    
+
     throw new Error(errorMessage);
   }
 }
@@ -539,10 +610,15 @@ export async function validateWithYamllint(yamlFilePath: string, autoInstall: bo
  * @param config Optional yamllint configuration ('relaxed' or path to config file)
  * @returns Promise that resolves if validation passes
  */
-export async function validateYamlContentWithYamllint(yamlContent: string, tempFileName: string = 'temp.yml', autoInstall: boolean = true, config?: string): Promise<void> {
+export async function validateYamlContentWithYamllint(
+  yamlContent: string,
+  tempFileName: string = 'temp.yml',
+  autoInstall: boolean = true,
+  config?: string
+): Promise<void> {
   // Create a temporary file with the YAML content
   const tempFilePath = path.join(os.tmpdir(), tempFileName);
-  
+
   try {
     fs.writeFileSync(tempFilePath, yamlContent, 'utf8');
     await validateWithYamllint(tempFilePath, autoInstall, config);
@@ -565,13 +641,17 @@ function validateWorkflowStructure(parsedYaml: unknown): void {
   if (!parsedYaml) {
     throw new Error('Generated workflow is empty');
   }
-  
+
   if (typeof parsedYaml !== 'object') {
     throw new Error('Generated workflow is not a valid object');
   }
-  
+
   // Detect if this is a Bitrise configuration or GitHub Actions workflow
-  if (typeof parsedYaml === 'object' && parsedYaml && 'format_version' in parsedYaml) {
+  if (
+    typeof parsedYaml === 'object' &&
+    parsedYaml &&
+    'format_version' in parsedYaml
+  ) {
     // This is a Bitrise configuration
     validateBitriseStructure(parsedYaml as Record<string, unknown>);
   } else if (typeof parsedYaml === 'object' && parsedYaml) {
@@ -582,31 +662,49 @@ function validateWorkflowStructure(parsedYaml: unknown): void {
 
 /**
  * Validates GitHub Actions workflow structure
- * @param parsedYaml Parsed GitHub Actions workflow  
+ * @param parsedYaml Parsed GitHub Actions workflow
  */
-function validateGitHubActionsStructure(parsedYaml: Record<string, unknown>): void {
+function validateGitHubActionsStructure(
+  parsedYaml: Record<string, unknown>
+): void {
   if (!parsedYaml.name) {
     throw new Error('GitHub Actions workflow must have a name');
   }
-  
+
   if (!parsedYaml.on) {
-    throw new Error('GitHub Actions workflow must have triggers defined in the "on" field');
+    throw new Error(
+      'GitHub Actions workflow must have triggers defined in the "on" field'
+    );
   }
-  
-  if (!parsedYaml.jobs || typeof parsedYaml.jobs !== 'object' || Object.keys(parsedYaml.jobs).length === 0) {
+
+  if (
+    !parsedYaml.jobs ||
+    typeof parsedYaml.jobs !== 'object' ||
+    Object.keys(parsedYaml.jobs).length === 0
+  ) {
     throw new Error('GitHub Actions workflow must have at least one job');
   }
-  
+
   // Validate each job
-  Object.entries(parsedYaml.jobs as Record<string, unknown>).forEach(([jobId, job]) => {
-    if (!job || typeof job !== 'object' || !('runs-on' in job)) {
-      throw new Error(`GitHub Actions job "${jobId}" must specify a runs-on property`);
+  Object.entries(parsedYaml.jobs as Record<string, unknown>).forEach(
+    ([jobId, job]) => {
+      if (!job || typeof job !== 'object' || !('runs-on' in job)) {
+        throw new Error(
+          `GitHub Actions job "${jobId}" must specify a runs-on property`
+        );
+      }
+
+      if (
+        !('steps' in job) ||
+        !Array.isArray((job as { steps: unknown }).steps) ||
+        (job as { steps: unknown[] }).steps.length === 0
+      ) {
+        throw new Error(
+          `GitHub Actions job "${jobId}" must have at least one step`
+        );
+      }
     }
-    
-    if (!('steps' in job) || !Array.isArray((job as { steps: unknown }).steps) || (job as { steps: unknown[] }).steps.length === 0) {
-      throw new Error(`GitHub Actions job "${jobId}" must have at least one step`);
-    }
-  });
+  );
 }
 
 /**
@@ -617,21 +715,34 @@ function validateBitriseStructure(parsedYaml: Record<string, unknown>): void {
   if (!parsedYaml.format_version) {
     throw new Error('Bitrise configuration must have a format_version');
   }
-  
+
   if (typeof parsedYaml.format_version !== 'number') {
     throw new Error('Bitrise format_version must be a number');
   }
-  
-  if (!parsedYaml.workflows || typeof parsedYaml.workflows !== 'object' || Object.keys(parsedYaml.workflows).length === 0) {
+
+  if (
+    !parsedYaml.workflows ||
+    typeof parsedYaml.workflows !== 'object' ||
+    Object.keys(parsedYaml.workflows).length === 0
+  ) {
     throw new Error('Bitrise configuration must have at least one workflow');
   }
-  
+
   // Validate each workflow
-  Object.entries(parsedYaml.workflows as Record<string, unknown>).forEach(([workflowId, workflow]) => {
-    if (!workflow || typeof workflow !== 'object' || !('steps' in workflow) || !Array.isArray((workflow as { steps: unknown }).steps)) {
-      throw new Error(`Bitrise workflow "${workflowId}" must have steps array`);
+  Object.entries(parsedYaml.workflows as Record<string, unknown>).forEach(
+    ([workflowId, workflow]) => {
+      if (
+        !workflow ||
+        typeof workflow !== 'object' ||
+        !('steps' in workflow) ||
+        !Array.isArray((workflow as { steps: unknown }).steps)
+      ) {
+        throw new Error(
+          `Bitrise workflow "${workflowId}" must have steps array`
+        );
+      }
     }
-  });
+  );
 }
 
 /**
@@ -643,32 +754,40 @@ function validateNoUndefinedValues(obj: unknown, path: string = ''): void {
   if (obj === undefined) {
     throw new Error(`Found undefined value at ${path || 'root'}`);
   }
-  
+
   if (obj === null) {
     return;
   }
-  
+
   if (typeof obj === 'object') {
     // Check for undefined values in objects and arrays
     const isArray = Array.isArray(obj);
-    
+
     Object.entries(obj).forEach(([key, value]) => {
-      const currentPath = path ? (isArray ? `${path}[${key}]` : `${path}.${key}`) : key;
+      const currentPath = path
+        ? isArray
+          ? `${path}[${key}]`
+          : `${path}.${key}`
+        : key;
       validateNoUndefinedValues(value, currentPath);
     });
-    
+
     // For objects, also check if any property explicitly contains the string 'undefined'
     // This can happen when string concatenation includes undefined values
     if (!isArray) {
       Object.entries(obj).forEach(([key, value]) => {
         if (typeof value === 'string' && value.includes('undefined')) {
           const currentPath = path ? `${path}.${key}` : key;
-          throw new Error(`Possible undefined variable used in string at ${currentPath}`);
+          throw new Error(
+            `Possible undefined variable used in string at ${currentPath}`
+          );
         }
       });
     }
   } else if (typeof obj === 'string' && obj.includes('undefined')) {
     // Also check string values that might contain the word 'undefined' from concatenation
-    throw new Error(`Possible undefined variable used in string at ${path || 'root'}`);
+    throw new Error(
+      `Possible undefined variable used in string at ${path || 'root'}`
+    );
   }
 }

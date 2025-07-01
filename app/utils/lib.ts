@@ -13,7 +13,12 @@ import { buildBitriseBuildPipeline } from '../../src/presets/bitriseBuildPreset'
 
 // Map of pipeline builders (copied from generator.ts but without Node.js dependencies)
 // Support both GitHub Actions and Bitrise configurations
-const builders: Record<string, (opts: WorkflowOptions) => Record<string, any> | import('../../src/types').BitriseConfig> = {};
+const builders: Record<
+  string,
+  (
+    opts: WorkflowOptions
+  ) => Record<string, any> | import('../../src/types').BitriseConfig
+> = {};
 
 /**
  * Register a new workflow builder
@@ -22,7 +27,9 @@ const builders: Record<string, (opts: WorkflowOptions) => Record<string, any> | 
  */
 export function registerBuilder(
   kind: string,
-  builder: (opts: WorkflowOptions) => Record<string, any> | import('../../src/types').BitriseConfig
+  builder: (
+    opts: WorkflowOptions
+  ) => Record<string, any> | import('../../src/types').BitriseConfig
 ): void {
   builders[kind] = builder;
 }
@@ -40,34 +47,43 @@ export function getAvailablePresets(): string[] {
  * @param cfg The workflow configuration
  * @returns Workflow YAML and secrets summary
  */
-export function generateWorkflow(cfg: WorkflowConfig): { yaml: string, secretsSummary?: string } {
+export function generateWorkflow(cfg: WorkflowConfig): {
+  yaml: string;
+  secretsSummary?: string;
+} {
   // Validate the config before proceeding
   const validatedConfig = validateWorkflowConfig(cfg);
-  
+
   const options: WorkflowOptions = validatedConfig.options ?? {};
   const builder = builders[validatedConfig.kind];
-  
+
   if (!builder) {
     throw new Error(
       `Unsupported pipeline kind: ${validatedConfig.kind}. ` +
-      `Available presets: ${getAvailablePresets().join(', ')}`
+        `Available presets: ${getAvailablePresets().join(', ')}`
     );
   }
-  
+
   const obj = builder(options);
-  let yamlStr = yaml.dump(obj, { 
+  let yamlStr = yaml.dump(obj, {
     lineWidth: 120,
-    noRefs: true  // Prevent the creation of anchors and references
+    noRefs: true, // Prevent the creation of anchors and references
   });
   yamlStr = injectSecrets(yamlStr);
-  
+
   // Generate secrets summary for build preset
   let secretsSummary: string | undefined;
-  if (validatedConfig.kind === 'build' && validatedConfig.options && validatedConfig.options.build) {
+  if (
+    validatedConfig.kind === 'build' &&
+    validatedConfig.options &&
+    validatedConfig.options.build
+  ) {
     try {
       // Import from the src directory directly
       // Note: This works in browser because we're using Next.js which bundles everything together
-      const { generateSecretsSummary } = require('../../src/helpers/secretsManager');
+      const {
+        generateSecretsSummary,
+      } = require('../../src/helpers/secretsManager');
       if (validatedConfig.options && validatedConfig.options.build) {
         secretsSummary = generateSecretsSummary(validatedConfig.options.build);
       }
@@ -75,10 +91,10 @@ export function generateWorkflow(cfg: WorkflowConfig): { yaml: string, secretsSu
       console.error('Error generating secrets summary:', err);
     }
   }
-  
+
   return {
     yaml: yamlStr,
-    secretsSummary
+    secretsSummary,
   };
 }
 
@@ -104,7 +120,4 @@ registerBuilder('build', (opts: WorkflowOptions) => {
 });
 
 // Export the types
-export type { 
-  WorkflowConfig, 
-  WorkflowOptions 
-};
+export type { WorkflowConfig, WorkflowOptions };

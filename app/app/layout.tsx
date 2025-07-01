@@ -1,19 +1,20 @@
-import type { Metadata } from "next";
-import { Inter as FontSans } from "next/font/google";
+import type { Metadata } from 'next';
+import { Inter as FontSans } from 'next/font/google';
 
-import { cn } from "@/utils/cn";
-import "./globals.css";
-import { ThemeProvider } from "@/providers/theme-provider";
-import { Toaster } from "sonner";
+import { cn } from '@/utils/cn';
+import './globals.css';
+import { ThemeProvider } from '@/providers/theme-provider';
+import { Toaster } from 'sonner';
 
 const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
+  subsets: ['latin'],
+  variable: '--font-sans',
 });
 
 export const metadata: Metadata = {
-  title: "React Native CI/CD Workflow Builder",
-  description: "Generate GitHub Actions workflows for your React Native projects",
+  title: 'React Native CI/CD Workflow Builder',
+  description:
+    'Generate GitHub Actions workflows for your React Native projects',
 };
 
 export default function RootLayout({
@@ -26,7 +27,7 @@ export default function RootLayout({
       <head />
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
+          'min-h-screen bg-background font-sans antialiased',
           fontSans.variable
         )}
       >

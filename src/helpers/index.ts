@@ -10,7 +10,7 @@ export {
   buildConcurrency,
   escapeString,
   cacheSteps,
-  validateWorkflowConfig
+  validateWorkflowConfig,
 } from '../helpers';
 
 // Export from steps.ts

@@ -11,7 +11,9 @@ import notificationHelpers from '../helpers/notifications';
 /**
  * Build workflow preset for PR/branch builds
  */
-export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOptions }) {
+export function buildBuildPipeline(
+  opts: WorkflowOptions & { build?: BuildOptions }
+) {
   const {
     triggers,
     env,
@@ -34,7 +36,7 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
 
   // Create common setup steps using helper
   const setupSteps = commonSteps.createSetupSteps(packageManager, cache);
-  
+
   // Get PR source detection step
   const determineBuildSourceStep = commonSteps.createSourceDetectionStep();
 
@@ -55,9 +57,10 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
     // Add storage-specific steps
     const storageSteps = storageHelpers.createAndroidStorageSteps(build);
     androidBuildSteps = [...androidBuildSteps, ...storageSteps];
-    
+
     // Add notification steps
-    const notificationSteps = notificationHelpers.createAndroidNotificationSteps(build);
+    const notificationSteps =
+      notificationHelpers.createAndroidNotificationSteps(build);
     androidBuildSteps = [...androidBuildSteps, ...notificationSteps];
 
     // Add the Android build job
@@ -78,13 +81,14 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
       buildParams,
       build
     );
-    
+
     // Add storage-specific steps
     const storageSteps = storageHelpers.createIOSStorageSteps(build);
     iosBuildSteps = [...iosBuildSteps, ...storageSteps];
-    
+
     // Add notification steps
-    const notificationSteps = notificationHelpers.createIOSNotificationSteps(build);
+    const notificationSteps =
+      notificationHelpers.createIOSNotificationSteps(build);
     iosBuildSteps = [...iosBuildSteps, ...notificationSteps];
 
     // Add the iOS build job
@@ -95,7 +99,7 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
     };
   }
 
-  // Add quality check job if health checks are included 
+  // Add quality check job if health checks are included
   if (build.includeHealthCheck) {
     // Create a separate job for health checks to avoid duplication
     jobs['quality-check'] = {
@@ -114,11 +118,30 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
         packageManager === 'yarn'
           ? { name: 'Install', run: 'yarn install --immutable' }
           : { name: 'Install', run: 'npm ci' },
-        { name: 'TypeScript', run: packageManager === 'yarn' ? 'yarn tsc --noEmit' : 'npm run tsc -- --noEmit' },
-        { name: 'ESLint', run: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint' },
-        { name: 'Prettier', run: packageManager === 'yarn' ? 'yarn format:check' : 'npm run format:check' },
-        { name: 'Unit tests', run: packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci' },
-      ]
+        {
+          name: 'TypeScript',
+          run:
+            packageManager === 'yarn'
+              ? 'yarn tsc --noEmit'
+              : 'npm run tsc -- --noEmit',
+        },
+        {
+          name: 'ESLint',
+          run: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
+        },
+        {
+          name: 'Prettier',
+          run:
+            packageManager === 'yarn'
+              ? 'yarn format:check'
+              : 'npm run format:check',
+        },
+        {
+          name: 'Unit tests',
+          run:
+            packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
+        },
+      ],
     };
   }
 
@@ -134,7 +157,9 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
   }
 
   return {
-    name: opts.name ?? `React Native ${build.platform === 'both' ? 'App' : build.platform} Build`,
+    name:
+      opts.name ??
+      `React Native ${build.platform === 'both' ? 'App' : build.platform} Build`,
     on: buildTriggers(triggers),
     env: buildEnv(env, secrets),
     jobs,
