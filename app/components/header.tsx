@@ -1,10 +1,10 @@
 'use client';
 
-import Link from "next/link";
-import { BookText, Github } from "lucide-react";
-import { ThemeToggle } from "./theme-toggle";
 import { PROJECT_NAME } from "@/config/constants";
+import { BookText, Star } from "lucide-react";
+import Link from "next/link";
 import { IssueReportDialog } from "./issue-report-dialog";
+import { ThemeToggle } from "./theme-toggle";
 import { Button } from "./ui/button";
 
 export function Header() {
@@ -39,13 +39,15 @@ export function Header() {
               href="https://github.com/kagrawal61/rn-ci-workflow-builder"
               target="_blank"
               rel="noopener noreferrer"
+              className="ml-2"
             >
               <Button
-                variant="ghost"
-                size="icon"
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
               >
-                <Github className="h-5 w-5" />
-                <span className="sr-only">GitHub</span>
+                <Star className="h-4 w-4" />
+                <span>Star us on GitHub</span>
               </Button>
             </a>
             <ThemeToggle />

@@ -5,9 +5,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 ![Platforms](https://img.shields.io/badge/platforms-Android%20%26%20iOS-important)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/kagrawal61/rn-ci-workflow-builder/graphs/commit-activity)
+[![Maintenance](https://img.shields.io/badge/Maintained-yes-green.svg)](https://github.com/kagrawal61/rn-ci-workflow-builder/graphs/commit-activity)
 [![GitHub Issues](https://img.shields.io/github/issues/kagrawal61/rn-ci-workflow-builder.svg)](https://github.com/kagrawal61/rn-ci-workflow-builder/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kagrawal61/rn-ci-workflow-builder.svg)](https://github.com/kagrawal61/rn-ci-workflow-builder/pulls)
+[![GitHub PRs](https://img.shields.io/badge/PRs-Open-blue.svg)](https://github.com/kagrawal61/rn-ci-workflow-builder/pulls)
+[![GitHub Stars](https://img.shields.io/github/stars/kagrawal61/rn-ci-workflow-builder.svg?style=social)](https://github.com/kagrawal61/rn-ci-workflow-builder/stargazers)
 
 **A powerful, flexible tool to generate GitHub Actions and Bitrise workflows for React Native CI/CD pipelines.**
 
