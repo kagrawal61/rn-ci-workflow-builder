@@ -40,3 +40,7 @@ next-env.d.ts
 .github/workflows/*
 
 bitrise.yml
+
+# Local development files
+CLAUDE.md
+docs/workflows/*
