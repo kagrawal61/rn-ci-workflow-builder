@@ -26,4 +26,4 @@ rules:
   indentation:
     spaces: 2
     indent-sequences: true
-    check-multi-line-strings: false 
+    check-multi-line-strings: false
