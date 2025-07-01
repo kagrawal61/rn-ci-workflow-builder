@@ -95,6 +95,16 @@ export const STORAGE_SECRET_DOCS: Record<string, StorageSecretDocs> = {
     description: 'Stores artifacts using GitHub Actions artifacts storage',
     requiredSecrets: [],
   },
+  bitrise: {
+    name: 'Bitrise',
+    description: 'Stores artifacts using Bitrise platform',
+    requiredSecrets: [
+      {
+        name: 'BITRISE_API_TOKEN',
+        description: 'Bitrise API token for uploading artifacts',
+      },
+    ],
+  },
 };
 
 /**
@@ -124,7 +134,12 @@ export const NOTIFICATION_SECRET_DOCS: Record<
   'pr-comment': {
     name: 'PR Comment',
     description: 'Posts comments on pull requests',
-    requiredSecrets: [],
+    requiredSecrets: [
+      {
+        name: 'GITHUB_TOKEN',
+        description: 'GitHub token for posting PR comments',
+      },
+    ],
   },
   both: {
     name: 'Slack & PR Comment',
@@ -134,6 +149,10 @@ export const NOTIFICATION_SECRET_DOCS: Record<
       {
         name: 'SLACK_WEBHOOK',
         description: 'Slack webhook URL for sending notifications',
+      },
+      {
+        name: 'GITHUB_TOKEN',
+        description: 'GitHub token for posting PR comments',
       },
     ],
   },

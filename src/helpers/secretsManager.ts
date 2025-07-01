@@ -1,7 +1,7 @@
 import { BuildOptions } from '../presets/types';
 import {
-  STORAGE_SECRET_DOCS,
   NOTIFICATION_SECRET_DOCS,
+  STORAGE_SECRET_DOCS,
   getRequiredSecretsDocumentation,
 } from '../validation/docs';
 
@@ -55,11 +55,7 @@ export function getContextualSecrets(
   }
 
   // Add notification secrets with context
-  if (
-    buildOptions.notification &&
-    buildOptions.notification !== 'none' &&
-    buildOptions.notification !== 'pr-comment'
-  ) {
+  if (buildOptions.notification && buildOptions.notification !== 'none') {
     const notificationSecrets = docs.notification.requiredSecrets;
 
     for (const secret of notificationSecrets) {
