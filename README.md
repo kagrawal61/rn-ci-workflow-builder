@@ -5,7 +5,7 @@ A powerful tool to generate GitHub Actions workflows for React Native CI/CD pipe
 ## Features
 
 - Generate workflow YAML files for React Native applications
-- Built-in presets for common CI/CD tasks (health checks, builds, etc.)
+- Built-in presets for common CI/CD tasks (static analysis, builds, etc.)
 - Configurable via CLI or programmatically 
 - TypeScript support with full type definitions
 - Customizable workflows for different CI/CD needs
@@ -33,11 +33,11 @@ yarn add rn-ci-workflow-builder
 
 When you run a command like `yarn generate:health`, this is what happens:
 
-1. The CLI script (`src/cli.ts`) is executed with the `generate health-check` command
+1. The CLI script (`src/cli.ts`) is executed with the `generate static-analysis` command
 2. The CLI registers all available workflow presets
 3. It creates a workflow configuration object with the specified preset kind
 4. This configuration is passed to the `generateWorkflow` function
-5. The appropriate builder function for the preset is called (e.g., `buildHealthCheckPipeline`)
+5. The appropriate builder function for the preset is called (e.g., `buildStaticAnalysisPipeline`)
 6. The builder creates a GitHub Actions or Bitrise workflow object with jobs and steps
 7. The workflow object is converted to YAML
 8. Required secrets are identified based on configuration choices
@@ -55,11 +55,11 @@ The CLI allows you to quickly generate workflow files for your React Native proj
 # Install globally
 npm install -g rn-ci-workflow-builder
 
-# Generate workflow with default options (health-check)
+# Generate workflow with default options (static-analysis)
 rn-ci-workflow-builder generate
 
 # Generate specific preset
-rn-ci-workflow-builder generate health-check
+rn-ci-workflow-builder generate static-analysis
 
 # Generate build workflow
 rn-ci-workflow-builder generate build
@@ -172,7 +172,7 @@ The main configuration structure:
 
 ```typescript
 interface WorkflowConfig {
-  kind: 'health-check' | string;
+  kind: 'static-analysis' | string;
   options?: WorkflowOptions;
 }
 ```
@@ -198,9 +198,9 @@ interface WorkflowOptions {
 
 ### Available Presets
 
-#### Health Check Workflow
+#### Static Analysis Workflow
 
-The health-check preset creates a workflow that runs the following checks:
+The static-analysis preset creates a workflow that runs the following checks:
 
 - TypeScript typechecking
 - ESLint
@@ -209,9 +209,9 @@ The health-check preset creates a workflow that runs the following checks:
 
 ```json
 {
-  "kind": "health-check",
+  "kind": "static-analysis",
   "options": {
-    "name": "React Native Health Check",
+    "name": "React Native Static Analysis",
     "nodeVersions": [18],
     "packageManager": "yarn",
     "triggers": {
@@ -358,12 +358,12 @@ yarn build
 ### Development Commands
 
 ```bash
-# Run in development mode (generates health-check workflow)
+# Run in development mode (generates static-analysis workflow)
 npm run dev
 # or
 yarn dev
 
-# Generate workflow using health-check preset
+# Generate workflow using static-analysis preset
 npm run generate:health
 # or
 yarn generate:health
@@ -453,11 +453,11 @@ export function buildMyCustomWorkflow(opts: WorkflowOptions): Record<string, any
 import { buildMyCustomWorkflow } from './myCustomWorkflow';
 
 export function registerBuiltInPresets(): void {
-  registerBuilder('health-check', buildHealthCheckPipeline);
+  registerBuilder('static-analysis', buildStaticAnalysisPipeline);
   registerBuilder('my-custom', buildMyCustomWorkflow);
 }
 
-export const presetKinds = ['health-check', 'my-custom'] as const;
+export const presetKinds = ['static-analysis', 'my-custom'] as const;
 ```
 
 4. Use your new preset:

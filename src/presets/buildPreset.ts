@@ -25,7 +25,7 @@ export function buildBuildPipeline(opts: WorkflowOptions & { build?: BuildOption
       variant: 'release',
       storage: 'github',
       notification: 'pr-comment',
-      includeHealthCheck: true,
+      includeHealthCheck: true, // Will be renamed to includeStaticAnalysis in the future
     },
   } = opts;
 

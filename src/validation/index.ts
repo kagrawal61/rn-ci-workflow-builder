@@ -91,8 +91,8 @@ function validatePresetOptions(config: WorkflowConfig): void {
     case 'build':
       validateBuildOptions(config.options as WorkflowOptions & { build?: BuildOptions });
       break;
-    case 'health-check':
-      // Health check doesn't need extra validation currently
+    case 'static-analysis':
+      // Static analysis doesn't need extra validation currently
       break;
     default:
       // If we get here, it means we've added a new preset but haven't added validation for it

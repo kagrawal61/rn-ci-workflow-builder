@@ -33,7 +33,7 @@ export function validateBuildSchema(options: BuildOptions): BuildOptions {
       'notification'
     ) as BuildOptions['notification'],
     
-    includeHealthCheck: options.includeHealthCheck !== undefined ? !!options.includeHealthCheck : true,
+    includeHealthCheck: options.includeHealthCheck !== undefined ? !!options.includeHealthCheck : true, // Will be renamed to includeStaticAnalysis in the future
   };
   
   return validatedOptions;

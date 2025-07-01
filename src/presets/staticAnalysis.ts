@@ -1,7 +1,7 @@
 import { WorkflowOptions } from '../types';
 import { buildTriggers, buildEnv, cacheSteps } from '../helpers';
 
-export function buildHealthCheckPipeline(opts: WorkflowOptions): Record<string, any> {
+export function buildStaticAnalysisPipeline(opts: WorkflowOptions): Record<string, any> {
   const {
     triggers,
     env,
@@ -65,7 +65,7 @@ export function buildHealthCheckPipeline(opts: WorkflowOptions): Record<string, 
   jobs.test = testJob;
 
   return {
-    name: opts.name ?? 'Health-check',
+    name: opts.name ?? 'Static Analysis',
     on: buildTriggers(triggers),
     env: buildEnv(env, secrets),
     jobs,

@@ -22,4 +22,4 @@ export const DISCORD_URL = "https://discord.gg/"; // Add your Discord invite if 
 export const DOCS_URL = `${REPO_URL}/blob/main/README.md`;
 
 // Default workflow options
-export const DEFAULT_WORKFLOW_NAME = "React Native Health Check";
+export const DEFAULT_WORKFLOW_NAME = "React Native Static Analysis";

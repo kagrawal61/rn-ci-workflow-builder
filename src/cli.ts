@@ -30,7 +30,7 @@ program
   .option('-d, --dir <path>', 'Output directory (default: .github/workflows for GitHub, . for Bitrise)')
   .option('-p, --platform <platform>', 'CI platform (github or bitrise)', 'github')
   .option('-v, --validate-only', 'Only validate the configuration without generating files')
-  .action(async (preset = 'health-check', options) => {
+  .action(async (preset = 'build', options) => {
     try {
       // Default config
       let config: WorkflowConfig = { 
@@ -64,7 +64,7 @@ program
         }
 
         // Override preset if specified in command
-        if (preset && preset !== 'health-check') {
+        if (preset && preset !== 'build') {
           config.kind = preset;
         }
         
@@ -231,7 +231,7 @@ program
       variant: 'release',
       storage: storage as any,
       notification: notification as any,
-      includeHealthCheck: true,
+      includeHealthCheck: true, // Will be renamed to includeStaticAnalysis in the future
     };
     
     console.log(generateSecretsSummary(buildOptions));

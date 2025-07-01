@@ -1,4 +1,5 @@
-import { IconArrowRight } from "@tabler/icons-react";
+// import { IconArrowRight } from "@tabler/icons-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function CoreConceptsPage() {
@@ -13,16 +14,17 @@ export default function CoreConceptsPage() {
 
       <div className="leading-7">
         <p>
-          The React Native CI/CD Workflow Builder is designed to generate optimized GitHub Actions
-          workflows for your React Native projects. To use it effectively, it helps to understand
-          the core concepts that drive its design and functionality.
+          While the <Link href="/docs/getting-started" className="text-primary hover:underline">Getting Started</Link> guide 
+          shows you how to use the application and <Link href="/docs/configuration" className="text-primary hover:underline">Configuration</Link> 
+          covers specific options, this section explains the underlying concepts and design principles of the workflow builder.
+          Understanding these concepts will help you make better decisions when creating your workflows.
         </p>
       </div>
 
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold tracking-tight" id="workflow-generation">Workflow Generation Process</h2>
         <p className="text-muted-foreground">
-          How configurations are transformed into GitHub Actions workflows
+          How your workflow selections are transformed into ready-to-use GitHub Actions workflows
         </p>
 
         <div className="space-y-3 rounded-lg border p-6">
@@ -31,15 +33,15 @@ export default function CoreConceptsPage() {
               <span className="text-sm font-medium">1</span>
             </div>
             <div>
-              <h3 className="font-semibold">Configuration Input</h3>
+              <h3 className="font-semibold">Form-Based Configuration</h3>
               <p className="text-sm text-muted-foreground">
-                Users provide a workflow configuration in JSON format, specifying the workflow kind and options
+                You provide workflow details through the web app's intuitive form interface
               </p>
             </div>
           </div>
           
           <div className="ml-4 mt-2 border-l-2 border-muted pl-4">
-            <IconArrowRight className="h-4 w-4 -rotate-90 text-muted-foreground" />
+            <ArrowRight className="h-4 w-4 -rotate-90 text-muted-foreground" />
           </div>
           
           <div className="flex items-center gap-4">
@@ -47,15 +49,15 @@ export default function CoreConceptsPage() {
               <span className="text-sm font-medium">2</span>
             </div>
             <div>
-              <h3 className="font-semibold">Preset Selection</h3>
+              <h3 className="font-semibold">Template Application</h3>
               <p className="text-sm text-muted-foreground">
-                The generator selects the appropriate preset builder function based on the workflow kind
+                The web app applies your selections to the appropriate workflow template
               </p>
             </div>
           </div>
           
           <div className="ml-4 mt-2 border-l-2 border-muted pl-4">
-            <IconArrowRight className="h-4 w-4 -rotate-90 text-muted-foreground" />
+            <ArrowRight className="h-4 w-4 -rotate-90 text-muted-foreground" />
           </div>
           
           <div className="flex items-center gap-4">
@@ -63,15 +65,15 @@ export default function CoreConceptsPage() {
               <span className="text-sm font-medium">3</span>
             </div>
             <div>
-              <h3 className="font-semibold">Workflow Object Creation</h3>
+              <h3 className="font-semibold">Real-Time Preview</h3>
               <p className="text-sm text-muted-foreground">
-                The builder creates a structured workflow object with jobs, steps, and configurations
+                You see your workflow YAML update instantly as you make configuration choices
               </p>
             </div>
           </div>
           
           <div className="ml-4 mt-2 border-l-2 border-muted pl-4">
-            <IconArrowRight className="h-4 w-4 -rotate-90 text-muted-foreground" />
+            <ArrowRight className="h-4 w-4 -rotate-90 text-muted-foreground" />
           </div>
           
           <div className="flex items-center gap-4">
@@ -79,15 +81,15 @@ export default function CoreConceptsPage() {
               <span className="text-sm font-medium">4</span>
             </div>
             <div>
-              <h3 className="font-semibold">YAML Serialization</h3>
+              <h3 className="font-semibold">Secret Detection</h3>
               <p className="text-sm text-muted-foreground">
-                The workflow object is serialized to YAML format using js-yaml
+                Required secrets are automatically identified based on your configuration choices
               </p>
             </div>
           </div>
           
           <div className="ml-4 mt-2 border-l-2 border-muted pl-4">
-            <IconArrowRight className="h-4 w-4 -rotate-90 text-muted-foreground" />
+            <ArrowRight className="h-4 w-4 -rotate-90 text-muted-foreground" />
           </div>
           
           <div className="flex items-center gap-4">
@@ -95,25 +97,9 @@ export default function CoreConceptsPage() {
               <span className="text-sm font-medium">5</span>
             </div>
             <div>
-              <h3 className="font-semibold">Secret Replacement</h3>
+              <h3 className="font-semibold">Workflow Download</h3>
               <p className="text-sm text-muted-foreground">
-                Placeholders for secrets are replaced with GitHub Actions secret syntax
-              </p>
-            </div>
-          </div>
-          
-          <div className="ml-4 mt-2 border-l-2 border-muted pl-4">
-            <IconArrowRight className="h-4 w-4 -rotate-90 text-muted-foreground" />
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <span className="text-sm font-medium">6</span>
-            </div>
-            <div>
-              <h3 className="font-semibold">File Output</h3>
-              <p className="text-sm text-muted-foreground">
-                The resulting YAML is either output to console or written to a file
+                You download the final YAML file ready to use in your GitHub repository
               </p>
             </div>
           </div>
@@ -128,15 +114,15 @@ export default function CoreConceptsPage() {
         
         <div className="space-y-4">
           <p>
-            The preset system is the heart of the workflow generator. Each preset is a function that:
+            Workflow presets are ready-to-use templates tailored for specific CI/CD needs. Each preset:
           </p>
           
           <ul className="ml-6 list-disc space-y-2">
-            <li>Takes <code>WorkflowOptions</code> as input</li>
-            <li>Applies reasonable defaults for missing options</li>
-            <li>Generates a complete GitHub Actions workflow structure</li>
-            <li>Follows best practices for React Native CI/CD</li>
-            <li>Can be customized through configuration options</li>
+            <li>Addresses a specific CI/CD need (code quality, builds, etc.)</li>
+            <li>Provides sensible defaults for quick setup</li>
+            <li>Follows industry best practices for React Native</li>
+            <li>Is fully customizable through the web interface</li>
+            <li>Generates optimized workflows for your specific needs</li>
           </ul>
           
           <p className="mt-2">
@@ -145,16 +131,16 @@ export default function CoreConceptsPage() {
           
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-lg border p-4">
-              <h3 className="font-semibold">Health Check</h3>
+              <h3 className="font-semibold">Static Analysis</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 Runs TypeScript checks, linting, formatting, and tests
               </p>
               <Link
-                href="/docs/workflow-presets#health-check"
+                href="/docs/workflow-presets#static-analysis"
                 className="mt-2 inline-flex items-center text-sm text-primary hover:underline"
               >
                 Learn more
-                <IconArrowRight className="ml-1 h-3 w-3" />
+                <ArrowRight className="ml-1 h-3 w-3" />
               </Link>
             </div>
             
@@ -168,7 +154,7 @@ export default function CoreConceptsPage() {
                 className="mt-2 inline-flex items-center text-sm text-primary hover:underline"
               >
                 Learn more
-                <IconArrowRight className="ml-1 h-3 w-3" />
+                <ArrowRight className="ml-1 h-3 w-3" />
               </Link>
             </div>
           </div>
@@ -183,37 +169,37 @@ export default function CoreConceptsPage() {
         
         <div className="space-y-4">
           <p>
-            Workflows are configured using a typed configuration system that:
+            The web app provides an intuitive configuration interface that:
           </p>
           
           <ul className="ml-6 list-disc space-y-2">
-            <li>Provides type safety through TypeScript interfaces</li>
-            <li>Uses reasonable defaults for optional parameters</li>
-            <li>Allows for extensive customization</li>
-            <li>Supports environment variables and secrets</li>
+            <li>Presents clear options with helpful tooltips</li>
+            <li>Uses sensible defaults to get you started quickly</li>
+            <li>Provides full customization when you need it</li>
+            <li>Manages environment variables and secrets securely</li>
+            <li>Validates your choices to prevent configuration errors</li>
           </ul>
           
-          <div className="rounded-lg bg-muted p-4">
-            <h4 className="font-semibold">Example Configuration</h4>
-            <pre className="mt-2 overflow-x-auto text-sm">
-              <code>
-{`{
-  "kind": "build",
-  "options": {
-    "name": "React Native Build",
-    "triggers": {
-      "branches": ["main", "develop"],
-      "events": ["push", "pull_request"]
-    },
-    "build": {
-      "platform": "android",
-      "variant": "release",
-      "storage": "github"
-    }
-  }
-}`}
-              </code>
-            </pre>
+          <div className="rounded-lg border p-4 bg-muted/30">
+            <h4 className="font-semibold">Key Configuration Categories</h4>
+            <div className="grid gap-2 sm:grid-cols-2 mt-3">
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="font-medium text-sm">Basic Settings</p>
+                <ul className="mt-1 ml-4 list-disc text-xs space-y-1">
+                  <li>Workflow name</li>
+                  <li>Node.js version</li>
+                  <li>Package manager</li>
+                </ul>
+              </div>
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="font-medium text-sm">Trigger Options</p>
+                <ul className="mt-1 ml-4 list-disc text-xs space-y-1">
+                  <li>Trigger events (push, PR)</li>
+                  <li>Branch filters</li>
+                  <li>Path filters</li>
+                </ul>
+              </div>
+            </div>
           </div>
           
           <p>
@@ -231,56 +217,69 @@ export default function CoreConceptsPage() {
         
         <div className="space-y-4">
           <p>
-            The generated workflows are designed to work seamlessly with GitHub Actions:
+            The workflows you create are ready to use with GitHub Actions without any additional configuration:
           </p>
           
           <ul className="ml-6 list-disc space-y-2">
-            <li>Uses standard GitHub Actions syntax and features</li>
-            <li>Incorporates popular and reliable actions from the ecosystem</li>
-            <li>Configures caching for faster builds</li>
-            <li>Sets up proper job dependencies and parallel execution</li>
-            <li>Handles secrets securely according to GitHub best practices</li>
+            <li>Download and add to your repository with just a few clicks</li>
+            <li>Leverage industry-standard actions for reliability</li>
+            <li>Benefit from optimized caching for faster builds</li>
+            <li>Get parallel execution when possible for better performance</li>
+            <li>Utilize secure secret management following GitHub best practices</li>
           </ul>
           
-          <div className="rounded-lg border p-4">
-            <p className="text-sm">
-              Generated workflows should be placed in the <code>.github/workflows</code> directory of your
-              React Native project repository. GitHub will automatically detect and run these workflows
-              based on the configured triggers.
-            </p>
+          <div className="rounded-lg border p-4 bg-muted/30">
+            <h4 className="font-semibold mb-2">Using Your Workflow</h4>
+            <ol className="ml-4 list-decimal text-sm space-y-2">
+              <li>Download the YAML file from the web app</li>
+              <li>Add it to the <code>.github/workflows</code> directory in your repository</li>
+              <li>Commit and push to your GitHub repository</li>
+              <li>GitHub will automatically run your workflow based on the triggers you configured</li>
+              <li>View results in the Actions tab of your GitHub repository</li>
+            </ol>
           </div>
         </div>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold tracking-tight" id="extension">Extension Points</h2>
+        <h2 className="text-2xl font-semibold tracking-tight" id="workflows-in-action">Workflows in Action</h2>
         <p className="text-muted-foreground">
-          The workflow generator is designed to be extended with new presets and functionality
+          How your generated workflows help streamline your React Native development process
         </p>
         
         <div className="space-y-4">
           <p>
-            To add new workflow types:
+            The workflows you create deliver tangible benefits to your development process:
           </p>
           
-          <ol className="ml-6 list-decimal space-y-2">
-            <li>Create a new preset file in <code>src/presets/</code></li>
-            <li>Add the preset builder function to the <code>builders</code> map in <code>generator.ts</code></li>
-            <li>Define any new types needed in <code>types.ts</code></li>
-            <li>Create sample configuration files in <code>samples/</code></li>
-          </ol>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-lg border p-4">
+              <h3 className="font-medium mb-2">Code Quality Assurance</h3>
+              <ul className="ml-4 list-disc text-sm space-y-1">
+                <li>Automated type checking catches errors early</li>
+                <li>Consistent code style through linting checks</li>
+                <li>Unit tests validate your code's behavior</li>
+                <li>Prevents problematic code from reaching your main branch</li>
+              </ul>
+            </div>
+            
+            <div className="rounded-lg border p-4">
+              <h3 className="font-medium mb-2">Efficient Build Process</h3>
+              <ul className="ml-4 list-disc text-sm space-y-1">
+                <li>Automated builds triggered by your code changes</li>
+                <li>Consistent build environment for reliable results</li>
+                <li>Smart caching for faster build times</li>
+                <li>Build artifacts stored where you need them</li>
+              </ul>
+            </div>
+          </div>
           
-          <div className="mt-4 rounded-lg bg-muted p-4">
-            <h4 className="font-semibold">Advanced Usage</h4>
-            <p className="mt-2 text-sm">
-              For more advanced customization, you can:
+          <div className="mt-4 rounded-lg bg-muted/30 p-4">
+            <h4 className="font-semibold mb-2">Continuous Improvement</h4>
+            <p className="text-sm">
+              We're constantly adding new features and improvements to our workflow templates based on industry best practices and user feedback.
+              Check back regularly for updates that can further enhance your CI/CD pipeline.
             </p>
-            <ul className="mt-2 ml-4 list-disc text-sm space-y-1">
-              <li>Create custom helper functions in <code>src/helpers/</code></li>
-              <li>Extend the validation system in <code>src/validation/</code></li>
-              <li>Add new storage providers in <code>src/helpers/storage.ts</code></li>
-              <li>Implement custom notification options in <code>src/helpers/notifications.ts</code></li>
-            </ul>
           </div>
         </div>
       </section>

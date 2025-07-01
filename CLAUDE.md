@@ -15,12 +15,12 @@ yarn build
 # or
 npm run build
 
-# Development mode (runs health-check preset by default)
+# Development mode (runs static-analysis preset by default)
 yarn dev
 # or
 npm run dev
 
-# Generate workflow using health-check preset
+# Generate workflow using static-analysis preset
 yarn generate:health
 # or
 npm run generate:health
@@ -43,9 +43,9 @@ This project is a workflow generator for React Native CI/CD pipelines. It genera
 
 2. **Workflow Presets**:
    - Located in `src/presets/`.
-   - Available presets: `health-check`, `build`
+   - Available presets: `static-analysis`, `build`
    - Each preset supports both GitHub Actions and Bitrise platforms
-   - Platform-specific implementations: `healthCheck.ts`, `buildPreset.ts` (GitHub Actions), `bitriseHealthCheck.ts`, `bitriseBuildPreset.ts` (Bitrise)
+   - Platform-specific implementations: `staticAnalysis.ts`, `buildPreset.ts` (GitHub Actions), `bitriseStaticAnalysis.ts`, `bitriseBuildPreset.ts` (Bitrise)
    - Each preset is a function that takes `WorkflowOptions` and returns a workflow object structure.
 
 3. **Helper Functions**:

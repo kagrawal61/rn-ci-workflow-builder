@@ -1,7 +1,7 @@
 {
   "name": "rn-ci-workflow-builder",
   "version": "0.1.0",
-  "description": "CLI + library to generate GitHub Actions workflows for React-Native CI/CD pipelines (health-check, build, etc.)",
+  "description": "CLI + library to generate GitHub Actions workflows for React-Native CI/CD pipelines (static-analysis, build, etc.)",
   "type": "commonjs",
   "main": "dist/src/generator.js",
   "types": "dist/src/generator.d.ts",
@@ -9,9 +9,9 @@
     "rn-ci-workflow-builder": "./dist/src/cli.js"
   },
   "scripts": {
-    "dev": "ts-node src/cli.ts generate health-check",
+    "dev": "ts-node src/cli.ts generate build",
     "generate": "ts-node src/cli.ts generate",
-    "generate:health": "ts-node src/cli.ts generate health-check",
+    "generate:health": "ts-node src/cli.ts generate static-analysis",
     "generate:build": "ts-node src/cli.ts generate build",
     "generate:build:android": "ts-node src/cli.ts generate build --config samples/build-android-pr.json",
     "generate:build:ios": "ts-node src/cli.ts generate build --config samples/build-ios-pr.json",

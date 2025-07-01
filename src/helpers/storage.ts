@@ -14,7 +14,7 @@ const storageHelpers = {
         name: 'Upload Android Artifact',
         id: 'artifact-upload-android',
         if: 'success()',
-        uses: 'actions/upload-artifact@v3',
+        uses: 'actions/upload-artifact@v4',
         with: {
           name: 'android-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
           path: 'android/app/build/outputs/apk/**/*.apk',
@@ -91,7 +91,7 @@ const storageHelpers = {
         name: 'Upload iOS Artifact',
         id: 'artifact-upload-ios',
         if: 'success()',
-        uses: 'actions/upload-artifact@v3',
+        uses: 'actions/upload-artifact@v4',
         with: {
           name: 'ios-' + build.variant + '-${{ github.head_ref || github.ref_name }}',
           path: 'ios/build/Build/Products/**/*.ipa',

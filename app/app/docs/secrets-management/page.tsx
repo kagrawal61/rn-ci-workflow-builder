@@ -11,10 +11,29 @@ export default function SecretsManagementPage() {
       <div>
         <p className="leading-7">
           CI/CD workflows often require access to sensitive information such as API keys, 
-          signing certificates, and deployment credentials. This page explains how to 
+          signing certificates, and deployment credentials. This guide explains how to 
           securely manage these secrets in your workflow configurations.
         </p>
       </div>
+
+      <section className="space-y-6">
+        <h2 className="text-2xl font-semibold tracking-tight">Understanding Secrets in CI/CD</h2>
+        
+        <p className="leading-7">
+          Secrets are sensitive values that should never be committed to your repository but are required for your CI/CD workflows.
+          These include API keys, signing keys, access tokens, and other credentials.
+        </p>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Why Secrets Management Matters</h3>
+          <ul className="ml-6 list-disc space-y-2">
+            <li>Prevents exposure of sensitive information in your repository</li>
+            <li>Enables secure automation of deployment and distribution</li>
+            <li>Allows different team members to run workflows without sharing credentials</li>
+            <li>Supports different environments (development, staging, production)</li>
+          </ul>
+        </div>
+      </section>
 
       <section className="space-y-6">
         <h2 className="text-2xl font-semibold tracking-tight">GitHub Actions Secrets</h2>
@@ -33,7 +52,7 @@ export default function SecretsManagementPage() {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Setting Up Secrets</h3>
+          <h3 className="text-lg font-semibold">Setting Up Secrets in GitHub Actions</h3>
           <ol className="ml-6 list-decimal space-y-2">
             <li>Go to your GitHub repository</li>
             <li>Navigate to Settings → Secrets and variables → Actions</li>
@@ -41,6 +60,9 @@ export default function SecretsManagementPage() {
             <li>Enter the name and value for your secret</li>
             <li>Click "Add secret"</li>
           </ol>
+          <p className="mt-2 text-sm">
+            For more details, see the <a href="https://docs.github.com/en/actions/security-guides/encrypted-secrets" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">GitHub Actions encrypted secrets documentation</a>.
+          </p>
         </div>
 
         <div className="rounded-lg border p-4">
@@ -61,119 +83,185 @@ export default function SecretsManagementPage() {
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-2xl font-semibold tracking-tight">Using Secrets in Workflows</h2>
+        <h2 className="text-2xl font-semibold tracking-tight">Bitrise Secrets</h2>
+        <p className="text-muted-foreground">
+          Bitrise provides multiple ways to securely manage sensitive information
+        </p>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Referencing Secrets</h3>
-          <p className="text-muted-foreground">
-            To use secrets in your workflow, reference them in your configuration:
-          </p>
-          <pre className="mt-4 overflow-x-auto rounded-lg bg-secondary p-4">
-            <code className="text-sm">
-{`{
-  "kind": "build",
-  "options": {
-    "secrets": [
-      "ANDROID_KEYSTORE_BASE64",
-      "ANDROID_KEYSTORE_PASSWORD",
-      "ANDROID_KEY_ALIAS",
-      "ANDROID_KEY_PASSWORD"
-    ],
-    "build": {
-      "platform": "android",
-      "variant": "release"
-    }
-  }
-}`}
-            </code>
-          </pre>
+          <h3 className="text-lg font-semibold">How Bitrise Secrets Work</h3>
+          <ul className="ml-6 list-disc space-y-2">
+            <li>Secrets can be managed as Environment Variables with the "Sensitive" option enabled</li>
+            <li>Secrets are encrypted and masked in build logs</li>
+            <li>Secrets can be scoped to specific apps or workflows</li>
+            <li>Bitrise also offers Secrets management through the Secrets tab</li>
+          </ul>
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">How It Works</h3>
-          <p className="text-muted-foreground">
-            When you include secrets in your workflow configuration:
+          <h3 className="text-lg font-semibold">Setting Up Secrets in Bitrise</h3>
+          <ol className="ml-6 list-decimal space-y-2">
+            <li>Log in to your Bitrise account</li>
+            <li>Navigate to your app</li>
+            <li>Go to Workflow Editor → Secrets tab</li>
+            <li>Click "Add new" and enter the key and value for your secret</li>
+            <li>Toggle "Expose for Pull Requests" only if needed (usually keep this off for sensitive values)</li>
+            <li>Click "Add new secret"</li>
+          </ol>
+          <p className="mt-2 text-sm">
+            Alternatively, you can add secrets as Environment Variables:
           </p>
           <ol className="ml-6 list-decimal space-y-2">
-            <li>The workflow generator adds the secrets to the workflow YAML</li>
-            <li>GitHub Actions makes them available as environment variables during workflow execution</li>
-            <li>Your build steps can access them securely</li>
+            <li>Go to Workflow Editor → Env Vars tab</li>
+            <li>Click "Add new"</li>
+            <li>Enter the key and value</li>
+            <li>Check "Make sensitive" to secure the value</li>
+            <li>Click "Add new env var"</li>
           </ol>
-        </div>
-
-        <div className="rounded-lg border p-4">
-          <h4 className="font-semibold">Generated YAML Example</h4>
-          <pre className="mt-2 overflow-x-auto bg-muted p-2 text-sm">
-            <code>
-{`env:
-  ANDROID_KEYSTORE_BASE64: \${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-  ANDROID_KEYSTORE_PASSWORD: \${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-  ANDROID_KEY_ALIAS: \${{ secrets.ANDROID_KEY_ALIAS }}
-  ANDROID_KEY_PASSWORD: \${{ secrets.ANDROID_KEY_PASSWORD }}`}
-            </code>
-          </pre>
+          <p className="mt-2 text-sm">
+            For more details, see the <a href="https://devcenter.bitrise.io/en/builds/secrets.html" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Bitrise secrets documentation</a>.
+          </p>
         </div>
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-2xl font-semibold tracking-tight">Required Secrets by Platform</h2>
+        <h2 className="text-2xl font-semibold tracking-tight">Required Secrets by Context</h2>
+        <p className="text-muted-foreground">
+          Different workflow configurations require different sets of secrets
+        </p>
 
-        <div className="overflow-hidden rounded-lg border">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-muted">
-                <th className="px-4 py-2 text-left font-medium">Platform</th>
-                <th className="px-4 py-2 text-left font-medium">Required Secrets</th>
-                <th className="px-4 py-2 text-left font-medium">Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-t">
-                <td className="px-4 py-2 text-sm" rowSpan={4}>Android</td>
-                <td className="px-4 py-2 font-mono text-xs">ANDROID_KEYSTORE_BASE64</td>
-                <td className="px-4 py-2 text-sm">Base64-encoded keystore file for signing APKs/AABs</td>
-              </tr>
-              <tr className="border-t">
-                <td className="px-4 py-2 font-mono text-xs">ANDROID_KEYSTORE_PASSWORD</td>
-                <td className="px-4 py-2 text-sm">Password for the keystore file</td>
-              </tr>
-              <tr className="border-t">
-                <td className="px-4 py-2 font-mono text-xs">ANDROID_KEY_ALIAS</td>
-                <td className="px-4 py-2 text-sm">Alias for the signing key in the keystore</td>
-              </tr>
-              <tr className="border-t">
-                <td className="px-4 py-2 font-mono text-xs">ANDROID_KEY_PASSWORD</td>
-                <td className="px-4 py-2 text-sm">Password for the signing key</td>
-              </tr>
-              <tr className="border-t">
-                <td className="px-4 py-2 text-sm" rowSpan={3}>iOS</td>
-                <td className="px-4 py-2 font-mono text-xs">IOS_DISTRIBUTION_CERT_BASE64</td>
-                <td className="px-4 py-2 text-sm">Base64-encoded distribution certificate (.p12)</td>
-              </tr>
-              <tr className="border-t">
-                <td className="px-4 py-2 font-mono text-xs">IOS_PROVISIONING_PROFILE_BASE64</td>
-                <td className="px-4 py-2 text-sm">Base64-encoded provisioning profile (.mobileprovision)</td>
-              </tr>
-              <tr className="border-t">
-                <td className="px-4 py-2 font-mono text-xs">IOS_CERT_PASSWORD</td>
-                <td className="px-4 py-2 text-sm">Password for the distribution certificate</td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Storage Provider Secrets</h3>
+          <div className="overflow-hidden rounded-lg border">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="px-4 py-2 text-left font-medium">Provider</th>
+                  <th className="px-4 py-2 text-left font-medium">Required Secrets</th>
+                  <th className="px-4 py-2 text-left font-medium">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-t">
+                  <td className="px-4 py-2 text-sm">GitHub Artifacts</td>
+                  <td className="px-4 py-2 font-mono text-xs">None</td>
+                  <td className="px-4 py-2 text-sm">Uses GITHUB_TOKEN automatically</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 text-sm" rowSpan={2}>Firebase App Distribution</td>
+                  <td className="px-4 py-2 font-mono text-xs">FIREBASE_APP_ID</td>
+                  <td className="px-4 py-2 text-sm">Your Firebase App ID</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs">FIREBASE_TOKEN</td>
+                  <td className="px-4 py-2 text-sm">Firebase CLI authentication token</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 text-sm" rowSpan={3}>Google Drive</td>
+                  <td className="px-4 py-2 font-mono text-xs">GOOGLE_DRIVE_CLIENT_ID</td>
+                  <td className="px-4 py-2 text-sm">OAuth client ID</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs">GOOGLE_DRIVE_CLIENT_SECRET</td>
+                  <td className="px-4 py-2 text-sm">OAuth client secret</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs">GOOGLE_DRIVE_REFRESH_TOKEN</td>
+                  <td className="px-4 py-2 text-sm">OAuth refresh token</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 text-sm" rowSpan={3}>Amazon S3</td>
+                  <td className="px-4 py-2 font-mono text-xs">AWS_ACCESS_KEY_ID</td>
+                  <td className="px-4 py-2 text-sm">AWS access key with S3 permissions</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs">AWS_SECRET_ACCESS_KEY</td>
+                  <td className="px-4 py-2 text-sm">Corresponding AWS secret key</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs">AWS_BUCKET_NAME</td>
+                  <td className="px-4 py-2 text-sm">Target S3 bucket name</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Platform-Specific Secrets</h3>
+          <div className="overflow-hidden rounded-lg border">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="px-4 py-2 text-left font-medium">Platform</th>
+                  <th className="px-4 py-2 text-left font-medium">Required Secrets</th>
+                  <th className="px-4 py-2 text-left font-medium">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-t">
+                  <td className="px-4 py-2 text-sm" rowSpan={4}>Android</td>
+                  <td className="px-4 py-2 font-mono text-xs">ANDROID_KEYSTORE_BASE64</td>
+                  <td className="px-4 py-2 text-sm">Base64-encoded keystore file</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs">ANDROID_KEYSTORE_PASSWORD</td>
+                  <td className="px-4 py-2 text-sm">Password for the keystore file</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs">ANDROID_KEY_ALIAS</td>
+                  <td className="px-4 py-2 text-sm">Alias of the key in the keystore</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs">ANDROID_KEY_PASSWORD</td>
+                  <td className="px-4 py-2 text-sm">Password for the specific key</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 text-sm" rowSpan={3}>iOS</td>
+                  <td className="px-4 py-2 font-mono text-xs">IOS_DISTRIBUTION_CERT_BASE64</td>
+                  <td className="px-4 py-2 text-sm">Base64-encoded distribution certificate</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs">IOS_PROVISIONING_PROFILE_BASE64</td>
+                  <td className="px-4 py-2 text-sm">Base64-encoded provisioning profile</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs">IOS_CERT_PASSWORD</td>
+                  <td className="px-4 py-2 text-sm">Certificate password</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Notification Secrets</h3>
+          <div className="overflow-hidden rounded-lg border">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="px-4 py-2 text-left font-medium">Notification Type</th>
+                  <th className="px-4 py-2 text-left font-medium">Required Secrets</th>
+                  <th className="px-4 py-2 text-left font-medium">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-t">
+                  <td className="px-4 py-2 text-sm">Slack</td>
+                  <td className="px-4 py-2 font-mono text-xs">SLACK_WEBHOOK_URL</td>
+                  <td className="px-4 py-2 text-sm">Webhook URL for posting to Slack channel</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="px-4 py-2 text-sm">Teams</td>
+                  <td className="px-4 py-2 font-mono text-xs">TEAMS_WEBHOOK_URL</td>
+                  <td className="px-4 py-2 text-sm">Webhook URL for posting to Teams channel</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <div className="rounded-lg bg-muted p-6">
-        <h3 className="font-semibold">Security Best Practices</h3>
-        <ul className="mt-2 ml-4 list-disc text-sm space-y-2">
-          <li>Never hardcode secrets in workflow configuration files</li>
-          <li>Limit secret access to only the workflows that need them</li>
-          <li>Rotate secrets regularly, especially for production environments</li>
-          <li>Use environment-specific secrets for staging, testing, and production</li>
-          <li>Review GitHub Actions logs to ensure secrets are properly masked</li>
-          <li>Use organization-level secrets for shared credentials</li>
-        </ul>
-      </div>
     </div>
   );
 }

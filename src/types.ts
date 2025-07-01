@@ -5,7 +5,7 @@
 /**
  * Available workflow preset kinds
  */
-export type PipelineKind = 'health-check' | string;
+export type PipelineKind = 'static-analysis' | string;
 
 /**
  * Available CI platforms
@@ -146,8 +146,8 @@ export interface GitHubWorkflow {
   jobs: Record<string, GitHubJob>;
 }
 
-// Import build options
-import { BuildOptions } from './presets/types';
+// Import preset options
+import { BuildOptions, HealthCheckOptions } from './presets/types';
 
 /**
  * Bitrise workflow step
@@ -240,6 +240,8 @@ export interface WorkflowOptions {
   concurrency?: ConcurrencyConfig;
   /** Build-specific options (for build preset) */
   build?: BuildOptions;
+  /** Static analysis specific options */
+  healthCheck?: HealthCheckOptions;
 }
 
 /**

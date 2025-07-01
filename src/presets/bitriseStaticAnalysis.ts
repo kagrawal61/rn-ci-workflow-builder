@@ -1,6 +1,6 @@
 import { WorkflowOptions, BitriseConfig } from '../types';
 
-export function buildBitriseHealthCheckPipeline(opts: WorkflowOptions): BitriseConfig {
+export function buildBitriseStaticAnalysisPipeline(opts: WorkflowOptions): BitriseConfig {
   const {
     triggers,
     env,
@@ -98,14 +98,14 @@ export function buildBitriseHealthCheckPipeline(opts: WorkflowOptions): BitriseC
     triggers.push.branches.forEach(branch => {
       triggerMap.push({
         push_branch: branch,
-        workflow: 'rn-health-check'
+        workflow: 'rn-static-analysis'
       });
     });
   } else {
     // Default push trigger for main branch
     triggerMap.push({
       push_branch: 'main',
-      workflow: 'rn-health-check'
+      workflow: 'rn-static-analysis'
     });
   }
 
@@ -113,14 +113,14 @@ export function buildBitriseHealthCheckPipeline(opts: WorkflowOptions): BitriseC
     triggers.pullRequest.branches.forEach(branch => {
       triggerMap.push({
         pull_request_target_branch: branch,
-        workflow: 'rn-health-check'
+        workflow: 'rn-static-analysis'
       });
     });
   } else {
     // Default PR trigger for main branch
     triggerMap.push({
       pull_request_target_branch: 'main',
-      workflow: 'rn-health-check'
+      workflow: 'rn-static-analysis'
     });
   }
 
@@ -132,8 +132,8 @@ export function buildBitriseHealthCheckPipeline(opts: WorkflowOptions): BitriseC
       envs: appEnvs.length > 0 ? appEnvs : undefined
     },
     workflows: {
-      'rn-health-check': {
-        title: opts.name || 'React Native Health Check',
+      'rn-static-analysis': {
+        title: opts.name || 'React Native Static Analysis',
         description: 'Run health checks including TypeScript, ESLint, Prettier, and unit tests',
         steps: testSteps
       }

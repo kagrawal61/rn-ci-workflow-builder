@@ -10,7 +10,7 @@ const commonSteps = {
    * Creates common setup steps used across platforms
    */
   createSetupSteps(packageManager: PackageManager, cache: CacheConfig | undefined, build: BuildOptions): GitHubStep[] {
-    // Note: Health check steps are now moved to a separate job in the workflow
+    // Note: Static analysis steps are now moved to a separate job in the workflow
     // to avoid duplication and follow best practices
 
     return [

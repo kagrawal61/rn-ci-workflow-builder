@@ -1,12 +1,12 @@
 import { generateWorkflow, WorkflowConfig, WorkflowOptions } from './lib';
-import { BuildOptions } from '../../src/presets/types';
+import { BuildOptions, HealthCheckOptions } from '../../src/presets/types';
 
-// Helper to create a default health check configuration
+// Helper to create a default static analysis configuration
 export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
   return {
-    kind: 'health-check',
+    kind: 'static-analysis',
     options: {
-      name: 'React Native Health Check',
+      name: 'React Native Static Analysis',
       triggers: {
         push: {
           branches: ['main'],
@@ -20,7 +20,13 @@ export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
       nodeVersions: [20],
       packageManager: 'yarn',
       runsOn: 'ubuntu-latest',
-      cache: { enabled: true }
+      cache: { enabled: true },
+      healthCheck: {
+        typescript: true,
+        eslint: true,
+        prettier: true,
+        unitTests: true
+      }
     }
   };
 };
@@ -51,7 +57,13 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
         storage: 'github',
         notification: 'pr-comment',
         includeHealthCheck: true,
-        androidOutputType: 'apk'
+        androidOutputType: 'apk',
+        healthCheckOptions: {
+          typescript: true,
+          eslint: true,
+          prettier: true,
+          unitTests: true
+        }
       }
     }
   };
@@ -72,14 +84,14 @@ export const generateWorkflowYaml = (config: WorkflowConfig): { yaml: string, se
 // Helper to get all preset kinds
 export const getPresetKinds = (): string[] => {
   // Return available preset kinds
-  return ['health-check', 'build'];
+  return ['static-analysis', 'build'];
 };
 
 // Create a config from form values
 export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   // Create a properly typed configuration object to avoid type errors
   const config: Required<WorkflowConfig> = {
-    kind: formValues.preset || 'health-check',
+    kind: formValues.preset || 'static-analysis',
     options: {
       name: '',
       platform: formValues.platform || 'github',
@@ -89,7 +101,13 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
       runsOn: 'ubuntu-latest',
       cache: { enabled: false },
       env: {},
-      secrets: []
+      secrets: [],
+      healthCheck: {
+        typescript: true,
+        eslint: true,
+        prettier: true,
+        unitTests: true
+      }
     }
   };
   
@@ -132,8 +150,18 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   // Package manager
   config.options.packageManager = formValues.packageManager || 'yarn';
   
-  // Runner OS
-  config.options.runsOn = formValues.runsOn || 'ubuntu-latest';
+  // Runner OS - automatically select based on platform
+  if (formValues.preset === 'build' && (formValues.buildPlatform === 'ios' || formValues.buildPlatform === 'both')) {
+    // For iOS builds, we don't directly set runsOn since iOS job will use macos-latest
+    // For 'both' platform, individual jobs specify their own runners
+    // Only set runsOn for android-only builds
+    if (formValues.buildPlatform === 'android') {
+      config.options.runsOn = 'ubuntu-latest';
+    }
+  } else {
+    // For health checks or other presets, use ubuntu-latest
+    config.options.runsOn = 'ubuntu-latest';
+  }
   
   
   // Cache configuration is enabled by default
@@ -153,19 +181,37 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
     config.options.secrets = formValues.secrets;
   }
   
-  // Add build configuration if this is a build preset
+  // Add preset-specific configuration
   if (formValues.preset === 'build') {
+    // Build preset configuration
     const buildConfig: BuildOptions = {
       platform: formValues.buildPlatform || 'both',
       variant: formValues.buildVariant || 'release',
       storage: formValues.buildStorage || 'github',
       notification: formValues.buildNotification || 'pr-comment',
       includeHealthCheck: formValues.includeHealthCheck !== undefined ? formValues.includeHealthCheck : true,
-      androidOutputType: formValues.androidOutputType || 'apk' // 'apk', 'aab', or 'both'
+      androidOutputType: formValues.androidOutputType || 'apk', // 'apk', 'aab', or 'both'
+      healthCheckOptions: {
+        typescript: formValues.typescriptCheck !== undefined ? formValues.typescriptCheck : true,
+        eslint: formValues.eslintCheck !== undefined ? formValues.eslintCheck : true,
+        prettier: formValues.prettierCheck !== undefined ? formValues.prettierCheck : true,
+        unitTests: formValues.unitTestsCheck !== undefined ? formValues.unitTestsCheck : true
+      }
     };
     
     // Add the build config to options
     config.options.build = buildConfig;
+  } else if (formValues.preset === 'static-analysis') {
+    // Static analysis preset configuration
+    const healthCheckConfig: HealthCheckOptions = {
+      typescript: formValues.typescriptCheck !== undefined ? formValues.typescriptCheck : true,
+      eslint: formValues.eslintCheck !== undefined ? formValues.eslintCheck : true,
+      prettier: formValues.prettierCheck !== undefined ? formValues.prettierCheck : true,
+      unitTests: formValues.unitTestsCheck !== undefined ? formValues.unitTestsCheck : true
+    };
+    
+    // Add the health check config to options
+    config.options.healthCheck = healthCheckConfig;
   }
   
   return config;

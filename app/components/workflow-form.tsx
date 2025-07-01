@@ -20,20 +20,65 @@ import {
 } from "./ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
+export interface WorkflowFormValues {
+  platform?: string;
+  preset?: string;
+  name?: string;
+  nodeVersion?: number;
+  packageManager?: string;
+  buildPlatform?: string;
+  buildVariant?: string;
+  androidOutputType?: string;
+  buildStorage?: string;
+  buildNotification?: string;
+  includeHealthCheck?: boolean;
+  typescriptCheck?: boolean;
+  eslintCheck?: boolean;
+  prettierCheck?: boolean;
+  unitTestsCheck?: boolean;
+  enablePushTrigger?: boolean;
+  pushBranches?: string;
+  ignorePaths?: string;
+  enablePrTrigger?: boolean;
+  prTargetBranches?: string;
+  enableManualTrigger?: boolean;
+  enableScheduleTrigger?: boolean;
+  cronExpression?: string;
+  envVars: Record<string, string>;
+  secrets: string[];
+  [key: string]: unknown;
+}
+
 interface WorkflowFormProps {
-  values: any;
-  onChange: (values: any) => void;
+  values: WorkflowFormValues;
+  onChange: (values: Record<string, unknown>) => void;
 }
 
 export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
   const nodeVersionOptions = [14, 16, 18, 20];
-  const runnerOptions = ["ubuntu-latest", "macos-latest"];
   
   const [envVarKey, setEnvVarKey] = useState("");
   const [envVarValue, setEnvVarValue] = useState("");
   const [secretName, setSecretName] = useState("");
   
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: unknown) => {
+    // Special validation for health check options to ensure at least one is selected
+    if (field === "typescriptCheck" || field === "eslintCheck" || field === "prettierCheck" || field === "unitTestsCheck") {
+      // Count how many checks are currently enabled
+      const enabledChecksCount = [
+        field === "typescriptCheck" ? value : values.typescriptCheck !== false,
+        field === "eslintCheck" ? value : values.eslintCheck !== false,
+        field === "prettierCheck" ? value : values.prettierCheck !== false,
+        field === "unitTestsCheck" ? value : values.unitTestsCheck !== false
+      ].filter(Boolean).length;
+      
+      // If this change would result in no checks enabled, prevent it
+      if (enabledChecksCount === 0) {
+        return; // Don't allow the change
+      }
+    }
+    
+    // For all other fields, or if the validation passed, apply the change
     onChange({ [field]: value });
   };
   
@@ -140,14 +185,14 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 </Tooltip>
               </div>
               <Select 
-                value={values.preset || "health-check"}
+                value={values.preset || "build"}
                 onValueChange={(value) => handleInputChange("preset", value)}
               >
                 <SelectTrigger id="preset">
                   <SelectValue placeholder="Select workflow preset" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="health-check">Health Check</SelectItem>
+                  <SelectItem value="static-analysis">Static Analysis</SelectItem>
                   <SelectItem value="build">Build Pipeline</SelectItem>
                 </SelectContent>
               </Select>
@@ -157,6 +202,93 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   : "Generate a workflow for code quality checks"}
               </p>
             </div>
+            
+            {/* Static Analysis Options - Only shown when static-analysis preset is selected */}
+            {values.preset === "static-analysis" && (
+              <div className="space-y-2 mt-4">
+                <div className="flex items-center justify-between">
+                  <Label>Static Analysis Options</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <span className="sr-only">Info</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Select which checks to include in your workflow
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                
+                <div className="rounded-md border p-4 space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="typescript-check"
+                      checked={values.typescriptCheck !== false}
+                      onCheckedChange={(checked) => handleInputChange("typescriptCheck", checked)}
+                    />
+                    <div className="grid gap-1">
+                      <Label htmlFor="typescript-check">TypeScript Type Checking</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Run TypeScript compiler to check for type errors
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="eslint-check"
+                      checked={values.eslintCheck !== false}
+                      onCheckedChange={(checked) => handleInputChange("eslintCheck", checked)}
+                    />
+                    <div className="grid gap-1">
+                      <Label htmlFor="eslint-check">ESLint</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Check code for style and programming errors using ESLint
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="prettier-check"
+                      checked={values.prettierCheck !== false}
+                      onCheckedChange={(checked) => handleInputChange("prettierCheck", checked)}
+                    />
+                    <div className="grid gap-1">
+                      <Label htmlFor="prettier-check">Prettier</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Verify code formatting using Prettier
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="unit-tests-check"
+                      checked={values.unitTestsCheck !== false}
+                      onCheckedChange={(checked) => handleInputChange("unitTestsCheck", checked)}
+                    />
+                    <div className="grid gap-1">
+                      <Label htmlFor="unit-tests-check">Unit Tests</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Run tests with Jest or other configured test runner
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-2 pt-2 border-t text-xs text-amber-600 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    At least one check must remain selected
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -177,7 +309,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 id="name" 
                 value={values.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
-                placeholder={values.preset === "build" ? "React Native Build Pipeline" : "React Native Health Check"}
+                placeholder={values.preset === "build" ? "React Native Build Pipeline" : "React Native Static Analysis"}
               />
             </div>
             
@@ -206,38 +338,6 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 <SelectContent>
                   <SelectItem value="yarn">Yarn</SelectItem>
                   <SelectItem value="npm">npm</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="runner-os">Runner OS</Label>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0">
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                      <span className="sr-only">Info</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {values.platform === "bitrise" ? "Build machine specification for Bitrise" : "The virtual environment to run the workflow"}
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <Select 
-                value={values.runsOn}
-                onValueChange={(value) => handleInputChange("runsOn", value)}
-              >
-                <SelectTrigger id="runner-os">
-                  <SelectValue placeholder="Select runner OS" />
-                </SelectTrigger>
-                <SelectContent>
-                  {runnerOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -515,21 +615,74 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 </Select>
               </div>
 
-              {/* Include Health Check */}
-              <div className="flex items-center space-x-2 pt-2">
-                <Checkbox 
-                  id="include-health-check"
-                  checked={values.includeHealthCheck}
-                  onCheckedChange={(checked) => handleInputChange("includeHealthCheck", checked)}
-                />
-                <div className="grid gap-1">
-                  <Label htmlFor="include-health-check">
-                    Include Health Check Steps
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Run linting, typechecking and tests before building
-                  </p>
+              {/* Include Static Analysis */}
+              <div className="flex flex-col space-y-4 pt-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="include-static-analysis"
+                    checked={values.includeHealthCheck}
+                    onCheckedChange={(checked) => handleInputChange("includeHealthCheck", checked)}
+                  />
+                  <div className="grid gap-1">
+                    <Label htmlFor="include-static-analysis">
+                      Include Static Analysis Steps
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Run static code analysis before building
+                    </p>
+                  </div>
                 </div>
+                
+                {values.includeHealthCheck && (
+                  <div className="rounded-md border p-4 ml-6 space-y-4">
+                    <p className="text-sm font-medium">Select which checks to include:</p>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="typescript-check-build"
+                        checked={values.typescriptCheck !== false}
+                        onCheckedChange={(checked) => handleInputChange("typescriptCheck", checked)}
+                      />
+                      <Label htmlFor="typescript-check-build">TypeScript Type Checking</Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="eslint-check-build"
+                        checked={values.eslintCheck !== false}
+                        onCheckedChange={(checked) => handleInputChange("eslintCheck", checked)}
+                      />
+                      <Label htmlFor="eslint-check-build">ESLint</Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="prettier-check-build"
+                        checked={values.prettierCheck !== false}
+                        onCheckedChange={(checked) => handleInputChange("prettierCheck", checked)}
+                      />
+                      <Label htmlFor="prettier-check-build">Prettier</Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="unit-tests-check-build"
+                        checked={values.unitTestsCheck !== false}
+                        onCheckedChange={(checked) => handleInputChange("unitTestsCheck", checked)}
+                      />
+                      <Label htmlFor="unit-tests-check-build">Unit Tests</Label>
+                    </div>
+                    
+                    <div className="mt-2 pt-2 border-t text-xs text-amber-600 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                      At least one check must remain selected
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

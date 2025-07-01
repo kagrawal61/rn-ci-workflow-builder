@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { WorkflowFormValues } from "./workflow-form";
 import { motion } from "framer-motion";
 import { Settings2, PlayCircle, ChevronRight, Database, Zap } from "lucide-react";
 import { 
@@ -15,19 +16,19 @@ import { YamlPreview } from "./yaml-preview";
 import { WorkflowForm } from "./workflow-form";
 
 export function WorkflowBuilder() {
-  const [formValues, setFormValues] = useState<any>(() => {
+  const [formValues, setFormValues] = useState<WorkflowFormValues>(() => {
     // Set up default form values based on the default config
-    const defaultConfig = createDefaultHealthCheckConfig();
+    const defaultConfig = createDefaultBuildConfig();
     
     return {
       // Preset selection
-      preset: "health-check",
+      preset: "build",
       
       // Platform selection
       platform: "github",
       
       // Basic settings
-      name: defaultConfig.options?.name || "React Native Health Check",
+      name: defaultConfig.options?.name || "React Native Static Analysis",
       
       // Trigger settings
       enablePushTrigger: !!defaultConfig.options?.triggers?.push,
@@ -48,9 +49,6 @@ export function WorkflowBuilder() {
       // Package manager
       packageManager: defaultConfig.options?.packageManager || "yarn",
       
-      // Runner OS
-      runsOn: defaultConfig.options?.runsOn || "ubuntu-latest",
-      
       // Cache settings
       cachePaths: "",
       cacheKey: "",
@@ -65,7 +63,13 @@ export function WorkflowBuilder() {
       buildVariant: "release",
       buildStorage: "github",
       buildNotification: "pr-comment",
-      includeHealthCheck: true
+      includeHealthCheck: true, // Will be renamed to includeStaticAnalysis in the future
+      
+      // Static analysis settings
+      typescriptCheck: true,
+      eslintCheck: true,
+      prettierCheck: true,
+      unitTestsCheck: true
     };
   });
   
@@ -87,7 +91,7 @@ export function WorkflowBuilder() {
     }
   }, [formValues]);
 
-  const handleFormChange = (newValues: any) => {
+  const handleFormChange = (newValues: Record<string, unknown>) => {
     // Check if preset changed
     if (newValues.preset && newValues.preset !== formValues.preset) {
       // Switch to new preset's defaults
@@ -96,17 +100,17 @@ export function WorkflowBuilder() {
         : createDefaultHealthCheckConfig();
       
       // Update form values with defaults from the selected preset
-      setFormValues((prev: any) => {
+      setFormValues((prev: Record<string, unknown>) => {
         const baseValues = {
           ...prev,
-          name: defaultConfig.options?.name || (newValues.preset === 'build' ? 'React Native Build Pipeline' : 'React Native Health Check'),
+          name: defaultConfig.options?.name || (newValues.preset === 'build' ? 'React Native Build Pipeline' : 'React Native Static Analysis'),
         };
         
         return { ...baseValues, ...newValues };
       });
     } else {
       // Regular form update
-      setFormValues((prev: any) => ({ ...prev, ...newValues }));
+      setFormValues((prev: Record<string, unknown>) => ({ ...prev, ...newValues }));
     }
   };
 
@@ -197,7 +201,7 @@ export function WorkflowBuilder() {
             
             <YamlPreview 
               yamlContent={yamlContent} 
-              fileName={formValues.platform === 'bitrise' ? 'bitrise.yml' : `${formValues.name.toLowerCase().replace(/\s+/g, '-')}.yml`}
+              fileName={formValues.platform === 'bitrise' ? 'bitrise.yml' : `${String(formValues.name || '').toLowerCase().replace(/\s+/g, '-')}.yml`}
               secretsSummary={secretsSummary}
             />
             

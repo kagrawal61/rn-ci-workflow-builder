@@ -99,7 +99,7 @@ export function YamlPreview({ yamlContent, fileName = "workflow.yml", secretsSum
         </div>
       </div>
       <div className="max-h-[500px] overflow-auto p-0 border rounded-b-lg" style={{ backgroundColor: theme === "dark" ? "#1e1e2e" : "#ffffff" }}>
-        {/* @ts-ignore - TypeScript has an issue with SyntaxHighlighter component */}
+        {/* @ts-expect-error - TypeScript has an issue with SyntaxHighlighter component */}
         <SyntaxHighlighter
           language="yaml"
           style={theme === "dark" ? atomDark : prism}

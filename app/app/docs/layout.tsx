@@ -1,6 +1,10 @@
+"use client";
+
 import { type ReactNode } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Header } from "@/components/header";
+import { cn } from "@/utils/cn";
 
 interface DocsSidebarNavProps {
   items: {
@@ -10,17 +14,30 @@ interface DocsSidebarNavProps {
 }
 
 function DocsSidebarNav({ items }: DocsSidebarNavProps) {
+  const pathname = usePathname();
+  
   return (
     <nav className="flex flex-col space-y-1">
-      {items.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className="text-sm font-medium hover:text-primary hover:underline px-3 py-2 rounded-md hover:bg-accent"
-        >
-          {item.title}
-        </Link>
-      ))}
+      {items.map((item) => {
+        const isActive = 
+          (pathname === item.href) || 
+          (item.href !== "/docs" && pathname?.startsWith(item.href));
+          
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              "text-sm font-medium px-3 py-2 rounded-md transition-colors",
+              isActive 
+                ? "bg-primary/10 text-primary font-semibold border-l-2 border-primary" 
+                : "hover:text-primary hover:bg-accent"
+            )}
+          >
+            {item.title}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
@@ -54,10 +71,6 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
     {
       title: "Secrets Management",
       href: "/docs/secrets-management",
-    },
-    {
-      title: "Examples & Recipes",
-      href: "/docs/examples",
     },
   ];
 
