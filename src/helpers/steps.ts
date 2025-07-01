@@ -1,6 +1,5 @@
 import { GitHubStep, PackageManager, CacheConfig } from '../types';
 import { cacheSteps } from '../helpers';
-import { BuildOptions } from '../presets/types';
 
 /**
  * Common GitHub Actions workflow step helpers
@@ -9,7 +8,7 @@ const commonSteps = {
   /**
    * Creates common setup steps used across platforms
    */
-  createSetupSteps(packageManager: PackageManager, cache: CacheConfig | undefined, build: BuildOptions): GitHubStep[] {
+  createSetupSteps(packageManager: PackageManager, cache: CacheConfig | undefined): GitHubStep[] {
     // Note: Static analysis steps are now moved to a separate job in the workflow
     // to avoid duplication and follow best practices
 
@@ -41,12 +40,15 @@ const commonSteps = {
       id: 'build-source',
       run: `
 # Determine if this is a PR or a direct push
-if [[ "\${{ github.event_name }}" == "pull_request" || "\${{ github.event_name }}" == "pull_request_target" ]]; then
+EVENT_NAME="\${{ github.event_name }}"
+if [[ "$EVENT_NAME" == "pull_request" ]] || [[ "$EVENT_NAME" == "pull_request_target" ]]; then
   # This is a PR - use PR-specific variables
   echo "is_pr=true" >> $GITHUB_OUTPUT
   echo "source_branch=\${{ github.head_ref }}" >> $GITHUB_OUTPUT
   echo "source_sha=\${{ github.sha }}" >> $GITHUB_OUTPUT
-  echo "📌 Running on PR #\${{ github.event.pull_request.number }} from branch \${{ github.head_ref }}"
+  PR_NUM="\${{ github.event.pull_request.number }}"
+  BRANCH="\${{ github.head_ref }}"
+  echo "📌 Running on PR #$PR_NUM from branch $BRANCH"
 else
   # This is a direct push - use branch ref
   echo "is_pr=false" >> $GITHUB_OUTPUT

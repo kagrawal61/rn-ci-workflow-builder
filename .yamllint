@@ -1,0 +1,29 @@
+extends: default
+
+rules:
+  # Allow longer lines for GitHub Actions workflows
+  line-length:
+    max: 120
+    level: warning
+  
+  # Document start is not always required for GitHub Actions
+  document-start:
+    present: false
+  
+  # Allow multiple spaces after colons for better readability in workflows
+  colons:
+    max-spaces-after: 1
+  
+  # Allow truthy values (on/off) commonly used in GitHub Actions
+  truthy:
+    allowed-values: ['true', 'false', 'on', 'off']
+  
+  # Allow longer comments for better documentation
+  comments:
+    min-spaces-from-content: 1
+  
+  # Be more lenient with indentation for complex nested structures
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
