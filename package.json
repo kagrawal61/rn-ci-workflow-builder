@@ -18,6 +18,7 @@
     "generate:build:ios": "ts-node src/cli.ts generate build --config samples/build-ios-pr.json",
     "generate:build:both": "ts-node src/cli.ts generate build --config samples/build-both-platforms.json",
     "generate:build:android:both-formats": "ts-node src/cli.ts generate build --config samples/build-android-both-formats.json",
+    "generate:all-combinations": "ts-node scripts/generate-all-combinations.ts",
     "list-presets": "ts-node src/cli.ts list-presets",
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -p tsconfig.json --watch",
