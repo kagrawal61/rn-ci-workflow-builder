@@ -84,7 +84,7 @@ function createPRCommentStep(
       '  gh pr comment $PR_NUM --body "$MESSAGE"\n' +
       'fi',
     env: {
-      GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}',
+      GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}',
     },
   };
 }
