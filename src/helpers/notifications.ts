@@ -2,47 +2,15 @@ import { GitHubStep } from '../types';
 import { BuildOptions } from '../presets/types';
 
 /**
- * Creates a GitHub CLI installation step that works across different CI/CD providers
- * Based on official installation guide: https://github.com/cli/cli#installation
+ * Creates a GitHub CLI authorization step
+ * GitHub CLI is pre-installed on GitHub Actions runners, so we only need to authorize it.
  */
 function createGitHubCLIInstallationStep(): GitHubStep {
   return {
     name: 'Setup GitHub CLI',
     run:
-      '# Check if gh CLI is installed\n' +
-      'if ! command -v gh &> /dev/null; then\n' +
-      '  echo "GitHub CLI not found, installing via Homebrew..."\n' +
-      '\n' +
-      '  # Check if Homebrew is installed\n' +
-      '  if ! command -v brew &> /dev/null; then\n' +
-      '    echo "Homebrew not found. Installing Homebrew first..."\n' +
-      '    # Install Homebrew (works on both Linux and macOS)\n' +
-      '    BASE_URL="https://raw.githubusercontent.com"\n' +
-      '    INSTALL_URL="$BASE_URL/Homebrew/install/HEAD/install.sh"\n' +
-      '    /bin/bash -c "$(curl -fsSL $INSTALL_URL)"\n' +
-      '\n' +
-      '    # Add Homebrew to PATH for the current session\n' +
-      '    if [[ "$OSTYPE" == "linux-gnu"* ]]; then\n' +
-      '      echo "Adding Homebrew to PATH for Linux..."\n' +
-      '      BREW_PATH="/home/linuxbrew/.linuxbrew/bin/brew"\n' +
-      '      eval "$($BREW_PATH shellenv)"\n' +
-      '    elif [[ "$OSTYPE" == "darwin"* ]]; then\n' +
-      '      echo "Adding Homebrew to PATH for macOS..."\n' +
-      '      BREW_PATH="/opt/homebrew/bin/brew"\n' +
-      '      eval "$($BREW_PATH shellenv)"\n' +
-      '    fi\n' +
-      '  else\n' +
-      '    echo "Homebrew is already installed"\n' +
-      '  fi\n' +
-      '\n' +
-      '  # Install GitHub CLI via Homebrew\n' +
-      '  echo "Installing GitHub CLI via Homebrew..."\n' +
-      '  brew install gh\n' +
-      'else\n' +
-      '  echo "GitHub CLI is already installed"\n' +
-      'fi\n' +
-      '\n' +
-      '# Verify installation\n' +
+      '# GitHub CLI is pre-installed on GitHub Actions runners\n' +
+      'echo "Using pre-installed GitHub CLI"\n' +
       'gh --version\n' +
       'echo "GitHub CLI setup completed successfully"',
     env: {

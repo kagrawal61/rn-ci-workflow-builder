@@ -52,11 +52,11 @@ describe('Notification Helpers', () => {
 
       expect(steps).toHaveLength(2);
 
-      // Check GitHub CLI installation step
+      // Check GitHub CLI setup step
       const cliStep = steps.find(step => step.name === 'Setup GitHub CLI');
       expect(cliStep).toBeDefined();
       expect(cliStep?.if).toBe("steps.build-source.outputs.is_pr == 'true'");
-      expect(cliStep?.run).toContain('command -v gh');
+      expect(cliStep?.run).toContain('gh --version');
       expect(cliStep?.env?.GITHUB_TOKEN).toBe('${{ secrets.GITHUB_TOKEN }}');
 
       // Check PR comment step
@@ -132,7 +132,7 @@ describe('Notification Helpers', () => {
       expect(s3Comment?.run).toContain('${{ secrets.S3_BASE_URL }}');
     });
 
-    it('should include proper GitHub CLI installation for different OS types', () => {
+    it('should verify GitHub CLI is pre-installed', () => {
       const buildOptions: BuildOptions = {
         platform: 'android',
         variant: 'debug',
@@ -144,11 +144,8 @@ describe('Notification Helpers', () => {
         notificationHelpers.createAndroidNotificationSteps(buildOptions);
 
       const cliStep = steps.find(step => step.name === 'Setup GitHub CLI');
-      expect(cliStep?.run).toContain('brew install gh');
-      expect(cliStep?.run).toContain('linux-gnu');
-      expect(cliStep?.run).toContain('darwin');
-      expect(cliStep?.run).toContain('/opt/homebrew/bin/brew');
-      expect(cliStep?.run).toContain('/home/linuxbrew/.linuxbrew/bin/brew');
+      expect(cliStep?.run).toContain('GitHub CLI is pre-installed');
+      expect(cliStep?.run).toContain('gh --version');
     });
   });
 
