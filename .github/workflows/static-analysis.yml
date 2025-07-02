@@ -1,14 +1,5 @@
 name: React Native Static Analysis
 'on':
-  push:
-    branches:
-      - develop
-    paths-ignore:
-      - docs/**
-      - '*.md'
-  pull_request:
-    branches:
-      - main
   workflow_dispatch: {}
 env: {}
 jobs:

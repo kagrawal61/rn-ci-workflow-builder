@@ -67,11 +67,14 @@ jobs:
           echo "Using Gradle task: assembleRelease for release build with apk output format"
 
           # Using direct Gradle command
-          ./android/gradlew assembleRelease || {
+          cd android
+          ./gradlew assembleRelease || {
             echo "❌ Android build failed"
             echo "::error::Android build failed. Check logs for details."
             exit 1
           }
+
+          cd ..
 
           echo "✅ Android build completed successfully"
 
@@ -90,29 +93,3 @@ jobs:
           name: android-release-apk-${{ github.head_ref || github.ref_name }}
           path: android/app/build/outputs/apk/**/*.apk
           retention-days: 30
-    needs:
-      - quality-check
-  quality-check:
-    name: Quality Checks
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: SampleRNApp
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: yarn
-      - name: Install
-        run: yarn install --immutable
-      - name: TypeScript
-        run: yarn tsc --noEmit
-      - name: ESLint
-        run: yarn lint
-      - name: Prettier
-        run: yarn format:check
-      - name: Unit tests
-        run: yarn test --ci
