@@ -2,6 +2,15 @@
   "name": "rn-ci-workflow-builder-web",
   "version": "0.1.0",
   "private": true,
+  "keywords": [
+    "react-native",
+    "github-actions",
+    "bitrise",
+    "ci-cd",
+    "workflow-builder",
+    "web-interface",
+    "nextjs"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

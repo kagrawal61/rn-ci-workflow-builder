@@ -29,7 +29,6 @@ If applicable, add screenshots or logs to help explain your problem.
 - Node.js version: [e.g. 18.16.0]
 - NPM/Yarn version: [e.g. npm 9.5.0, yarn 1.22.19]
 - React Native version: [e.g. 0.72.3]
-- rn-ci-workflow-builder version: [e.g. 0.1.0]
 
 ## Configuration Files
 If applicable, provide relevant parts of your workflow configuration files.
