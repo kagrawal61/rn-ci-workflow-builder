@@ -19,7 +19,7 @@ describe('Storage Helpers', () => {
         id: 'artifact-upload-android',
         if: 'success()',
         'continue-on-error': true,
-        uses: 'actions/upload-artifact@v3',
+        uses: 'actions/upload-artifact@v4',
         with: {
           name: 'android-debug-apk-${{ github.head_ref || github.ref_name }}',
           path: 'android/app/build/outputs/apk/**/*.apk',
@@ -215,7 +215,7 @@ describe('Storage Helpers', () => {
         id: 'artifact-upload-ios',
         if: 'success()',
         'continue-on-error': true,
-        uses: 'actions/upload-artifact@v3',
+        uses: 'actions/upload-artifact@v4',
         with: {
           name: 'ios-debug-${{ github.head_ref || github.ref_name }}',
           path: 'ios/build/Build/Products/**/*.ipa',

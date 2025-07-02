@@ -19,7 +19,7 @@ const storageHelpers = {
             id: 'artifact-upload-android-apk',
             if: 'success()',
             'continue-on-error': true,
-            uses: 'actions/upload-artifact@v3',
+            uses: 'actions/upload-artifact@v4',
             with: {
               name:
                 'android-' +
@@ -34,7 +34,7 @@ const storageHelpers = {
             id: 'artifact-upload-android-aab',
             if: 'success()',
             'continue-on-error': true,
-            uses: 'actions/upload-artifact@v3',
+            uses: 'actions/upload-artifact@v4',
             with: {
               name:
                 'android-' +
@@ -53,7 +53,7 @@ const storageHelpers = {
             id: 'artifact-upload-android',
             if: 'success()',
             'continue-on-error': true,
-            uses: 'actions/upload-artifact@v3',
+            uses: 'actions/upload-artifact@v4',
             with: {
               name:
                 'android-' +
@@ -152,7 +152,7 @@ const storageHelpers = {
           id: 'artifact-upload-ios',
           if: 'success()',
           'continue-on-error': true,
-          uses: 'actions/upload-artifact@v3',
+          uses: 'actions/upload-artifact@v4',
           with: {
             name:
               'ios-' +
