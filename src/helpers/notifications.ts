@@ -1,5 +1,5 @@
-import { GitHubStep } from '../types';
 import { BuildOptions } from '../presets/types';
+import { GitHubStep } from '../types';
 
 /**
  * Creates a GitHub CLI authorization step
@@ -13,9 +13,6 @@ function createGitHubCLIInstallationStep(): GitHubStep {
       'echo "Using pre-installed GitHub CLI"\n' +
       'gh --version\n' +
       'echo "GitHub CLI setup completed successfully"',
-    env: {
-      GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}',
-    },
   };
 }
 
