@@ -1,5 +1,6 @@
 import { generateWorkflow, WorkflowConfig, getAvailablePresets } from './lib';
-import { BuildOptions, HealthCheckOptions } from '../../src/presets/types';
+import { BuildOptions, HealthCheckOptions, Platform, Variant, AndroidOutputType, StorageSolution, NotificationType } from '../../src/presets/types';
+import { PackageManager, CIPlatform } from '../../src/types';
 
 // Helper to create a default static analysis configuration
 export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
@@ -58,12 +59,12 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
         notification: 'pr-comment',
         includeHealthCheck: true,
         androidOutputType: 'apk',
-        healthCheckOptions: {
-          typescript: true,
-          eslint: true,
-          prettier: true,
-          unitTests: true,
-        },
+      },
+      healthCheck: {
+        typescript: true,
+        eslint: true,
+        prettier: true,
+        unitTests: true,
       },
     },
   };
@@ -94,10 +95,10 @@ export const getPresetKinds = (): string[] => {
 export const createConfigFromFormValues = (formValues: Record<string, unknown>): WorkflowConfig => {
   // Create a properly typed configuration object to avoid type errors
   const config: Required<WorkflowConfig> = {
-    kind: formValues.preset || 'static-analysis',
+    kind: (formValues.preset as string) || 'static-analysis',
     options: {
       name: '',
-      platform: formValues.platform || 'github',
+      platform: (formValues.platform as CIPlatform) || 'github',
       triggers: {},
       nodeVersions: [],
       packageManager: 'yarn',
@@ -115,7 +116,7 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
   };
 
   // Map form values to workflow options
-  if (formValues.name) config.options.name = formValues.name;
+  if (formValues.name) config.options.name = formValues.name as string;
 
   // Initialize triggers if not already initialized
   if (!config.options.triggers) {
@@ -124,17 +125,17 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
 
   if (formValues.enablePushTrigger) {
     config.options.triggers.push = {
-      branches: formValues.pushBranches
+      branches: (formValues.pushBranches as string)
         ?.split(',')
         .map((b: string) => b.trim()) || ['main'],
       ignorePaths:
-        formValues.ignorePaths?.split(',').map((p: string) => p.trim()) || [],
+        (formValues.ignorePaths as string)?.split(',').map((p: string) => p.trim()) || [],
     };
   }
 
   if (formValues.enablePrTrigger) {
     config.options.triggers.pullRequest = {
-      branches: formValues.prTargetBranches
+      branches: (formValues.prTargetBranches as string)
         ?.split(',')
         .map((b: string) => b.trim()) || ['main'],
     };
@@ -145,18 +146,18 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
   }
 
   if (formValues.enableScheduleTrigger && formValues.cronExpression) {
-    config.options.triggers.schedule = [{ cron: formValues.cronExpression }];
+    config.options.triggers.schedule = [{ cron: formValues.cronExpression as string }];
   }
 
   // Handle Node.js version (single version)
   if (formValues.nodeVersion) {
-    config.options.nodeVersions = [formValues.nodeVersion];
+    config.options.nodeVersions = [formValues.nodeVersion as number];
   } else {
     config.options.nodeVersions = [20];
   }
 
   // Package manager
-  config.options.packageManager = formValues.packageManager || 'yarn';
+  config.options.packageManager = (formValues.packageManager as PackageManager) || 'yarn';
 
   // Runner OS - since we only support Android for now, always use ubuntu-latest
   // This will be updated when iOS support is added
@@ -166,19 +167,19 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
   config.options.cache = {
     enabled: true,
     paths:
-      formValues.cachePaths?.split(',').map((p: string) => p.trim()) ||
+      (formValues.cachePaths as string)?.split(',').map((p: string) => p.trim()) ||
       undefined,
-    key: formValues.cacheKey || undefined,
+    key: (formValues.cacheKey as string) || undefined,
   };
 
   // Environment variables
-  if (formValues.envVars && Object.keys(formValues.envVars).length > 0) {
-    config.options.env = formValues.envVars;
+  if (formValues.envVars && typeof formValues.envVars === 'object') {
+    config.options.env = formValues.envVars as Record<string, string>;
   }
 
   // Secrets
-  if (formValues.secrets && formValues.secrets.length > 0) {
-    config.options.secrets = formValues.secrets;
+  if (formValues.secrets && Array.isArray(formValues.secrets)) {
+    config.options.secrets = formValues.secrets as string[];
   }
 
   // Add preset-specific configuration
@@ -187,54 +188,38 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
     const buildConfig: BuildOptions = {
       // Override any iOS or both selection to use Android-only for now
       // This will be removed when iOS support is ready
-      platform: formValues.buildPlatform === 'ios' || formValues.buildPlatform === 'both' 
+      platform: (formValues.buildPlatform as string) === 'ios' || (formValues.buildPlatform as string) === 'both' 
         ? 'android' 
-        : formValues.buildPlatform || 'android',
-      variant: formValues.buildVariant || 'release',
-      storage: formValues.buildStorage || 'github',
-      notification: formValues.buildNotification || 'pr-comment',
+        : (formValues.buildPlatform as Platform) || 'android',
+      variant: (formValues.buildVariant as Variant) || 'release',
+      storage: (formValues.buildStorage as StorageSolution) || 'github',
+      notification: (formValues.buildNotification as NotificationType) || 'pr-comment',
       includeHealthCheck:
-        formValues.includeHealthCheck !== undefined
+        typeof formValues.includeHealthCheck === 'boolean'
           ? formValues.includeHealthCheck
           : true,
-      androidOutputType: formValues.androidOutputType || 'apk', // 'apk', 'aab', or 'both'
-      healthCheckOptions: {
-        typescript:
-          formValues.typescriptCheck !== undefined
-            ? formValues.typescriptCheck
-            : true,
-        eslint:
-          formValues.eslintCheck !== undefined ? formValues.eslintCheck : true,
-        prettier:
-          formValues.prettierCheck !== undefined
-            ? formValues.prettierCheck
-            : true,
-        unitTests:
-          formValues.unitTestsCheck !== undefined
-            ? formValues.unitTestsCheck
-            : true,
-      },
+      androidOutputType: (formValues.androidOutputType as AndroidOutputType) || 'apk', // 'apk', 'aab', or 'both'
     };
 
     // Add the build config to options
     config.options.build = buildConfig;
+    
+    // Add health check options if include health check is enabled
+    if (buildConfig.includeHealthCheck) {
+      config.options.healthCheck = {
+        typescript: formValues.typescriptCheck === false ? false : true,
+        eslint: formValues.eslintCheck === false ? false : true,
+        prettier: formValues.prettierCheck === false ? false : true,
+        unitTests: formValues.unitTestsCheck === false ? false : true,
+      };
+    }
   } else if (formValues.preset === 'static-analysis') {
     // Static analysis preset configuration
     const healthCheckConfig: HealthCheckOptions = {
-      typescript:
-        formValues.typescriptCheck !== undefined
-          ? formValues.typescriptCheck
-          : true,
-      eslint:
-        formValues.eslintCheck !== undefined ? formValues.eslintCheck : true,
-      prettier:
-        formValues.prettierCheck !== undefined
-          ? formValues.prettierCheck
-          : true,
-      unitTests:
-        formValues.unitTestsCheck !== undefined
-          ? formValues.unitTestsCheck
-          : true,
+      typescript: formValues.typescriptCheck === false ? false : true,
+      eslint: formValues.eslintCheck === false ? false : true,
+      prettier: formValues.prettierCheck === false ? false : true,
+      unitTests: formValues.unitTestsCheck === false ? false : true,
     };
 
     // Add the health check config to options
