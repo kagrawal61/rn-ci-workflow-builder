@@ -159,7 +159,7 @@ export function cacheSteps(
     name: 'Setup cache',
     uses: 'actions/cache@v3',
     with: {
-      path: cfg.paths?.join('\n') ?? dirVar,
+      path: (cfg.paths && cfg.paths.length > 0) ? cfg.paths.join('\n') : dirVar,
       key: cfg.key ?? keyExpr,
       ...(cfg.key ? {} : { 'restore-keys': '${{ runner.os }}-' + pm + '-' }),
     },
