@@ -59,8 +59,9 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-the project maintainers.
+reported to the community leaders responsible for enforcement by creating an issue
+at https://github.com/kagrawal61/rn-ci-workflow-builder/issues or contacting
+the project maintainers directly.
 All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the

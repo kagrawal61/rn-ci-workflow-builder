@@ -407,7 +407,7 @@ The build preset creates a workflow for building React Native apps for Android a
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/rn-ci-workflow-builder.git
+git clone https://github.com/kagrawal61/rn-ci-workflow-builder.git
 cd rn-ci-workflow-builder
 
 # Install dependencies
