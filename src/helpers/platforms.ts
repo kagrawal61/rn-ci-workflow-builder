@@ -86,19 +86,25 @@ ${(() => {
 
 # First generate APK
 echo "Using Gradle task: ${apkTask} for ${variant} build with APK output format"
-./android/gradlew ${apkTask} || {
+cd android
+./gradlew ${apkTask} || {
   echo "❌ Android APK build failed"
   echo "::error::Android APK build failed. Check logs for details."
   exit 1
 }
+cd ..
+
 
 # Then generate AAB
 echo "Using Gradle task: ${aabTask} for ${variant} build with AAB output format"
-./android/gradlew ${aabTask} || {
+cd android
+./gradlew ${aabTask} || {
   echo "❌ Android AAB build failed"
   echo "::error::Android AAB build failed. Check logs for details."
   exit 1
-}`;
+}
+cd ..
+`;
   } else {
     // For single output type (APK or AAB)
     let task = '';
@@ -112,11 +118,14 @@ echo "Using Gradle task: ${aabTask} for ${variant} build with AAB output format"
     return `echo "Using Gradle task: ${task} for ${variant} build with ${outputType} output format"
 
 # Using direct Gradle command
-./android/gradlew ${task} || {
+cd android
+./gradlew ${task} || {
   echo "❌ Android build failed"
   echo "::error::Android build failed. Check logs for details."
   exit 1
-}`;
+}
+cd ..
+`;
   }
 })()}
 
