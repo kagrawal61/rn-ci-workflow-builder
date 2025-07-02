@@ -23,16 +23,15 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
       );
 
-      expect(steps).toHaveLength(7); // setup + determine + verify + setup-java + make-executable + build
+      expect(steps).toHaveLength(6); // setup (2) + verify + setup-java + make-executable + build
       expect(steps[0]).toEqual(mockSetupSteps[0]);
       expect(steps[1]).toEqual(mockSetupSteps[1]);
-      expect(steps[2]).toEqual(mockDetermineBuildSourceStep);
+      // Build source step removed, so not checking for it
 
       // Check for Android-specific steps
       const verifyStep = steps.find(
@@ -61,7 +60,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
@@ -82,7 +80,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
@@ -104,7 +101,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
@@ -124,7 +120,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
@@ -147,7 +142,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
@@ -183,7 +177,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
@@ -192,7 +185,7 @@ describe('Platform Helpers', () => {
       expect(steps).toHaveLength(7); // setup + determine + verify + ruby + pod-install + build
       expect(steps[0]).toEqual(mockSetupSteps[0]);
       expect(steps[1]).toEqual(mockSetupSteps[1]);
-      expect(steps[2]).toEqual(mockDetermineBuildSourceStep);
+      // Build source step removed, so not checking for it
 
       // Check for iOS-specific steps
       const verifyStep = steps.find(
@@ -225,7 +218,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
@@ -245,7 +237,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
@@ -269,7 +260,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
@@ -291,7 +281,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions
@@ -311,7 +300,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        mockDetermineBuildSourceStep,
         'npm',
         '',
         buildOptions

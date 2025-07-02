@@ -74,7 +74,7 @@ export function WorkflowBuilder() {
       secrets: [],
 
       // Build-specific settings (initially empty)
-      buildPlatform: 'both',
+      buildPlatform: 'android',
       buildFlavor: 'develop',
       buildVariant: 'release',
       buildStorage: 'github',
@@ -152,6 +152,12 @@ export function WorkflowBuilder() {
       setYamlContent(result.yaml);
       setSecretsSummary(result.secretsSummary);
       setActiveTab('preview');
+      
+      // Scroll to the top of the workflow builder section when switching tabs
+      const workflowBuilderSection = document.getElementById('workflow-builder');
+      if (workflowBuilderSection) {
+        workflowBuilderSection.scrollIntoView({ behavior: 'smooth' });
+      }
     } catch (error) {
       console.error('Error generating YAML:', error);
     } finally {
@@ -228,7 +234,14 @@ export function WorkflowBuilder() {
               </div>
               <Button
                 variant="outline"
-                onClick={() => setActiveTab('configure')}
+                onClick={() => {
+                  setActiveTab('configure');
+                  // Scroll to the top of the workflow builder section when switching tabs
+                  const workflowBuilderSection = document.getElementById('workflow-builder');
+                  if (workflowBuilderSection) {
+                    workflowBuilderSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="flex items-center gap-2"
               >
                 <Settings2 className="h-4 w-4" /> Edit Configuration

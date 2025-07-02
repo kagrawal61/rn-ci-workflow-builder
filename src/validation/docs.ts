@@ -123,11 +123,11 @@ export const NOTIFICATION_SECRET_DOCS: Record<
 > = {
   slack: {
     name: 'Slack',
-    description: 'Sends notifications to Slack',
+    description: 'Sends notifications to Slack using the official Slack GitHub Action',
     requiredSecrets: [
       {
         name: 'SLACK_WEBHOOK',
-        description: 'Slack webhook URL for sending notifications',
+        description: 'Slack webhook URL for sending notifications via the official Slack GitHub Action',
       },
     ],
   },
@@ -148,7 +148,7 @@ export const NOTIFICATION_SECRET_DOCS: Record<
     requiredSecrets: [
       {
         name: 'SLACK_WEBHOOK',
-        description: 'Slack webhook URL for sending notifications',
+        description: 'Slack webhook URL for sending notifications via the official Slack GitHub Action',
       },
       {
         name: 'GITHUB_TOKEN',

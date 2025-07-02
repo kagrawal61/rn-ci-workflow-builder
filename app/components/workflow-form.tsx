@@ -1,27 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { Label } from '@radix-ui/react-label';
 import { motion } from 'framer-motion';
+import { Info, Plus, Trash } from 'lucide-react';
+import { useState } from 'react';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from './ui/accordion';
-import { Input } from './ui/input';
-import { Label } from '@radix-ui/react-label';
-import { Switch } from './ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
 import { Button } from './ui/button';
-import { Info, Plus, Trash } from 'lucide-react';
-import { Checkbox } from './ui/checkbox';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import {
   Card,
   CardContent,
@@ -29,6 +18,17 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card';
+import { Checkbox } from './ui/checkbox';
+import { Input } from './ui/input';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
+import { Switch } from './ui/switch';
 import {
   Tooltip,
   TooltipContent,
@@ -464,7 +464,12 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
               {/* Platform Selection */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="build-platform">Platform</Label>
+                  <div className="flex flex-col">
+                    <Label htmlFor="build-platform">Platform</Label>
+                    <p className="text-xs text-muted-foreground">
+                      iOS support coming soon
+                    </p>
+                  </div>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -482,7 +487,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   </Tooltip>
                 </div>
                 <RadioGroup
-                  value={values.buildPlatform || 'both'}
+                  value={values.buildPlatform || 'android'}
                   onValueChange={value =>
                     handleInputChange('buildPlatform', value)
                   }
@@ -493,13 +498,23 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                     <Label htmlFor="platform-android">Android only</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="ios" id="platform-ios" />
-                    <Label htmlFor="platform-ios">iOS only</Label>
+                    <RadioGroupItem value="ios" id="platform-ios" disabled={true} />
+                    <Label htmlFor="platform-ios" className="flex items-center">
+                      iOS only
+                      <span className="ml-2 rounded-full bg-amber-200 px-2 py-0.5 text-xs font-medium text-amber-800">
+                        Coming Soon
+                      </span>
+                    </Label>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  {/* <div className="flex items-center space-x-2">
                     <RadioGroupItem value="both" id="platform-both" />
-                    <Label htmlFor="platform-both">Both platforms</Label>
-                  </div>
+                    <Label htmlFor="platform-both" className="flex items-center">
+                      Both platforms
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        (currently Android only)
+                      </span>
+                    </Label>
+                  </div> */}
                 </RadioGroup>
               </div>
 
@@ -893,7 +908,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
           </Card>
         )}
 
-        <Accordion type="multiple" defaultValue={['triggers']}>
+        <Accordion type="multiple" defaultValue={['']}>
           <AccordionItem value="triggers">
             <AccordionTrigger>Trigger Settings</AccordionTrigger>
             <AccordionContent className="space-y-6 pt-4">

@@ -1,4 +1,4 @@
-import { generateWorkflow, WorkflowConfig, WorkflowOptions, getAvailablePresets } from './lib';
+import { generateWorkflow, WorkflowConfig, getAvailablePresets } from './lib';
 import { BuildOptions, HealthCheckOptions } from '../../src/presets/types';
 
 // Helper to create a default static analysis configuration
@@ -52,7 +52,7 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
       runsOn: 'ubuntu-latest',
       cache: { enabled: true },
       build: {
-        platform: 'both',
+        platform: 'android',
         variant: 'release',
         storage: 'github',
         notification: 'pr-comment',
@@ -91,7 +91,7 @@ export const getPresetKinds = (): string[] => {
 };
 
 // Create a config from form values
-export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
+export const createConfigFromFormValues = (formValues: Record<string, unknown>): WorkflowConfig => {
   // Create a properly typed configuration object to avoid type errors
   const config: Required<WorkflowConfig> = {
     kind: formValues.preset || 'static-analysis',
@@ -158,21 +158,9 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   // Package manager
   config.options.packageManager = formValues.packageManager || 'yarn';
 
-  // Runner OS - automatically select based on platform
-  if (
-    formValues.preset === 'build' &&
-    (formValues.buildPlatform === 'ios' || formValues.buildPlatform === 'both')
-  ) {
-    // For iOS builds, we don't directly set runsOn since iOS job will use macos-latest
-    // For 'both' platform, individual jobs specify their own runners
-    // Only set runsOn for android-only builds
-    if (formValues.buildPlatform === 'android') {
-      config.options.runsOn = 'ubuntu-latest';
-    }
-  } else {
-    // For health checks or other presets, use ubuntu-latest
-    config.options.runsOn = 'ubuntu-latest';
-  }
+  // Runner OS - since we only support Android for now, always use ubuntu-latest
+  // This will be updated when iOS support is added
+  config.options.runsOn = 'ubuntu-latest';
 
   // Cache configuration is enabled by default
   config.options.cache = {
@@ -197,7 +185,11 @@ export const createConfigFromFormValues = (formValues: any): WorkflowConfig => {
   if (formValues.preset === 'build') {
     // Build preset configuration
     const buildConfig: BuildOptions = {
-      platform: formValues.buildPlatform || 'both',
+      // Override any iOS or both selection to use Android-only for now
+      // This will be removed when iOS support is ready
+      platform: formValues.buildPlatform === 'ios' || formValues.buildPlatform === 'both' 
+        ? 'android' 
+        : formValues.buildPlatform || 'android',
       variant: formValues.buildVariant || 'release',
       storage: formValues.buildStorage || 'github',
       notification: formValues.buildNotification || 'pr-comment',
