@@ -99,19 +99,46 @@ function createSlackNotificationStep(
   return {
     name: 'Send Slack Notification',
     if: 'always()',
-    uses: 'rtCamp/action-slack-notify@master',
+    uses: 'slackapi/slack-github-action@v1.24.0',
+    with: {
+      payload: JSON.stringify({
+        text: platform + " " + build.variant + " build for ${{ github.head_ref || github.ref_name }} completed with status: ${{ job.status }}",
+        channel: '#builds',
+        username: 'Build Bot',
+        icon_emoji: ':robot_face:',
+        attachments: [
+          {
+            color: "${{ job.status == 'success' && 'good' || job.status == 'failure' && 'danger' || 'warning' }}",
+            title: platform + ' Build Result',
+            fields: [
+              {
+                title: "Repository",
+                value: "${{ github.repository }}",
+                short: true
+              },
+              {
+                title: "Branch/PR",
+                value: "${{ github.head_ref || github.ref_name }}",
+                short: true
+              },
+              {
+                title: "Commit",
+                value: "${{ github.sha }}",
+                short: true
+              },
+              {
+                title: "Build Variant",
+                value: build.variant,
+                short: true
+              }
+            ]
+          }
+        ]
+      })
+    },
     env: {
-      SLACK_WEBHOOK: '${{ secrets.SLACK_WEBHOOK }}',
-      SLACK_CHANNEL: '#builds',
-      SLACK_USERNAME: 'Build Bot',
-      SLACK_ICON: 'https://github.com/rtCamp.png?size=48',
-      SLACK_COLOR: '${{ job.status }}',
-      SLACK_TITLE: platform + ' Build Result',
-      SLACK_MESSAGE:
-        platform +
-        ' ' +
-        build.variant +
-        ' build for ${{ github.head_ref || github.ref_name }} completed with status: ${{ job.status }}',
+      SLACK_WEBHOOK_URL: '${{ secrets.SLACK_WEBHOOK }}',
+      SLACK_WEBHOOK_TYPE: 'INCOMING_WEBHOOK'
     },
   };
 }
@@ -125,14 +152,33 @@ const notificationHelpers = {
    */
   createAndroidNotificationSteps(build: BuildOptions): GitHubStep[] {
     const steps: GitHubStep[] = [];
-
-    // Add Slack notification if configured
+    
+    // Add Slack notification if configured - doesn't need special PR detection
     if (build.notification === 'slack' || build.notification === 'both') {
       steps.push(createSlackNotificationStep(build, 'Android'));
     }
 
     // Add PR comment notification if configured
     if (build.notification === 'pr-comment' || build.notification === 'both') {
+      // Add source detection step first if needed for PR comments
+      steps.push({
+        name: 'Determine PR Status',
+        id: 'build-source',
+        run: `
+# Determine if this is a PR or a direct push (simplified for PR comments only)
+EVENT_NAME="\${{ github.event_name }}"
+if [[ "$EVENT_NAME" == "pull_request" ]] || [[ "$EVENT_NAME" == "pull_request_target" ]]; then
+  # This is a PR - set output flag
+  echo "is_pr=true" >> $GITHUB_OUTPUT
+  echo "📌 Running on PR #\${{ github.event.pull_request.number }} from branch \${{ github.head_ref }}"
+else
+  # This is a direct push - set output flag
+  echo "is_pr=false" >> $GITHUB_OUTPUT
+  echo "📌 Running on branch \${{ github.ref_name }}"
+fi
+`,
+      });
+
       // Add GitHub CLI installation step (platform-agnostic)
       const cliInstallStep = createGitHubCLIInstallationStep();
       cliInstallStep.if = "steps.build-source.outputs.is_pr == 'true'";
@@ -151,13 +197,32 @@ const notificationHelpers = {
   createIOSNotificationSteps(build: BuildOptions): GitHubStep[] {
     const steps: GitHubStep[] = [];
 
-    // Add Slack notification if configured
+    // Add Slack notification if configured - doesn't need special PR detection
     if (build.notification === 'slack' || build.notification === 'both') {
       steps.push(createSlackNotificationStep(build, 'iOS'));
     }
 
     // Add PR comment notification if configured
     if (build.notification === 'pr-comment' || build.notification === 'both') {
+      // Add source detection step first if needed for PR comments
+      steps.push({
+        name: 'Determine PR Status',
+        id: 'build-source',
+        run: `
+# Determine if this is a PR or a direct push (simplified for PR comments only)
+EVENT_NAME="\${{ github.event_name }}"
+if [[ "$EVENT_NAME" == "pull_request" ]] || [[ "$EVENT_NAME" == "pull_request_target" ]]; then
+  # This is a PR - set output flag
+  echo "is_pr=true" >> $GITHUB_OUTPUT
+  echo "📌 Running on PR #\${{ github.event.pull_request.number }} from branch \${{ github.head_ref }}"
+else
+  # This is a direct push - set output flag
+  echo "is_pr=false" >> $GITHUB_OUTPUT
+  echo "📌 Running on branch \${{ github.ref_name }}"
+fi
+`,
+      });
+      
       // Add GitHub CLI installation step (platform-agnostic)
       const cliInstallStep = createGitHubCLIInstallationStep();
       cliInstallStep.if = "steps.build-source.outputs.is_pr == 'true'";

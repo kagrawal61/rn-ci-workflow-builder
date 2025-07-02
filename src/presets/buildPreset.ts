@@ -37,9 +37,6 @@ export function buildBuildPipeline(
   // Create common setup steps using helper
   const setupSteps = commonSteps.createSetupSteps(packageManager, cache);
 
-  // Get PR source detection step
-  const determineBuildSourceStep = commonSteps.createSourceDetectionStep();
-
   // Common build parameters for both iOS and Android
   const buildParams = `--variant ${build.variant}`;
 
@@ -48,7 +45,6 @@ export function buildBuildPipeline(
     // Create base Android build steps
     let androidBuildSteps = platformHelpers.createAndroidBuildSteps(
       setupSteps,
-      determineBuildSourceStep,
       packageManager,
       buildParams,
       build
@@ -71,12 +67,15 @@ export function buildBuildPipeline(
     };
   }
 
-  // iOS build steps
+  // iOS build steps - temporarily disabled
+  // TEMPORARILY DISABLED: iOS platform support is coming soon
+  // This block is disabled to prevent iOS job creation even if 'both' is selected in config
+  // Uncomment and restore this block when iOS support is ready
+  /*
   if (build.platform === 'ios' || build.platform === 'both') {
     // Create base iOS build steps
     let iosBuildSteps = platformHelpers.createIOSBuildSteps(
       setupSteps,
-      determineBuildSourceStep,
       packageManager,
       buildParams,
       build
@@ -98,6 +97,7 @@ export function buildBuildPipeline(
       steps: iosBuildSteps,
     };
   }
+  */
 
   // Add quality check job if health checks are included
   if (build.includeHealthCheck) {
@@ -148,10 +148,8 @@ export function buildBuildPipeline(
   // Set up dependencies between jobs
   if (build.includeHealthCheck) {
     // Build jobs depend on quality check
-    if (build.platform === 'ios' || build.platform === 'both') {
-      jobs['build-ios'].needs = ['quality-check'];
-    }
-    if (build.platform === 'android' || build.platform === 'both') {
+    // iOS job dependencies removed as iOS support is coming soon
+    if (build.platform === 'android' || build.platform === 'both' || build.platform === 'ios') {
       jobs['build-android'].needs = ['quality-check'];
     }
   }

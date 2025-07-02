@@ -144,7 +144,7 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
   }
 
   if (groups.notification.length > 0) {
-    summary += `### Notifications (${NOTIFICATION_SECRET_DOCS[buildOptions.notification].name})\n\n`;
+    summary += `Notifications (${NOTIFICATION_SECRET_DOCS[buildOptions.notification].name})\n\n`;
     for (const secret of groups.notification) {
       summary += `- \`${secret.name}\`: ${secret.description}\n`;
     }
@@ -159,7 +159,7 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
   }
 
   summary +=
-    '\n\nAdd these secrets to your GitHub repository settings or include them in your workflow configuration.';
+    '\n\nAdd these secrets to your GitHub repository settings and include them in your workflow configuration.';
 
   return summary;
 }
@@ -210,9 +210,9 @@ export function getSecretTooltips() {
       github: 'No additional secrets required',
     },
     notification: {
-      slack: 'Requires SLACK_WEBHOOK',
+      slack: 'Requires SLACK_WEBHOOK for the official Slack GitHub Action',
       'pr-comment': 'No additional secrets required',
-      both: 'Requires SLACK_WEBHOOK',
+      both: 'Requires SLACK_WEBHOOK for the official Slack GitHub Action',
       none: 'No notifications will be sent',
     },
   };

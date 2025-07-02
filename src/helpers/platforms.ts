@@ -10,14 +10,12 @@ const platformHelpers = {
    */
   createAndroidBuildSteps(
     setupSteps: GitHubStep[],
-    determineBuildSourceStep: GitHubStep,
     _packageManager: PackageManager, // Not used after switch to npx, kept for API compatibility
     _buildParams: string, // Not used after switch to official CLI, kept for API compatibility
     build: BuildOptions
   ): GitHubStep[] {
     return [
       ...setupSteps,
-      determineBuildSourceStep,
       // Verify Android environment
       {
         name: 'Verify Android Environment',
@@ -166,14 +164,12 @@ fi`;
    */
   createIOSBuildSteps(
     setupSteps: GitHubStep[],
-    determineBuildSourceStep: GitHubStep,
     _packageManager: PackageManager, // Not used after switch to npx, kept for API compatibility
     _buildParams: string, // Not used after switch to official CLI, kept for API compatibility
     build: BuildOptions // Adding build options parameter to access variant
   ): GitHubStep[] {
     return [
       ...setupSteps,
-      determineBuildSourceStep,
       // Verify iOS environment
       {
         name: 'Verify iOS Environment',
