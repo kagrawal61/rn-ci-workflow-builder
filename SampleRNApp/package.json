@@ -6,8 +6,15 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "test:ci": "jest --ci",
+    "tsc": "tsc",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json}\"",
+    "validate": "npm run type-check && npm run lint && npm run format:check && npm run test"
   },
   "dependencies": {
     "react": "19.1.0",

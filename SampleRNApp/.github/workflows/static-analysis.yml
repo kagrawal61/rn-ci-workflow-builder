@@ -1,0 +1,44 @@
+name: React Native Static Analysis
+'on':
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - docs/**
+      - '*.md'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: {}
+env: {}
+jobs:
+  static_analysis:
+    name: Run Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - name: Get yarn cache dir
+        id: yarn-cache
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      - name: Setup cache
+        uses: actions/cache@v3
+        with:
+          path: ''
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+      - name: Install
+        run: yarn install --immutable
+      - name: TypeScript
+        run: yarn tsc --noEmit
+      - name: ESLint
+        run: yarn lint
+      - name: Prettier
+        run: yarn format:check
+      - name: Unit tests
+        run: yarn test --ci
