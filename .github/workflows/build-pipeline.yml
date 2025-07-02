@@ -1,5 +1,8 @@
 name: React Native Build Pipeline
 'on':
+  pull_request:
+    branches:
+      - develop
   workflow_dispatch: {}
 env: {}
 jobs:
@@ -93,3 +96,51 @@ jobs:
           name: android-release-apk-${{ github.head_ref || github.ref_name }}
           path: SampleRNApp/android/app/build/outputs/apk/**/*.apk
           retention-days: 30
+      - name: Determine PR Status
+        id: build-source
+        run: |
+
+          # Determine if this is a PR or a direct push (simplified for PR comments only)
+          EVENT_NAME="${{ github.event_name }}"
+          if [[ "$EVENT_NAME" == "pull_request" ]] || [[ "$EVENT_NAME" == "pull_request_target" ]]; then
+            # This is a PR - set output flag
+            echo "is_pr=true" >> $GITHUB_OUTPUT
+            echo "📌 Running on PR #${{ github.event.pull_request.number }} from branch ${{ github.head_ref }}"
+          else
+            # This is a direct push - set output flag
+            echo "is_pr=false" >> $GITHUB_OUTPUT
+            echo "📌 Running on branch ${{ github.ref_name }}"
+          fi
+      - name: Setup GitHub CLI
+        run: |-
+          # GitHub CLI is pre-installed on GitHub Actions runners
+          echo "Using pre-installed GitHub CLI"
+          gh --version
+          echo "GitHub CLI setup completed successfully"
+        if: steps.build-source.outputs.is_pr == 'true'
+      - name: Add PR Comment via GitHub CLI
+        if: steps.build-source.outputs.is_pr == 'true'
+        run: |-
+          # Create comment message
+          MESSAGE="Android release build completed!
+
+          Download: Available in GitHub Artifacts"
+
+          # Check if comment already exists and update it
+          PR_NUM="${{ github.event.number }}"
+          SEARCH_TEXT="Android release build"
+          JQ_SELECT=".comments[] | select(.body | contains(\"$SEARCH_TEXT\"))"
+          JQ_FILTER="$JQ_SELECT | .id"
+          EXISTING_COMMENT_ID=$(gh pr view $PR_NUM --json comments --jq "$JQ_FILTER" | head -1)
+
+          if [ ! -z "$EXISTING_COMMENT_ID" ]; then
+            echo "Updating existing comment..."
+            REPO="${{ github.repository }}"
+            API_URL="/repos/$REPO/issues/comments/$EXISTING_COMMENT_ID"
+            gh api -X PATCH "$API_URL" -f body="$MESSAGE"
+          else
+            echo "Creating new comment..."
+            gh pr comment $PR_NUM --body "$MESSAGE"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
