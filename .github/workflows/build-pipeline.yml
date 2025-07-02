@@ -4,6 +4,13 @@ name: React Native Build Pipeline
     branches:
       - develop
   workflow_dispatch: {}
+
+# Add explicit permissions
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 env: {}
 jobs:
   build-android:
