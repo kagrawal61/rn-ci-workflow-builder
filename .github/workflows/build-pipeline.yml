@@ -91,5 +91,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android-release-apk-${{ github.head_ref || github.ref_name }}
-          path: android/app/build/outputs/apk/**/*.apk
+          path: SampleRNApp/android/app/build/outputs/apk/**/*.apk
           retention-days: 30
