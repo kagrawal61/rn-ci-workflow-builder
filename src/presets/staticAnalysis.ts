@@ -76,9 +76,9 @@ export function buildStaticAnalysisPipeline(
     });
   }
 
-  // Test job configuration
+  // Static analysis job configuration
   const testJob: GitHubJob = {
-    name: 'Run Tests',
+    name: 'Run Static Analysis',
     'runs-on': runsOn,
     steps: testSteps,
   };
@@ -86,8 +86,8 @@ export function buildStaticAnalysisPipeline(
   // Jobs collection
   const jobs: Record<string, GitHubJob> = {};
 
-  // Add test job to jobs collection
-  jobs.test = testJob;
+  // Add static analysis job to jobs collection
+  jobs.static_analysis = testJob;
 
   return {
     name: opts.name ?? 'Static Analysis',

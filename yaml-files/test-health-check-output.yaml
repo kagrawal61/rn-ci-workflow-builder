@@ -49,8 +49,8 @@ jobs:
           else
             echo "⏭️ Workflow will be skipped: $SKIP_REASON"
           fi
-  test:
-    name: Run Tests
+  static_analysis:
+    name: Run Static Analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
