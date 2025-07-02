@@ -37,7 +37,7 @@ Feature suggestions are welcome! Please create an issue with:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/rn-ci-workflow-builder.git
+git clone https://github.com/kagrawal61/rn-ci-workflow-builder.git
 cd rn-ci-workflow-builder
 
 # Install dependencies
