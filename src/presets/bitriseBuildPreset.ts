@@ -52,17 +52,21 @@ echo "Generating both APK and AAB formats for ${variant} build"
 
 # First generate APK
 echo "Using Gradle task: ${apkTask} for ${variant} build with APK output format"
-./android/gradlew ${apkTask} || {
+
+cd android
+./gradlew ${apkTask} || {
   echo "❌ Android APK build failed"
   exit 1
 }
 
 # Then generate AAB
 echo "Using Gradle task: ${aabTask} for ${variant} build with AAB output format"
-./android/gradlew ${aabTask} || {
+./gradlew ${aabTask} || {
   echo "❌ Android AAB build failed"
   exit 1
 }
+
+cd ..
 
 echo "✅ Android build completed successfully"
 
@@ -87,10 +91,13 @@ fi`;
 # Building APK
 echo "Using Gradle task: ${task} for ${variant} build with APK output format"
 
-./android/gradlew ${task} || {
+cd android
+./gradlew ${task} || {
   echo "❌ Android build failed"
   exit 1
 }
+
+cd ..
 
 echo "✅ Android build completed successfully"
 
@@ -109,10 +116,13 @@ fi`;
 # Building AAB
 echo "Using Gradle task: ${task} for ${variant} build with AAB output format"
 
-./android/gradlew ${task} || {
+cd android
+./gradlew ${task} || {
   echo "❌ Android build failed"
   exit 1
 }
+
+cd ..
 
 echo "✅ Android build completed successfully"
 
