@@ -1,0 +1,118 @@
+name: React Native Build Pipeline
+'on':
+  workflow_dispatch: {}
+env: {}
+jobs:
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: SampleRNApp
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: yarn
+      - name: Install
+        run: yarn install --immutable
+      - name: Verify Android Environment
+        id: android-env-check
+        run: |
+
+          # Check for required directories and files
+          echo "🔍 Verifying Android project setup..."
+
+          if [ ! -d "android" ]; then
+            echo "❌ Error: Android directory not found"
+            echo "Make sure you're running this workflow from the root"
+            echo "of a React Native project"
+            exit 1
+          fi
+
+          if [ ! -f "android/gradlew" ]; then
+            echo "⚠️ Warning: Gradle wrapper not found at android/gradlew"
+            echo "Build may fail if Gradle wrapper is not properly set up"
+          fi
+
+          echo "✅ Android environment looks good"
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Make Gradlew Executable
+        run: chmod +x android/gradlew
+      - name: Run Android Build
+        id: android-build
+        run: |
+
+          echo "🚀 Starting Android build for release..."
+
+          # Check for .env file and use it if exists
+          if [ -f ".env" ]; then
+            echo "✅ Found .env file, will be used for the build"
+          else
+            echo "⚠️ No .env file found in project root"
+          fi
+
+          # Run the build with error capture
+          echo "Building Android app using official React Native CLI..."
+
+          # Using direct Gradle commands for more reliable builds
+          echo "Using Gradle task: assembleRelease for release build with apk output format"
+
+          # Using direct Gradle command
+          ./android/gradlew assembleRelease || {
+            echo "❌ Android build failed"
+            echo "::error::Android build failed. Check logs for details."
+            exit 1
+          }
+
+          echo "✅ Android build completed successfully"
+
+          # Verify the expected outputs based on output type
+          if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+            echo "✅ APK files generated successfully"
+          else
+            echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
+          fi
+      - name: Upload Android Artifact
+        id: artifact-upload-android
+        if: success()
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-release-apk-${{ github.head_ref || github.ref_name }}
+          path: android/app/build/outputs/apk/**/*.apk
+          retention-days: 30
+    needs:
+      - quality-check
+  quality-check:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: SampleRNApp
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - name: Install
+        run: yarn install --immutable
+      - name: TypeScript
+        run: yarn tsc --noEmit
+      - name: ESLint
+        run: yarn lint
+      - name: Prettier
+        run: yarn format:check
+      - name: Unit tests
+        run: yarn test --ci
