@@ -553,8 +553,6 @@ The workflow generator includes a contextual secret management system that ident
 - Replaces secret placeholders with GitHub Actions secret syntax
 - Groups secrets by context (storage, platform, notification)
 
-Learn more in the [Secret Management documentation](./docs/secret-management.md)
-
 ## License
 
 MIT

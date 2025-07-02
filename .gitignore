@@ -125,7 +125,3 @@ $RECYCLE.BIN/
 *.bak
 *.backup
 *.tmp
-
-# Local development files
-CLAUDE.md
-docs/workflows/*

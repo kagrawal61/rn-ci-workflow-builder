@@ -14,11 +14,9 @@
     },
     "packageManager": "yarn",
     "nodeVersions": [18, 20],
-    "secrets": [
-      "SLACK_WEBHOOK"
-    ],
+    "secrets": ["SLACK_WEBHOOK"],
     "env": {
       "CUSTOM_VAR": "demo"
     }
   }
-} 
+}
