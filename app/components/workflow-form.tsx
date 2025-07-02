@@ -71,7 +71,7 @@ interface WorkflowFormProps {
 }
 
 export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
-  const nodeVersionOptions = [14, 16, 18, 20];
+  const nodeVersionOptions = [18, 20];
 
   const [envVarKey, setEnvVarKey] = useState('');
   const [envVarValue, setEnvVarValue] = useState('');
