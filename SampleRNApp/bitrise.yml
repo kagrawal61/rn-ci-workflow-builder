@@ -1,0 +1,83 @@
+format_version: 11
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: react-native
+meta:
+  bitrise.io:
+    stack: linux-docker-android-22.04
+    machine_type_id: elite
+app:
+  envs:
+    - CI: 'true'
+    - NODE_OPTIONS: '--max_old_space_size=4096'
+    - YARN_ENABLE_IMMUTABLE_INSTALLS: '1'
+workflows:
+  rn-health-check:
+    title: React Native Static Analysis
+    description: Run health checks including TypeScript, ESLint, Prettier, and unit tests
+    steps:
+      - cache-pull@2:
+          title: Restore Cache
+      - git-clone@8:
+          title: Git Clone
+      - nvm@1:
+          title: Setup Node.js 18
+          inputs:
+            - node_version: '18'
+      - script@1:
+          title: Enable Corepack and Activate Yarn
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                corepack enable
+                corepack prepare yarn@stable --activate
+      - script@1:
+          title: Install Dependencies
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                yarn install --immutable
+      - script@1:
+          title: TypeScript Check
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                yarn tsc --noEmit
+      - script@1:
+          title: ESLint Check
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                yarn lint
+      - script@1:
+          title: Prettier Check
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                yarn format:check
+      - script@1:
+          title: Unit Tests
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                yarn test --ci
+      - deploy-to-bitrise-io@2:
+          title: Upload Test Results
+          inputs:
+            - deploy_path: ./coverage
+      - cache-push@2:
+          title: Save Cache
+          inputs:
+            - paths: $HOME/.cache/yarn/v*
+
