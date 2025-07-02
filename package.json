@@ -3,6 +3,29 @@
   "version": "0.1.0",
   "description": "CLI + library to generate GitHub Actions workflows for React-Native CI/CD pipelines (static-analysis, build, etc.)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kagrawal61/rn-ci-workflow-builder"
+  },
+  "homepage": "https://github.com/kagrawal61/rn-ci-workflow-builder",
+  "bugs": {
+    "url": "https://github.com/kagrawal61/rn-ci-workflow-builder/issues"
+  },
+  "keywords": [
+    "react-native",
+    "github-actions",
+    "bitrise",
+    "ci-cd",
+    "mobile-ci",
+    "workflow-generator",
+    "cli",
+    "devops",
+    "mobile-build",
+    "automation"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "type": "commonjs",
   "main": "dist/src/generator.js",
   "types": "dist/src/generator.d.ts",

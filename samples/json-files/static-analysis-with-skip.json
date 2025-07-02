@@ -1,7 +1,7 @@
 {
   "kind": "static-analysis",
   "options": {
-    "name": "Test Static Analysis with Skip Conditions",
+    "name": "Static Analysis with Skip Conditions",
     "triggers": {
       "push": {
         "branches": ["main", "develop"]
