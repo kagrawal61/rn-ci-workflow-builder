@@ -15,16 +15,13 @@ jobs:
   static_analysis:
     name: Run Static Analysis
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: SampleRNApp
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Navigate to SampleRNApp
-        run: |
-          echo "Navigating to SampleRNApp directory"
-          cd SampleRNApp
-          echo "Current directory: $(pwd)"
-          echo "WORKDIR=SampleRNApp" >> $GITHUB_ENV
       
       - name: Setup Node
         uses: actions/setup-node@v4
