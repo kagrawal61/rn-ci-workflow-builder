@@ -1,0 +1,9 @@
+# Ignore iOS and Android folders
+ios/
+android/
+
+# Other common files to ignore
+node_modules/
+build/
+dist/
+coverage/
