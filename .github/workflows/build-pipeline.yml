@@ -85,7 +85,7 @@ jobs:
         id: artifact-upload-android
         if: success()
         continue-on-error: true
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-release-apk-${{ github.head_ref || github.ref_name }}
           path: android/app/build/outputs/apk/**/*.apk
