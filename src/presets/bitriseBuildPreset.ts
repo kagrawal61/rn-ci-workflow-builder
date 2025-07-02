@@ -1,10 +1,244 @@
 import {
-  WorkflowOptions,
   BitriseConfig,
   BitriseStep,
   BitriseWorkflow,
+  WorkflowOptions,
 } from '../types';
 import { BuildOptions } from './types';
+
+// Helper function to generate Android build script content
+function generateAndroidBuildScript(
+  variant: string,
+  outputType: string
+): string {
+  const isDebug = variant === 'debug';
+
+  // Common script parts
+  const commonHeader = `#!/usr/bin/env bash
+set -euo pipefail
+
+# Check for required directories and files
+echo "🔍 Verifying Android project setup..."
+
+if [ ! -d "android" ]; then
+  echo "❌ Error: Android directory not found"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
+  exit 1
+fi
+
+if [ ! -f "android/gradlew" ]; then
+  echo "⚠️ Warning: Gradle wrapper not found at android/gradlew"
+  echo "Build may fail if Gradle wrapper is not properly set up"
+fi
+
+echo "✅ Android environment looks good"
+
+# Make gradlew executable
+chmod +x android/gradlew
+
+echo "🚀 Starting Android build for ${variant}..."`;
+
+  // Different script parts based on output type
+  if (outputType === 'both') {
+    // For both APK and AAB
+    const apkTask = isDebug ? 'assembleDebug' : 'assembleRelease';
+    const aabTask = isDebug ? 'bundleDebug' : 'bundleRelease';
+
+    return `${commonHeader}
+
+# Generating both APK and AAB formats
+echo "Generating both APK and AAB formats for ${variant} build"
+
+# First generate APK
+echo "Using Gradle task: ${apkTask} for ${variant} build with APK output format"
+./android/gradlew ${apkTask} || {
+  echo "❌ Android APK build failed"
+  exit 1
+}
+
+# Then generate AAB
+echo "Using Gradle task: ${aabTask} for ${variant} build with AAB output format"
+./android/gradlew ${aabTask} || {
+  echo "❌ Android AAB build failed"
+  exit 1
+}
+
+echo "✅ Android build completed successfully"
+
+# Check for both APK and AAB files
+if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+  echo "✅ APK files generated successfully"
+else
+  echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
+fi
+
+if ls android/app/build/outputs/bundle/**/*.aab 1> /dev/null 2>&1; then
+  echo "✅ AAB files generated successfully"
+else
+  echo "⚠️ Warning: Expected AAB files not found. Storage steps may fail."
+fi`;
+  } else if (outputType === 'apk') {
+    // For APK only
+    const task = isDebug ? 'assembleDebug' : 'assembleRelease';
+
+    return `${commonHeader}
+
+# Building APK
+echo "Using Gradle task: ${task} for ${variant} build with APK output format"
+
+./android/gradlew ${task} || {
+  echo "❌ Android build failed"
+  exit 1
+}
+
+echo "✅ Android build completed successfully"
+
+# Verify the expected outputs
+if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+  echo "✅ APK files generated successfully"
+else
+  echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
+fi`;
+  } else {
+    // For AAB only
+    const task = isDebug ? 'bundleDebug' : 'bundleRelease';
+
+    return `${commonHeader}
+
+# Building AAB
+echo "Using Gradle task: ${task} for ${variant} build with AAB output format"
+
+./android/gradlew ${task} || {
+  echo "❌ Android build failed"
+  exit 1
+}
+
+echo "✅ Android build completed successfully"
+
+# Verify the expected outputs
+if ls android/app/build/outputs/bundle/**/*.aab 1> /dev/null 2>&1; then
+  echo "✅ AAB files generated successfully"
+else
+  echo "⚠️ Warning: Expected AAB files not found. Storage steps may fail."
+fi`;
+  }
+}
+
+// Helper function to generate iOS build script content
+function generateIOSBuildScript(variant: string): string {
+  const isDebug = variant === 'debug';
+  const configuration = isDebug ? 'Debug' : 'Release';
+
+  return `#!/usr/bin/env bash
+set -euo pipefail
+
+# Check for required directories and files
+echo "🔍 Verifying iOS project setup..."
+
+if [ ! -d "ios" ]; then
+  echo "❌ Error: iOS directory not found"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
+  exit 1
+fi
+
+if [ ! -f "ios/Podfile" ]; then
+  echo "⚠️ Warning: Podfile not found"
+  echo "iOS build might fail without a valid Podfile"
+fi
+
+echo "✅ iOS environment looks good"
+
+# Determine the configuration based on variant
+CONFIGURATION="${configuration}"
+
+echo "🚀 Starting iOS build with configuration: $CONFIGURATION..."
+
+# Extract project name from xcworkspace directory
+WORKSPACE_PATH=$(find ios -name "*.xcworkspace" -type d | head -n 1)
+if [ -z "$WORKSPACE_PATH" ]; then
+  echo "❌ No .xcworkspace found in ios directory"
+  exit 1
+fi
+
+PROJECT_NAME=$(basename "$WORKSPACE_PATH" .xcworkspace)
+echo "Detected project: $PROJECT_NAME"
+
+# Build the iOS project using xcodebuild
+echo "Building iOS project using native xcodebuild commands..."`;
+}
+
+// Helper function to generate notification steps for Bitrise
+function generateBitriseNotificationSteps(
+  build: BuildOptions,
+  platform: string
+): BitriseStep[] {
+  const steps: BitriseStep[] = [];
+
+  // Default Bitrise deployment step will already handle basic notifications
+  // We'll add extra steps for Slack or other notification methods based on config
+
+  if (build.notification === 'slack' || build.notification === 'both') {
+    // Add Slack notification step
+    steps.push({
+      'slack@3': {
+        title: `Send ${platform} Build Notification to Slack`,
+        inputs: [
+          { webhook_url: '$SLACK_WEBHOOK_URL' },
+          { channel: '#builds' },
+          {
+            text: `${platform} ${build.variant} build completed on branch: $BITRISE_GIT_BRANCH`,
+          },
+          {
+            buttons: `View Build Details|${platform === 'Android' ? '$BITRISE_PUBLIC_INSTALL_PAGE_URL' : '$BITRISE_PUBLIC_INSTALL_PAGE_URL_IOS'}`,
+          },
+          {
+            pretext: `${platform} ${build.variant} Build Result`,
+          },
+          {
+            fields: `Repository|$BITRISE_APP_TITLE
+Branch|$BITRISE_GIT_BRANCH
+Commit|$BITRISE_GIT_COMMIT
+Build Time|$BITRISE_BUILD_DURATION`,
+          },
+        ],
+        is_always_run: true,
+      },
+    });
+  }
+
+  // Add PR comment notification if configured
+  if (build.notification === 'pr-comment' || build.notification === 'both') {
+    steps.push({
+      'comment-on-github-pull-request@0': {
+        title: `Add ${platform} Build Comment to PR`,
+        inputs: [
+          { body: `## ${platform} ${build.variant} Build Results
+
+✅ Build completed successfully!
+
+### Download Details
+📱 ${platform} ${build.variant} build is ready for testing.
+🔗 Download URL: ${platform === 'Android' ? '$BITRISE_PUBLIC_INSTALL_PAGE_URL' : '$BITRISE_PUBLIC_INSTALL_PAGE_URL_IOS'}
+
+### Build Information
+- Repository: $BITRISE_APP_TITLE
+- Branch: $BITRISE_GIT_BRANCH
+- Commit: $BITRISE_GIT_COMMIT
+- Build Time: $BITRISE_BUILD_DURATION
+
+> Build generated via React Native CI Workflow Builder` },
+          { personal_access_token: '$GITHUB_TOKEN' },
+        ],
+        is_always_run: false,
+        run_if: '.IsCI',
+      },
+    });
+  }
+
+  return steps;
+}
 
 export function buildBitriseBuildPipeline(
   opts: WorkflowOptions & { build?: BuildOptions }
@@ -13,9 +247,11 @@ export function buildBitriseBuildPipeline(
     triggers,
     env,
     packageManager = 'yarn',
+    nodeVersions = [20],
     build = {
       platform: 'android',
       variant: 'release',
+      androidOutputType: 'apk', // Add support for androidOutputType
       storage: 'bitrise',
       notification: 'none',
       includeHealthCheck: true,
@@ -65,10 +301,10 @@ export function buildBitriseBuildPipeline(
     },
     {
       'nvm@1': {
-        title: 'Setup Node.js 18',
+        title: `Setup Node.js ${nodeVersions[0]}`,
         inputs: [
           {
-            node_version: '18',
+            node_version: `${nodeVersions[0]}`,
           },
         ],
       },
@@ -171,30 +407,14 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
       ...healthCheckSteps,
       {
         'script@1': {
-          title: 'Bundle React Native',
+          title: 'Build Android App',
           inputs: [
             {
-              content: `#!/usr/bin/env bash
-set -euo pipefail
-
-npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res`,
+              content: generateAndroidBuildScript(
+                build.variant || 'release',
+                (build as BuildOptions).androidOutputType || 'apk'
+              ),
             },
-          ],
-        },
-      },
-      {
-        'gradle-runner@2': {
-          title: 'Build Android',
-          inputs: [
-            {
-              gradle_task:
-                (build as BuildOptions).androidOutputType === 'aab'
-                  ? 'bundleRelease'
-                  : (build as BuildOptions).androidOutputType === 'both'
-                    ? 'assembleRelease bundleRelease'
-                    : 'assembleRelease',
-            },
-            { gradlew_path: './android/gradlew' },
           ],
         },
       },
@@ -210,14 +430,25 @@ npx react-native bundle --platform android --dev false --entry-file index.js --b
       });
     }
 
-    // Add deployment step
+    // Add deployment step for artifacts
     androidSteps.push({
       'deploy-to-bitrise-io@2': {
         title: 'Deploy to Bitrise.io',
-        inputs: [{ notify_user_groups: 'everyone' }],
+        inputs: [
+          { notify_user_groups: 'everyone' },
+          // Enable public install page for builds when notifications are needed
+          { is_enable_public_page: 'true' }
+        ],
       },
     });
-    
+
+    // Add custom notification steps based on configuration
+    const androidNotificationSteps = generateBitriseNotificationSteps(
+      build,
+      'Android'
+    );
+    androidSteps.push(...androidNotificationSteps);
+
     // Add cache push step as final step
     androidSteps.push(cachePushStep);
 
@@ -241,13 +472,10 @@ npx react-native bundle --platform android --dev false --entry-file index.js --b
       },
       {
         'script@1': {
-          title: 'Bundle React Native',
+          title: 'Build iOS App',
           inputs: [
             {
-              content: `#!/usr/bin/env bash
-set -euo pipefail
-
-npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle --assets-dest ios`,
+              content: generateIOSBuildScript(build.variant || 'release'),
             },
           ],
         },
@@ -268,9 +496,17 @@ npx react-native bundle --platform ios --dev false --entry-file index.js --bundl
       {
         'deploy-to-bitrise-io@2': {
           title: 'Deploy to Bitrise.io',
-          inputs: [{ notify_user_groups: 'everyone' }],
+          inputs: [
+            { notify_user_groups: 'everyone' },
+            // Enable public install page for builds when notifications are needed
+            { is_enable_public_page: 'true' }
+          ],
         },
       },
+
+      // Add custom notification steps based on configuration
+      ...generateBitriseNotificationSteps(build, 'iOS'),
+
       cachePushStep,
     ];
 
@@ -340,11 +576,27 @@ npx react-native bundle --platform ios --dev false --entry-file index.js --bundl
     default_step_lib_source:
       'https://github.com/bitrise-io/bitrise-steplib.git',
     project_type: 'react-native',
-    meta: build.platform === 'both' 
-      ? { 'bitrise.io': { stack: 'osx-xcode-15.3.x-ventura', machine_type_id: 'g2-m1.8core' } }
-      : build.platform === 'ios'
-        ? { 'bitrise.io': { stack: 'osx-xcode-15.3.x-ventura', machine_type_id: 'g2-m1.8core' } }
-        : { 'bitrise.io': { stack: 'linux-docker-android-22.04', machine_type_id: 'elite' } },
+    meta:
+      build.platform === 'both'
+        ? {
+            'bitrise.io': {
+              stack: 'osx-xcode-15.3.x-ventura',
+              machine_type_id: 'g2-m1.8core',
+            },
+          }
+        : build.platform === 'ios'
+          ? {
+              'bitrise.io': {
+                stack: 'osx-xcode-15.3.x-ventura',
+                machine_type_id: 'g2-m1.8core',
+              },
+            }
+          : {
+              'bitrise.io': {
+                stack: 'linux-docker-android-22.04',
+                machine_type_id: 'elite',
+              },
+            },
     app: {
       envs: appEnvs.length > 0 ? appEnvs : undefined,
     },
