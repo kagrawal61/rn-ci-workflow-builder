@@ -157,6 +157,8 @@ export interface BitriseStep {
     | {
         /** Step title/name */
         title?: string;
+        /** Step ID for reference */
+        id?: string;
         /** Step inputs - must be array format for Bitrise CLI compatibility */
         inputs?: Array<Record<string, string | boolean | number>>;
         /** Condition for step execution */
@@ -183,6 +185,13 @@ export interface BitriseWorkflow {
   before_run?: string[];
   /** After run workflows */
   after_run?: string[];
+  /** Meta configuration specific to this workflow */
+  meta?: {
+    'bitrise.io'?: {
+      stack?: string;
+      machine_type_id?: string;
+    };
+  };
 }
 
 /**
@@ -195,6 +204,13 @@ export interface BitriseConfig {
   default_step_lib_source?: string;
   /** Project type */
   project_type?: string;
+  /** Meta configuration for stack and machine type */
+  meta?: {
+    'bitrise.io'?: {
+      stack?: string;
+      machine_type_id?: string;
+    };
+  };
   /** App-level configuration */
   app?: {
     /** App-level environment variables */

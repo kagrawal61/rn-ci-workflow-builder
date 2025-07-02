@@ -73,7 +73,7 @@ fi
 # Run the build with error capture
 echo "Building Android app using official React Native CLI..."
 
-# Using official React Native CLI with appropriate task based on variant and output type
+# Using direct Gradle commands for more reliable builds
 ${(() => {
   // Determine the appropriate Gradle task based on variant and output type
   const variant = build.variant;
@@ -88,7 +88,7 @@ ${(() => {
 
 # First generate APK
 echo "Using Gradle task: ${apkTask} for ${variant} build with APK output format"
-npx react-native build-android --tasks=${apkTask} || {
+./android/gradlew ${apkTask} || {
   echo "❌ Android APK build failed"
   echo "::error::Android APK build failed. Check logs for details."
   exit 1
@@ -96,7 +96,7 @@ npx react-native build-android --tasks=${apkTask} || {
 
 # Then generate AAB
 echo "Using Gradle task: ${aabTask} for ${variant} build with AAB output format"
-npx react-native build-android --tasks=${aabTask} || {
+./android/gradlew ${aabTask} || {
   echo "❌ Android AAB build failed"
   echo "::error::Android AAB build failed. Check logs for details."
   exit 1
@@ -113,8 +113,8 @@ npx react-native build-android --tasks=${aabTask} || {
 
     return `echo "Using Gradle task: ${task} for ${variant} build with ${outputType} output format"
 
-# Using React Native CLI with --tasks flag
-npx react-native build-android --tasks=${task} || {
+# Using direct Gradle command
+./android/gradlew ${task} || {
   echo "❌ Android build failed"
   echo "::error::Android build failed. Check logs for details."
   exit 1
@@ -239,23 +239,87 @@ else
 fi
 
 # Run the build with error capture
-echo "Building iOS app using official React Native CLI..."
+echo "Building iOS app using direct Xcode commands..."
 
-# Convert variant to lowercase for configuration parameter
-MODE=$(echo "${build.variant}" | tr '[:upper:]' '[:lower:]')
-# This is a workaround - we need to use string value directly in MODE
+# Determine the configuration based on variant
+CONFIG=$(echo "${build.variant}" | tr '[:upper:]' '[:lower:]')
+if [ "$CONFIG" == "debug" ]; then
+  CONFIGURATION="Debug"
+else
+  CONFIGURATION="Release"
+fi
 
-# Using official React Native CLI for building iOS app
-npx react-native build-ios --mode=$MODE || {
-  echo "❌ iOS build failed"
-  echo "::error::iOS build failed. Check logs for details."
+echo "Using Xcode build with configuration: $CONFIGURATION"
+
+# Extract project name from xcworkspace directory
+WORKSPACE_PATH=$(find ios -name "*.xcworkspace" -type d | head -n 1)
+if [ -z "$WORKSPACE_PATH" ]; then
+  echo "❌ No .xcworkspace found in ios directory"
   exit 1
-}
+fi
+
+PROJECT_NAME=$(basename "$WORKSPACE_PATH" .xcworkspace)
+echo "Detected project: $PROJECT_NAME"
+
+# Using direct Xcode command for more reliable builds
+xcodebuild \
+  -workspace "ios/$PROJECT_NAME.xcworkspace" \
+  -scheme "$PROJECT_NAME" \
+  -configuration "$CONFIGURATION" \
+  -derivedDataPath ios/build \
+  -destination 'generic/platform=iOS' \
+  -archivePath "ios/build/$PROJECT_NAME.xcarchive" \
+  archive || {
+    echo "❌ iOS build failed"
+    echo "::error::Xcode build failed. Check logs for details."
+    exit 1
+  }
+
+# Export IPA for distribution
+xcodebuild \
+  -exportArchive \
+  -archivePath "ios/build/$PROJECT_NAME.xcarchive" \
+  -exportPath "ios/build/output" \
+  -exportOptionsPlist "ios/ExportOptions.plist" || {
+    echo "❌ iOS export failed"
+    echo "::warning::Xcode export failed. This might be due to missing ExportOptions.plist file."
+    
+    # Create a basic ExportOptions.plist if it doesn't exist
+    if [ ! -f "ios/ExportOptions.plist" ]; then
+      echo "Creating default ExportOptions.plist file..."
+      cat > ios/ExportOptions.plist << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>$([ "$CONFIG" == "debug" ] && echo "development" || echo "app-store")</string>
+    <key>teamID</key>
+    <string>TEAM_ID</string>
+</dict>
+</plist>
+EOF
+      
+      # Try export again
+      xcodebuild \
+        -exportArchive \
+        -archivePath "ios/build/$PROJECT_NAME.xcarchive" \
+        -exportPath "ios/build/output" \
+        -exportOptionsPlist "ios/ExportOptions.plist" || {
+          echo "❌ iOS export failed again"
+          echo "::error::Xcode export failed even with default ExportOptions.plist. Check logs for details."
+          exit 1
+        }
+    else
+      echo "ExportOptions.plist exists but export failed. Check the file format and content."
+      exit 1
+    fi
+  }
 
 echo "✅ iOS build completed successfully"
 
 # Verify the expected outputs exist
-if ls ios/build/Build/Products/**/*.ipa 1> /dev/null 2>&1; then
+if ls ios/build/output/*.ipa 1> /dev/null 2>&1; then
   echo "✅ IPA files generated successfully"
 else
   echo "⚠️ Warning: Expected IPA files not found. Storage steps may fail."
