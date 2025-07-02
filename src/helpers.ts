@@ -119,53 +119,18 @@ export function escapeString(str: string): string {
 
 /**
  * Build npm/yarn cache steps for GitHub Actions workflow
- * @param pm Package manager
- * @param cache Cache configuration
- * @returns Array of GitHub Actions steps
+ * NOTE: This function now returns an empty array since setup-node already handles caching
+ * @param pm Package manager (not used anymore)
+ * @param cache Cache configuration (not used anymore)
+ * @returns Empty array as setup-node with cache parameter handles caching
  */
 export function cacheSteps(
-  pm: PackageManager,
-  cache?: CacheConfig
+  _pm: PackageManager,
+  _cache?: CacheConfig
 ): GitHubStep[] {
-  const cfg = {
-    enabled: cache?.enabled !== false,
-    paths: cache?.paths,
-    key: cache?.key,
-  };
-  if (!cfg.enabled) return [];
-
-  const getDir: GitHubStep =
-    pm === 'yarn'
-      ? {
-          name: 'Get yarn cache dir',
-          id: 'yarn-cache',
-          run: 'echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT',
-        }
-      : {
-          name: 'Get npm cache dir',
-          id: 'npm-cache',
-          run: 'echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT',
-        };
-
-  const dirVar =
-    pm === 'yarn'
-      ? '${{ steps.yarn-cache.outputs.dir }}'
-      : '${{ steps.npm-cache.outputs.dir }}';
-  const lock = pm === 'yarn' ? 'yarn.lock' : 'package-lock.json';
-  const keyExpr =
-    '${{ runner.os }}-' + pm + '-${{ hashFiles(' + `'**/${lock}'` + ') }}';
-
-  const cacheStep: GitHubStep = {
-    name: 'Setup cache',
-    uses: 'actions/cache@v3',
-    with: {
-      path: (cfg.paths && cfg.paths.length > 0) ? cfg.paths.join('\n') : dirVar,
-      key: cfg.key ?? keyExpr,
-      ...(cfg.key ? {} : { 'restore-keys': '${{ runner.os }}-' + pm + '-' }),
-    },
-  };
-
-  return [getDir, cacheStep];
+  // Return empty array since setup-node already handles npm/yarn caching
+  // This prevents redundant caching steps when used with actions/setup-node@v4
+  return [];
 }
 
 /**
