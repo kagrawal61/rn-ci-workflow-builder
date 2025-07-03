@@ -136,7 +136,7 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
   }
 
   if (groups.platform.length > 0) {
-    summary += `### Platform (${buildOptions.platform})\n\n`;
+    summary += `Platform (${buildOptions.platform})\n\n`;
     for (const secret of groups.platform) {
       summary += `- \`${secret.name}\`: ${secret.description}\n`;
     }
@@ -144,7 +144,7 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
   }
 
   if (groups.notification.length > 0 && buildOptions.notification) {
-    summary += `### Notifications (${NOTIFICATION_SECRET_DOCS[buildOptions.notification].name})\n\n`;
+    summary += `Notifications (${NOTIFICATION_SECRET_DOCS[buildOptions.notification].name})\n\n`;
     for (const secret of groups.notification) {
       summary += `- \`${secret.name}\`: ${secret.description}\n`;
     }
@@ -152,7 +152,7 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
   }
 
   if (groups.general.length > 0) {
-    summary += `### General\n\n`;
+    summary += `General\n\n`;
     for (const secret of groups.general) {
       summary += `- \`${secret.name}\`: ${secret.description}\n`;
     }

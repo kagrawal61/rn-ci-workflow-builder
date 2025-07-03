@@ -106,17 +106,6 @@ registerBuilder('static-analysis', (opts: WorkflowOptions) => {
   throw new Error(`Unsupported platform: ${opts.platform}`);
 });
 
-// Keep health-check preset for backward compatibility by mapping it to static-analysis
-registerBuilder('health-check', (opts: WorkflowOptions) => {
-  // Default to GitHub Actions if no platform specified
-  if (!opts.platform || opts.platform === 'github') {
-    return buildStaticAnalysisPipeline(opts);
-  } else if (opts.platform === 'bitrise') {
-    return buildBitriseStaticAnalysisPipeline(opts);
-  }
-  throw new Error(`Unsupported platform: ${opts.platform}`);
-});
-
 registerBuilder('build', (opts: WorkflowOptions) => {
   // Default to GitHub Actions if no platform specified
   if (!opts.platform || opts.platform === 'github') {

@@ -103,7 +103,7 @@ Generate workflow YAML based on preset configuration.
 
 **Arguments:**
 - `preset` - Workflow preset name (default: `static-analysis`)
-- Available presets: `static-analysis`, `health-check` (alias), `build`
+- Available presets: `static-analysis`, `build`
 
 **Options:**
 - `-c, --config <path>` - Path to config file (JSON or YAML)
@@ -278,7 +278,7 @@ The main configuration structure:
 
 ```typescript
 interface WorkflowConfig {
-  kind: 'static-analysis' | 'health-check' | 'build' | string;
+  kind: 'static-analysis' | 'build' | string;
   options?: WorkflowOptions;
 }
 ```
@@ -528,7 +528,7 @@ export function registerBuiltInPresets(): void {
   registerBuilder('my-custom', buildMyCustomWorkflow);
 }
 
-export const presetKinds = ['static-analysis', 'health-check', 'my-custom'] as const;
+export const presetKinds = ['static-analysis', 'my-custom'] as const;
 ```
 
 4. Use your new preset:
