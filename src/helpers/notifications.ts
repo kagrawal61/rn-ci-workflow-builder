@@ -90,7 +90,59 @@ function createPRCommentStep(
 }
 
 /**
- * Creates a Slack notification step
+ * Creates a Bitrise-specific Slack notification step
+ */
+function createBitriseSlackNotificationStep(
+  build: BuildOptions,
+  platform: string
+): GitHubStep {
+  const downloadLocation = getDownloadLocation(build, platform);
+
+  return {
+    name: 'Send Slack Notification',
+    if: 'always()',
+    uses: 'slack@4',
+    with: {
+      webhook_url: '$SLACK_WEBHOOK_URL',
+      text:
+        platform +
+        ' ' +
+        build.variant +
+        ' build for $BITRISE_GIT_BRANCH completed with status: $BITRISE_BUILD_STATUS',
+      channel: '#builds',
+      from_username: 'Bitrise Bot',
+      from_username_on_error: 'Bitrise Bot',
+      icon_emoji: ':robot_face:',
+      icon_emoji_on_error: ':warning:',
+      color: 'good',
+      color_on_error: 'danger',
+      pretext: 'Build completed for ' + platform,
+      pretext_on_error: 'Build failed for ' + platform,
+      title: platform + ' Build Result',
+      title_link: '$BITRISE_BUILD_URL',
+      message:
+        'Platform: ' +
+        platform +
+        '\nVariant: ' +
+        build.variant +
+        '\nBranch: $BITRISE_GIT_BRANCH\nCommit: $BITRISE_GIT_COMMIT\nDownload: ' +
+        downloadLocation,
+      message_on_error:
+        'Platform: ' +
+        platform +
+        '\nVariant: ' +
+        build.variant +
+        '\nBranch: $BITRISE_GIT_BRANCH\nCommit: $BITRISE_GIT_COMMIT\nPlease check the build logs for details.',
+      fields:
+        'Repository|$BITRISE_GIT_MESSAGE\nBranch|$BITRISE_GIT_BRANCH\nCommit|$BITRISE_GIT_COMMIT\nBuild Number|$BITRISE_BUILD_NUMBER',
+      buttons:
+        'View Build|$BITRISE_BUILD_URL\nView Commit|$GIT_CLONE_COMMIT_MESSAGE_SUBJECT',
+    },
+  };
+}
+
+/**
+ * Creates a GitHub Actions Slack notification step using the latest Slack GitHub Action APIs
  */
 function createSlackNotificationStep(
   build: BuildOptions,
@@ -203,7 +255,7 @@ function createSlackNotificationStep(
  */
 const notificationHelpers = {
   /**
-   * Creates Android notification steps based on the notification configuration
+   * Creates Android notification steps based on the notification configuration (GitHub Actions)
    */
   createAndroidNotificationSteps(build: BuildOptions): GitHubStep[] {
     const steps: GitHubStep[] = [];
@@ -286,6 +338,40 @@ fi
       // Add PR comment step
       steps.push(createPRCommentStep(build, 'iOS'));
     }
+
+    return steps;
+  },
+
+  /**
+   * Creates Android notification steps based on the notification configuration (Bitrise)
+   */
+  createBitriseAndroidNotificationSteps(build: BuildOptions): GitHubStep[] {
+    const steps: GitHubStep[] = [];
+
+    // Add Slack notification if configured - doesn't need special PR detection
+    if (build.notification === 'slack' || build.notification === 'both') {
+      steps.push(createBitriseSlackNotificationStep(build, 'Android'));
+    }
+
+    // Note: Bitrise doesn't use PR comments in the same way as GitHub Actions
+    // PR comment notifications are handled differently in Bitrise workflows
+
+    return steps;
+  },
+
+  /**
+   * Creates iOS notification steps based on the notification configuration (Bitrise)
+   */
+  createBitriseIOSNotificationSteps(build: BuildOptions): GitHubStep[] {
+    const steps: GitHubStep[] = [];
+
+    // Add Slack notification if configured - doesn't need special PR detection
+    if (build.notification === 'slack' || build.notification === 'both') {
+      steps.push(createBitriseSlackNotificationStep(build, 'iOS'));
+    }
+
+    // Note: Bitrise doesn't use PR comments in the same way as GitHub Actions
+    // PR comment notifications are handled differently in Bitrise workflows
 
     return steps;
   },
