@@ -154,12 +154,22 @@ export function buildBuildPipeline(
     }
   }
 
+  // Add permissions when PR comments are enabled
+  const permissions = build.notification === 'pr-comment' || build.notification === 'both'
+    ? {
+        contents: 'read',
+        'pull-requests': 'write',
+        issues: 'write',
+      } as const
+    : undefined;
+
   return {
     name:
       opts.name ??
       `React Native ${build.platform === 'both' ? 'App' : build.platform} Build`,
     on: buildTriggers(triggers),
     env: buildEnv(env, secrets),
+    permissions,
     jobs,
   };
 }
