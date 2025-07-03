@@ -24,7 +24,7 @@
       "variant": "release",
       "storage": "github",
       "notification": "both",
-      "includeHealthCheck": true,
+      "includeStaticAnalysis": true,
       "androidOutputType": "both"
     }
   }

@@ -4,17 +4,16 @@
 
 // Re-export from workflow.ts
 export {
-  buildTriggers,
-  buildEnv,
-  injectSecrets,
   buildConcurrency,
-  escapeString,
+  buildEnv,
+  buildTriggers,
   cacheSteps,
-  validateWorkflowConfig,
+  escapeString,
+  injectSecrets,
 } from '../helpers';
 
 // Export from steps.ts
-export { default as commonSteps } from './steps';
+export { buildStaticAnalysisSteps, default as commonSteps } from './steps';
 
 // Export from platforms.ts
 export { default as platformHelpers } from './platforms';

@@ -1,5 +1,5 @@
-import { WorkflowConfig, WorkflowOptions } from '../types';
 import { BuildOptions } from '../presets/types';
+import { WorkflowConfig, WorkflowOptions } from '../types';
 
 /**
  * Schema validation for build preset options
@@ -32,10 +32,10 @@ export function validateBuildSchema(options: BuildOptions): BuildOptions {
       'notification'
     ) as BuildOptions['notification'],
 
-    includeHealthCheck:
-      options.includeHealthCheck !== undefined
-        ? !!options.includeHealthCheck
-        : true, // Will be renamed to includeStaticAnalysis in the future
+    includeStaticAnalysis:
+      options.includeStaticAnalysis !== undefined
+        ? !!options.includeStaticAnalysis
+        : true,
   };
 
   return validatedOptions;
@@ -190,32 +190,6 @@ function validateWorkflowOptionsSchema(
     }
   }
 
-  // Validate concurrency
-  if (options.concurrency !== undefined) {
-    if (
-      typeof options.concurrency !== 'object' ||
-      options.concurrency === null
-    ) {
-      throw new Error('Concurrency configuration must be an object');
-    }
-
-    if (!options.concurrency.group) {
-      throw new Error('Concurrency group is required');
-    }
-
-    if (typeof options.concurrency.group !== 'string') {
-      throw new Error('Concurrency group must be a string');
-    }
-
-    validatedOptions.concurrency = {
-      group: options.concurrency.group,
-      cancelInProgress:
-        options.concurrency.cancelInProgress !== undefined
-          ? !!options.concurrency.cancelInProgress
-          : false,
-    };
-  }
-
   return validatedOptions;
 }
 
@@ -356,4 +330,36 @@ function validateEnum<T>(
   }
 
   return value;
+}
+
+/**
+ * Validates and normalizes workflow configuration data
+ * This handles edge cases and provides sensible defaults
+ */
+export function validateWorkflowConfig(config: WorkflowConfig): WorkflowConfig {
+  // Clone to avoid mutations
+  const validatedConfig = { ...config };
+
+  // Validate build configuration if present
+  if (validatedConfig.options?.build) {
+    // Normalize boolean values for build options
+    const build = validatedConfig.options.build;
+
+    // Handle includeStaticAnalysis boolean conversion
+    if (build.includeStaticAnalysis !== undefined) {
+      build.includeStaticAnalysis = !!build.includeStaticAnalysis;
+    } else {
+      build.includeStaticAnalysis = true; // Default to true
+    }
+
+    // Validate androidOutputType
+    if (
+      build.androidOutputType &&
+      !['apk', 'aab', 'both'].includes(build.androidOutputType)
+    ) {
+      build.androidOutputType = 'apk'; // Default fallback
+    }
+  }
+
+  return validatedConfig;
 }

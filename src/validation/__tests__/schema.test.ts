@@ -4,13 +4,59 @@ import { validateBuildSchema, validateWorkflowSchema } from '../schema';
 
 describe('Schema Validation', () => {
   describe('validateBuildSchema', () => {
+    it('should validate build options with defaults', () => {
+      const options = {
+        platform: 'android' as const,
+        variant: 'release' as const,
+        storage: 'github' as const,
+        notification: 'pr-comment' as const,
+        includeStaticAnalysis: true,
+      };
+
+      const result = validateBuildSchema(options);
+
+      expect(result).toEqual(options);
+      expect(result.platform).toBe('android');
+      expect(result.variant).toBe('release');
+      expect(result.storage).toBe('github');
+      expect(result.notification).toBe('pr-comment');
+      expect(result.includeStaticAnalysis).toBe(true);
+    });
+
+    it('should default includeStaticAnalysis to true when undefined', () => {
+      const options = {
+        platform: 'android' as const,
+        variant: 'release' as const,
+        storage: 'github' as const,
+        notification: 'pr-comment' as const,
+      };
+
+      const result = validateBuildSchema(options);
+
+      expect(result.includeStaticAnalysis).toBe(true);
+    });
+
+    it('should handle boolean conversion for includeStaticAnalysis', () => {
+      const options = {
+        platform: 'android' as const,
+        variant: 'release' as const,
+        storage: 'github' as const,
+        notification: 'pr-comment' as const,
+        includeStaticAnalysis: 0, // Falsy value
+      };
+
+      const result = validateBuildSchema(options as any);
+
+      expect(result.includeStaticAnalysis).toBe(false);
+    });
+
     it('should validate valid build options', () => {
       const options: BuildOptions = {
         platform: 'android',
         variant: 'debug',
         storage: 'github',
         notification: 'none',
-        includeHealthCheck: true,
+        includeStaticAnalysis: true,
       };
 
       const result = validateBuildSchema(options);
@@ -60,33 +106,6 @@ describe('Schema Validation', () => {
       } as any;
 
       expect(() => validateBuildSchema(options)).toThrow();
-    });
-
-    it('should default includeHealthCheck to true when undefined', () => {
-      const options = {
-        platform: 'android',
-        variant: 'debug',
-        storage: 'github',
-        notification: 'none',
-      } as BuildOptions;
-
-      const result = validateBuildSchema(options);
-
-      expect(result.includeHealthCheck).toBe(true);
-    });
-
-    it('should handle boolean conversion for includeHealthCheck', () => {
-      const options = {
-        platform: 'android',
-        variant: 'debug',
-        storage: 'github',
-        notification: 'none',
-        includeHealthCheck: 0, // Falsy value
-      } as any;
-
-      const result = validateBuildSchema(options);
-
-      expect(result.includeHealthCheck).toBe(false);
     });
 
     it('should validate all platform options', () => {
@@ -230,12 +249,12 @@ describe('Schema Validation', () => {
 
     it('should handle config without options', () => {
       const config: WorkflowConfig = {
-        kind: 'health-check',
+        kind: 'static-analysis',
       };
 
       const result = validateWorkflowSchema(config);
 
-      expect(result.kind).toBe('health-check');
+      expect(result.kind).toBe('static-analysis');
       expect(result.options).toEqual({});
     });
 
@@ -256,7 +275,7 @@ describe('Schema Validation', () => {
 
     it('should validate platform option', () => {
       const config: WorkflowConfig = {
-        kind: 'health-check',
+        kind: 'static-analysis',
         options: {
           platform: 'bitrise',
         },
@@ -269,33 +288,33 @@ describe('Schema Validation', () => {
 
     it('should validate name option', () => {
       const config: WorkflowConfig = {
-        kind: 'health-check',
+        kind: 'static-analysis',
         options: {
-          name: 'Custom Health Check',
+          name: 'Custom Static Analysis',
         },
       };
 
       const result = validateWorkflowSchema(config);
 
-      expect(result.options?.name).toBe('Custom Health Check');
+      expect(result.options?.name).toBe('Custom Static Analysis');
     });
 
     it('should validate nodeVersions option', () => {
       const config: WorkflowConfig = {
-        kind: 'health-check',
+        kind: 'static-analysis',
         options: {
-          nodeVersions: ['18', '20'],
+          nodeVersions: [18, 20],
         },
       };
 
       const result = validateWorkflowSchema(config);
 
-      expect(result.options?.nodeVersions).toEqual(['18', '20']);
+      expect(result.options?.nodeVersions).toEqual([18, 20]);
     });
 
     it('should validate packageManager option', () => {
       const config: WorkflowConfig = {
-        kind: 'health-check',
+        kind: 'static-analysis',
         options: {
           packageManager: 'yarn',
         },
@@ -308,7 +327,7 @@ describe('Schema Validation', () => {
 
     it('should throw error for invalid platform', () => {
       const config: WorkflowConfig = {
-        kind: 'health-check',
+        kind: 'static-analysis',
         options: {
           platform: 'invalid-platform' as any,
         },
@@ -319,7 +338,7 @@ describe('Schema Validation', () => {
 
     it('should throw error for invalid package manager', () => {
       const config: WorkflowConfig = {
-        kind: 'health-check',
+        kind: 'static-analysis',
         options: {
           packageManager: 'invalid-pm' as any,
         },

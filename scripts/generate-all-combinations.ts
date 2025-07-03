@@ -7,9 +7,9 @@ import { registerBuiltInPresets } from '../src/presets';
 import {
   AndroidOutputType,
   BuildOptions,
-  HealthCheckOptions,
   NotificationType,
   Platform,
+  StaticAnalysisOptions,
   StorageSolution,
   Variant,
 } from '../src/presets/types';
@@ -34,10 +34,10 @@ interface CombinationConfig {
     storageOptions: StorageSolution[];
     notificationTypes: NotificationType[];
     androidOutputTypes: AndroidOutputType[];
-    includeHealthCheckOptions: boolean[];
+    includeStaticAnalysisOptions: boolean[];
   };
-  healthCheckOptions: {
-    combinations: HealthCheckOptions[];
+  staticAnalysisOptions: {
+    combinations: StaticAnalysisOptions[];
   };
 }
 
@@ -53,9 +53,9 @@ const COMBINATION_CONFIG: CombinationConfig = {
     storageOptions: ['github', 'drive', 'firebase', 's3', 'bitrise'],
     notificationTypes: ['slack', 'pr-comment', 'both', 'none'],
     androidOutputTypes: ['apk', 'aab', 'both'],
-    includeHealthCheckOptions: [true, false],
+    includeStaticAnalysisOptions: [true, false],
   },
-  healthCheckOptions: {
+  staticAnalysisOptions: {
     combinations: [
       // Individual checks
       { typescript: true },
@@ -120,8 +120,8 @@ function generateFileName(config: WorkflowConfig, index: number): string {
       name += `-${build.androidOutputType}`;
     }
 
-    if (build.includeHealthCheck) {
-      name += '-with-health-check';
+    if (build.includeStaticAnalysis) {
+      name += '-with-static-analysis';
     }
   }
 
@@ -188,7 +188,7 @@ function generateStaticAnalysisCombinations(): WorkflowConfig[] {
   for (const platform of COMBINATION_CONFIG.platforms) {
     for (const packageManager of COMBINATION_CONFIG.packageManagers) {
       for (const nodeVersions of COMBINATION_CONFIG.nodeVersions) {
-        for (const healthCheck of COMBINATION_CONFIG.healthCheckOptions
+        for (const staticAnalysis of COMBINATION_CONFIG.staticAnalysisOptions
           .combinations) {
           const config: WorkflowConfig = {
             kind: 'static-analysis',
@@ -198,8 +198,10 @@ function generateStaticAnalysisCombinations(): WorkflowConfig[] {
               packageManager,
               nodeVersions,
               triggers: generateBaseTriggers(),
-              healthCheck:
-                Object.keys(healthCheck).length > 0 ? healthCheck : undefined,
+              staticAnalysis:
+                Object.keys(staticAnalysis).length > 0
+                  ? staticAnalysis
+                  : undefined,
               secrets: generateBaseSecrets(),
               runsOn: platform === 'github' ? 'ubuntu-latest' : undefined,
               cache: { enabled: true },
@@ -230,8 +232,8 @@ function generateBuildCombinations(): WorkflowConfig[] {
               .storageOptions) {
               for (const notification of COMBINATION_CONFIG.buildOptions
                 .notificationTypes) {
-                for (const includeHealthCheck of COMBINATION_CONFIG.buildOptions
-                  .includeHealthCheckOptions) {
+                for (const includeStaticAnalysis of COMBINATION_CONFIG
+                  .buildOptions.includeStaticAnalysisOptions) {
                   // Generate combinations with and without Android output type
                   const androidOutputTypes =
                     buildPlatform === 'ios'
@@ -242,21 +244,21 @@ function generateBuildCombinations(): WorkflowConfig[] {
                         ];
 
                   for (const androidOutputType of androidOutputTypes) {
-                    // Generate combinations with different health check options when included
-                    const healthCheckCombinations = includeHealthCheck
-                      ? COMBINATION_CONFIG.healthCheckOptions.combinations
+                    // Generate combinations with different static analysis options when included
+                    const staticAnalysisCombinations = includeStaticAnalysis
+                      ? COMBINATION_CONFIG.staticAnalysisOptions.combinations
                       : [undefined];
 
-                    for (const healthCheckOptions of healthCheckCombinations) {
+                    for (const staticAnalysisOptions of staticAnalysisCombinations) {
                       const buildOptions: BuildOptions = {
                         platform: buildPlatform,
                         variant,
                         storage,
                         notification,
-                        includeHealthCheck,
+                        includeStaticAnalysis,
                         ...(androidOutputType && { androidOutputType }),
-                        ...(includeHealthCheck &&
-                          healthCheckOptions && { healthCheckOptions }),
+                        ...(includeStaticAnalysis &&
+                          staticAnalysisOptions && { staticAnalysisOptions }),
                       };
 
                       const config: WorkflowConfig = {
@@ -337,7 +339,7 @@ async function generateAllCombinations(countOnly: boolean = false) {
       `   - Notification Types: ${COMBINATION_CONFIG.buildOptions.notificationTypes.length}`
     );
     console.log(
-      `   - Health Check Combinations: ${COMBINATION_CONFIG.healthCheckOptions.combinations.length}`
+      `   - Static Analysis Combinations: ${COMBINATION_CONFIG.staticAnalysisOptions.combinations.length}`
     );
     return;
   }
@@ -405,8 +407,8 @@ Generated on: ${new Date().toISOString()}
 - **Notification Types**: ${COMBINATION_CONFIG.buildOptions.notificationTypes.join(', ')}
 - **Android Output Types**: ${COMBINATION_CONFIG.buildOptions.androidOutputTypes.join(', ')}
 
-### Health Check Options
-- **Total Health Check Combinations**: ${COMBINATION_CONFIG.healthCheckOptions.combinations.length}
+    ### Static Analysis Options
+    - **Total Static Analysis Combinations**: ${COMBINATION_CONFIG.staticAnalysisOptions.combinations.length}
 
 ## Failed Generations
 ${failed.length > 0 ? failed.map(f => `- ${f.file}: ${f.error}`).join('\n') : 'None'}

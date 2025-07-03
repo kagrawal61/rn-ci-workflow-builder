@@ -1,25 +1,27 @@
-import { WorkflowOptions, GitHubJob } from '../types';
-import { buildTriggers, buildEnv } from '../helpers';
-import { BuildOptions } from './types';
-import commonSteps from '../helpers/steps';
-import platformHelpers from '../helpers/platforms';
-import storageHelpers from '../helpers/storage';
+import { buildEnv, buildTriggers, cacheSteps } from '../helpers';
 import notificationHelpers from '../helpers/notifications';
-// Import iOS implementation utilities for future use
-// import { createIOSBuildJob, setupIOSJobDependencies } from './iosImplementation';
+import platformHelpers from '../helpers/platforms';
+import { buildStaticAnalysisSteps } from '../helpers/steps';
+import storageHelpers from '../helpers/storage';
+import {
+  GitHubJob,
+  GitHubStep,
+  GitHubWorkflow,
+  WorkflowOptions,
+} from '../types';
+
+// Types moved to src/presets/types.ts
 
 /**
  * Build workflow preset for PR/branch builds
- * 
+ *
  * Creates GitHub Actions workflow configurations for React Native app builds
  * with support for Android and quality checks.
- * 
+ *
  * @param opts Workflow generator options including platform, variant and notification settings
  * @returns Complete GitHub workflow configuration
  */
-export function buildBuildPipeline(
-  opts: WorkflowOptions & { build?: BuildOptions }
-) {
+export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
   const {
     triggers,
     env,
@@ -34,136 +36,177 @@ export function buildBuildPipeline(
       storage: 'github',
       notification: 'pr-comment',
       includeStaticAnalysis: true,
+      androidOutputType: 'apk',
     },
   } = opts;
+
+  // Add required secrets for build storage
+  const requiredSecrets = [...(secrets || [])];
+
+  // Add required secrets for notifications
+  if (build.notification === 'slack' || build.notification === 'both') {
+    if (!requiredSecrets.includes('SLACK_WEBHOOK_URL')) {
+      requiredSecrets.push('SLACK_WEBHOOK_URL');
+    }
+  }
+  if (build.notification === 'pr-comment' || build.notification === 'both') {
+    if (!requiredSecrets.includes('GITHUB_TOKEN')) {
+      requiredSecrets.push('GITHUB_TOKEN');
+    }
+  }
+
+  // Add required secrets for storage
+  if (build.storage === 'drive' || build.storage === 's3') {
+    if (!requiredSecrets.includes('RCLONE_CONFIG')) {
+      requiredSecrets.push('RCLONE_CONFIG');
+    }
+  }
+
+  if (build.storage === 'firebase') {
+    if (!requiredSecrets.includes('FIREBASE_APP_ID')) {
+      requiredSecrets.push('FIREBASE_APP_ID');
+    }
+    if (!requiredSecrets.includes('FIREBASE_TOKEN')) {
+      requiredSecrets.push('FIREBASE_TOKEN');
+    }
+  }
 
   // Jobs collection
   const jobs: Record<string, GitHubJob> = {};
 
-  // Create common setup steps using helper
-  const setupSteps = commonSteps.createSetupSteps(packageManager, cache);
-
-  // Common build parameters for both iOS and Android
-  const buildParams = `--variant ${build.variant}`;
-
-  // Android build steps
-  if (build.platform === 'android' || build.platform === 'both') {
-    // Create base Android build steps
-    let androidBuildSteps = platformHelpers.createAndroidBuildSteps(
-      setupSteps,
+  // Add static analysis job if static analysis is included
+  if (build.includeStaticAnalysis) {
+    // Create a separate job for static analysis to avoid duplication
+    const staticAnalysisSteps = buildStaticAnalysisSteps(
       packageManager,
-      buildParams,
-      build
+      nodeVersions[0] || 20,
+      cache,
+      opts.staticAnalysis
     );
 
-    // Add storage-specific steps
-    const storageSteps = storageHelpers.createAndroidStorageSteps(build);
-    androidBuildSteps = [...androidBuildSteps, ...storageSteps];
-
-    // Add notification steps
-    const notificationSteps =
-      notificationHelpers.createAndroidNotificationSteps(build);
-    androidBuildSteps = [...androidBuildSteps, ...notificationSteps];
-
-    // Add the Android build job
-    jobs['build-android'] = {
-      name: 'Build Android',
+    const staticAnalysisJob: GitHubJob = {
+      name: 'Run Static Analysis',
       'runs-on': runsOn,
-      steps: androidBuildSteps,
+      steps: staticAnalysisSteps,
     };
+
+    jobs.static_analysis = staticAnalysisJob;
   }
 
-  // iOS build support is coming soon
-  // The implementation has been moved to iosImplementation.ts
-  // When iOS support is ready, uncomment the import at the top of this file
-  // and add the following code:
-  //
-  // if (build.platform === 'ios' || build.platform === 'both') {
-  //   const iosJobs = createIOSBuildJob(opts, setupSteps, buildParams);
-  //   jobs = { ...jobs, ...iosJobs };
-  // }
+  // Create common setup steps
+  const setupSteps: GitHubStep[] = [
+    { name: 'Checkout', uses: 'actions/checkout@v4' },
+    {
+      name: 'Setup Node',
+      uses: 'actions/setup-node@v4',
+      with: {
+        'node-version': nodeVersions[0] || 20,
+        cache: packageManager === 'yarn' ? 'yarn' : 'npm',
+      },
+    },
+    ...cacheSteps(packageManager, cache),
+    packageManager === 'yarn'
+      ? { name: 'Install', run: 'yarn install --immutable' }
+      : { name: 'Install', run: 'npm ci' },
+  ];
 
-  // Determine if static analysis should be included
-  const includeStaticAnalysis = build.includeStaticAnalysis !== undefined 
-    ? build.includeStaticAnalysis 
-    : build.includeHealthCheck;
-  
-  // Add quality check job if static analysis is included
-  if (includeStaticAnalysis) {
-    // Create a separate job for static analysis checks to avoid duplication
-    jobs['quality-check'] = {
-      name: 'Quality Checks',
-      'runs-on': runsOn,
-      steps: [
-        { name: 'Checkout', uses: 'actions/checkout@v4' },
-        {
-          name: 'Setup Node',
-          uses: 'actions/setup-node@v4',
-          with: {
-            'node-version': nodeVersions[0] || 20,
-            cache: packageManager === 'yarn' ? 'yarn' : 'npm',
-          },
-        },
-        packageManager === 'yarn'
-          ? { name: 'Install', run: 'yarn install --immutable' }
-          : { name: 'Install', run: 'npm ci' },
-        {
-          name: 'TypeScript',
-          run:
-            packageManager === 'yarn'
-              ? 'yarn tsc --noEmit'
-              : 'npm run tsc -- --noEmit',
-        },
-        {
-          name: 'ESLint',
-          run: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
-        },
-        {
-          name: 'Prettier',
-          run:
-            packageManager === 'yarn'
-              ? 'yarn format:check'
-              : 'npm run format:check',
-        },
-        {
-          name: 'Unit tests',
-          run:
-            packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
-        },
-      ],
+  // Helper function to create a build job
+  const createBuildJob = (platform: 'android' | 'ios'): GitHubJob => {
+    const jobRunsOn = platform === 'ios' ? 'macos-latest' : runsOn;
+    const buildJob: GitHubJob = {
+      name: `Build ${platform.charAt(0).toUpperCase()}${platform.slice(1)} ${build.variant?.charAt(0).toUpperCase()}${build.variant?.slice(1)}`,
+      'runs-on': jobRunsOn,
+      steps: [],
     };
-  }
 
-  // Set up dependencies between jobs
-  if (includeStaticAnalysis) {
-    // Build jobs depend on quality check
-    // iOS job dependencies will be handled by setupIOSJobDependencies when iOS support is ready
-    if (build.platform === 'android' || build.platform === 'both' || build.platform === 'ios') {
-      jobs['build-android'].needs = ['quality-check'];
+    // Add dependency on static analysis job if it exists
+    if (build.includeStaticAnalysis) {
+      buildJob.needs = ['static_analysis'];
     }
+
+    // Add platform-specific build steps
+    if (platform === 'android') {
+      buildJob.steps = platformHelpers.createAndroidBuildSteps(
+        setupSteps,
+        packageManager,
+        '',
+        build
+      );
+    } else if (platform === 'ios') {
+      buildJob.steps = platformHelpers.createIOSBuildSteps(
+        setupSteps,
+        packageManager,
+        '',
+        build
+      );
+    }
+
+    // Add storage steps if configured
+    if (build.storage) {
+      const storageSteps =
+        platform === 'android'
+          ? storageHelpers.createAndroidStorageSteps(build)
+          : storageHelpers.createIOSStorageSteps(build);
+      buildJob.steps.push(...storageSteps);
+    }
+
+    // Add notification steps if configured
+    if (build.notification && build.notification !== 'none') {
+      const notificationSteps =
+        platform === 'android'
+          ? notificationHelpers.createAndroidNotificationSteps(build)
+          : notificationHelpers.createIOSNotificationSteps(build);
+      buildJob.steps.push(...notificationSteps);
+    }
+
+    return buildJob;
+  };
+
+  // Create build jobs based on platform
+  if (build.platform === 'both') {
+    jobs['build-android'] = createBuildJob('android');
+    jobs['build-ios'] = createBuildJob('ios');
+  } else if (build.platform === 'android') {
+    jobs['build-android'] = createBuildJob('android');
+  } else if (build.platform === 'ios') {
+    jobs['build-ios'] = createBuildJob('ios');
+  } else {
+    // Fallback for other platforms - create a generic build job
+    const platformName = build.platform || 'unknown';
+    const variantName = build.variant || 'debug';
+    const buildJob: GitHubJob = {
+      name: `Build ${platformName.charAt(0).toUpperCase()}${platformName.slice(1)} ${variantName.charAt(0).toUpperCase()}${variantName.slice(1)}`,
+      'runs-on': runsOn,
+      steps: setupSteps,
+    };
+
+    if (build.includeStaticAnalysis) {
+      buildJob.needs = ['static_analysis'];
+    }
+
+    jobs.build = buildJob;
   }
 
   /**
    * Add explicit GitHub workflow permissions when PR comments are enabled
-   * 
+   *
    * GitHub Actions uses a least-privilege approach for workflow token permissions.
    * When commenting on PRs, the workflow requires specific permissions:
    * - contents:read - For accessing repository contents
    * - pull-requests:write - For adding/updating comments on PRs
    * - issues:write - For interacting with issues (some PR operations require this)
    */
-  const permissions = build.notification === 'pr-comment' || build.notification === 'both'
-    ? {
-        contents: 'read',
-        'pull-requests': 'write',
-        issues: 'write',
-      } as const
-    : undefined;
+  const permissions =
+    build.notification === 'pr-comment' || build.notification === 'both'
+      ? ({
+          contents: 'read',
+          'pull-requests': 'write',
+          issues: 'write',
+        } as const)
+      : undefined;
 
   return {
-    name:
-      opts.name ??
-      `React Native ${build.platform === 'both' ? 'App' : build.platform} Build`,
+    name: opts.name ?? 'Build Pipeline',
     on: buildTriggers(triggers),
     env: buildEnv(env, secrets),
     permissions,

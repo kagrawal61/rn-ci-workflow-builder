@@ -2,7 +2,7 @@
 
 import { Label } from '@radix-ui/react-label';
 import { motion } from 'framer-motion';
-import { Info, Plus, Trash } from 'lucide-react';
+import { Info, Plus, Settings2, Trash } from 'lucide-react';
 import { useState } from 'react';
 import {
   Accordion,
@@ -47,7 +47,8 @@ export interface WorkflowFormValues {
   androidOutputType?: string;
   buildStorage?: string;
   buildNotification?: string;
-  includeHealthCheck?: boolean;
+  staticAnalysisNotification?: string;
+  includeStaticAnalysis?: boolean;
   typescriptCheck?: boolean;
   eslintCheck?: boolean;
   prettierCheck?: boolean;
@@ -78,7 +79,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
   const [secretName, setSecretName] = useState('');
 
   const handleInputChange = (field: string, value: unknown) => {
-    // Special validation for health check options to ensure at least one is selected
+    // Special validation for static analysis options to ensure at least one is selected
     if (
       field === 'typescriptCheck' ||
       field === 'eslintCheck' ||
@@ -344,6 +345,46 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                     At least one check must remain selected
                   </div>
                 </div>
+
+                {/* Static Analysis Notification */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="static-analysis-notification">Notifications</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 rounded-full p-0"
+                        >
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                          <span className="sr-only">Info</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        How to notify about static analysis results
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Select
+                    value={values.staticAnalysisNotification || 'pr-comment'}
+                    onValueChange={value =>
+                      handleInputChange('staticAnalysisNotification', value)
+                    }
+                  >
+                    <SelectTrigger id="static-analysis-notification">
+                      <SelectValue placeholder="Select notification method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pr-comment">PR Comment</SelectItem>
+                      <SelectItem value="slack">Slack</SelectItem>
+                      <SelectItem value="both">
+                        Both PR Comment & Slack
+                      </SelectItem>
+                      <SelectItem value="none">No Notifications</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 
@@ -455,12 +496,16 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
         {values.preset === 'build' && (
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle className="text-xl">Build Configuration</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Settings2 className="h-5 w-5" />
+                Build Configuration
+              </CardTitle>
               <CardDescription>
-                Configure the build options for your React Native app
+                Configure your build process, including platforms, variants, and
+                storage options
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               {/* Platform Selection */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -815,9 +860,9 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="include-static-analysis"
-                    checked={values.includeHealthCheck}
+                    checked={values.includeStaticAnalysis}
                     onCheckedChange={checked =>
-                      handleInputChange('includeHealthCheck', checked)
+                      handleInputChange('includeStaticAnalysis', checked)
                     }
                   />
                   <div className="grid gap-1">
@@ -830,7 +875,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   </div>
                 </div>
 
-                {values.includeHealthCheck && (
+                {values.includeStaticAnalysis && (
                   <div className="ml-6 space-y-4 rounded-md border p-4">
                     <p className="text-sm font-medium">
                       Select which checks to include:

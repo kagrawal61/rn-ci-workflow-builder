@@ -1,5 +1,5 @@
-import { WorkflowOptions } from '../types';
 import { BuildOptions } from '../presets/types';
+import { WorkflowOptions } from '../types';
 
 /**
  * Required secrets by storage type
@@ -55,7 +55,7 @@ export function validateBuildSecrets(
     // Add platform-specific Firebase secrets if using Firebase
     if (buildOptions.storage === 'firebase') {
       const platformSecrets =
-        FIREBASE_PLATFORM_SECRETS[buildOptions.platform] || [];
+        FIREBASE_PLATFORM_SECRETS[buildOptions.platform || 'android'] || [];
       requireSecrets(configSecrets, platformSecrets, missingSecrets);
     }
 

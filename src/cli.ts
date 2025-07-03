@@ -1,23 +1,23 @@
 #!/usr/bin/env node
-import fs from 'fs';
-import path from 'path';
 import { Command } from 'commander';
+import fs from 'fs';
 import * as jsYaml from 'js-yaml';
+import path from 'path';
 
 import {
   generateWorkflow,
   generateWorkflowForCli,
-  writeWorkflowFile,
   getAvailablePresets,
+  writeWorkflowFile,
 } from './generator';
-import { WorkflowConfig } from './types';
 import { generateSecretsSummary } from './helpers/secretsManager';
 import {
   BuildOptions,
+  NotificationType,
   Platform,
   StorageSolution,
-  NotificationType,
 } from './presets/types';
+import { WorkflowConfig } from './types';
 
 // Register built-in presets
 import { registerBuiltInPresets } from './presets';
@@ -277,7 +277,8 @@ program
       variant: 'release',
       storage: storage as StorageSolution,
       notification: notification as NotificationType,
-      includeHealthCheck: true, // Will be renamed to includeStaticAnalysis in the future
+      includeStaticAnalysis: true,
+      androidOutputType: 'apk',
     };
 
     console.log(generateSecretsSummary(buildOptions));

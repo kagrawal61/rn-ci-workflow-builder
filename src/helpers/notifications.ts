@@ -1,7 +1,27 @@
 import { BuildOptions } from '../presets/types';
 import { GitHubStep } from '../types';
 
-// GitHub CLI is pre-installed on GitHub Actions runners, so no setup step is needed
+// Types for better type safety
+interface NotificationStepConfig {
+  stepId: string;
+  stepName: string;
+  context?: string;
+}
+
+/**
+ * Creates a GitHub CLI authorization step
+ * GitHub CLI is pre-installed on GitHub Actions runners, so we only need to authorize it.
+ */
+function createGitHubCLIInstallationStep(): GitHubStep {
+  return {
+    name: 'Setup GitHub CLI',
+    run:
+      '# GitHub CLI is pre-installed on GitHub Actions runners\n' +
+      'echo "Using pre-installed GitHub CLI"\n' +
+      'gh --version\n' +
+      'echo "GitHub CLI setup completed successfully"',
+  };
+}
 
 /**
  * Determines the download location based on storage configuration
@@ -18,15 +38,48 @@ function getDownloadLocation(build: BuildOptions, platform: string): string {
       return 'Google Drive';
     case 's3': {
       const s3Path =
-        platformPath +
-        '/' +
-        build.variant +
-        '/${{ github.run_id }}';
+        platformPath + '/' + build.variant + '/${{ github.run_id }}';
       return '${{ secrets.S3_BASE_URL }}/' + s3Path;
     }
     default:
       return 'Available in artifacts';
   }
+}
+
+/**
+ * Creates a common PR status detection step
+ */
+function createPRStatusDetectionStep(
+  config: NotificationStepConfig
+): GitHubStep {
+  const contextMessage = config.context || 'build';
+
+  return {
+    name: config.stepName,
+    id: config.stepId,
+    run: `
+# Determine if this is a PR or a direct push
+EVENT_NAME="\${{ github.event_name }}"
+if [[ "$EVENT_NAME" == "pull_request" ]] || [[ "$EVENT_NAME" == "pull_request_target" ]]; then
+  # This is a PR - set output flag
+  echo "is_pr=true" >> $GITHUB_OUTPUT
+  echo "📌 Running ${contextMessage} on PR #\${{ github.event.pull_request.number }} from branch \${{ github.head_ref }}"
+else
+  # This is a direct push - set output flag
+  echo "is_pr=false" >> $GITHUB_OUTPUT
+  echo "📌 Running ${contextMessage} on branch \${{ github.ref_name }}"
+fi
+`,
+  };
+}
+
+/**
+ * Creates a conditional CLI installation step
+ */
+function createConditionalCLIInstallationStep(stepId: string): GitHubStep {
+  const cliInstallStep = createGitHubCLIInstallationStep();
+  cliInstallStep.if = `steps.${stepId}.outputs.is_pr == 'true'`;
+  return cliInstallStep;
 }
 
 /**
@@ -60,6 +113,44 @@ function createPRCommentStep(
       ' ' +
       build.variant +
       ' build completed"\n' +
+      'JQ_SELECT=".comments[] | select(.body | contains(\\"$SEARCH_TEXT\\"))"\n' +
+      'JQ_FILTER="$JQ_SELECT | .id"\n' +
+      'EXISTING_COMMENT_ID=$(gh pr view $PR_NUM --json comments --jq "$JQ_FILTER" | head -1)\n\n' +
+      'if [ ! -z "$EXISTING_COMMENT_ID" ]; then\n' +
+      '  echo "Updating existing comment..."\n' +
+      '  REPO="${{ github.repository }}"\n' +
+      '  API_URL="/repos/$REPO/issues/comments/$EXISTING_COMMENT_ID"\n' +
+      '  gh api -X PATCH "$API_URL" -f body="$MESSAGE"\n' +
+      'else\n' +
+      '  echo "Creating new comment..."\n' +
+      '  gh pr comment $PR_NUM --body "$MESSAGE"\n' +
+      'fi',
+    env: {
+      GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}',
+    },
+  };
+}
+
+/**
+ * Creates a static analysis PR comment step
+ */
+function createStaticAnalysisPRCommentStep(stepId: string): GitHubStep {
+  return {
+    name: 'Add Static Analysis PR Comment',
+    if: `steps.${stepId}.outputs.is_pr == 'true'`,
+    run:
+      '# Create comment message\n' +
+      'MESSAGE="## 📊 Static Analysis Results\n\n' +
+      "${{ job.status == 'success' && '✅ All static analysis checks passed!' || '❌ Some static analysis checks failed!' }}\n\n" +
+      '### Build Information\n' +
+      '- **Repository**: ${{ github.repository }}\n' +
+      '- **Branch**: ${{ github.head_ref }}\n' +
+      '- **Commit**: ${{ github.sha }}\n' +
+      '- **Workflow**: ${{ github.workflow }}\n\n' +
+      '> Static analysis completed via React Native CI Workflow Builder"\n\n' +
+      '# Check if comment already exists and update it\n' +
+      'PR_NUM="${{ github.event.number }}"\n' +
+      'SEARCH_TEXT="Static Analysis Results"\n' +
       'JQ_SELECT=".comments[] | select(.body | contains(\\"$SEARCH_TEXT\\"))"\n' +
       'JQ_FILTER="$JQ_SELECT | .id"\n' +
       'EXISTING_COMMENT_ID=$(gh pr view $PR_NUM --json comments --jq "$JQ_FILTER" | head -1)\n\n' +
@@ -178,6 +269,108 @@ function createSlackNotificationStep(
 }
 
 /**
+ * Creates a static analysis Slack notification step
+ */
+function createStaticAnalysisSlackNotificationStep(): GitHubStep {
+  const withConfig: Record<string, string> = {
+    webhook: '${{ secrets.SLACK_WEBHOOK_URL }}',
+    payload: JSON.stringify({
+      text: '*Static Analysis Results*: ${{ job.status }}',
+      blocks: [
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: '📊 Static Analysis Results',
+            emoji: true,
+          },
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: "${{ job.status == 'success' && ':white_check_mark: All checks passed!' || ':x: Some checks failed!' }}\\n*Repository:* ${{ github.repository }}\\n*Branch:* ${{ github.head_ref || github.ref_name }}\\n*Commit:* ${{ github.sha }}",
+          },
+        },
+        {
+          type: 'actions',
+          elements: [
+            {
+              type: 'button',
+              text: {
+                type: 'plain_text',
+                text: 'View Workflow',
+                emoji: true,
+              },
+              url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
+              action_id: 'view_workflow',
+            },
+            {
+              type: 'button',
+              text: {
+                type: 'plain_text',
+                text: 'View Commit',
+                emoji: true,
+              },
+              url: '${{ github.event.pull_request.html_url || github.event.head_commit.url }}',
+              action_id: 'view_commit',
+            },
+          ],
+        },
+      ],
+    }),
+  };
+
+  // Add webhook-type property using bracket notation to avoid TypeScript issues
+  withConfig['webhook-type'] = 'incoming-webhook';
+
+  return {
+    name: 'Send Slack Notification',
+    if: 'always()',
+    uses: 'slackapi/slack-github-action@v2.1.0',
+    with: withConfig,
+  };
+}
+
+/**
+ * Helper function to check if notification type includes a specific type
+ */
+function shouldIncludeNotification(
+  notificationType: string | undefined,
+  targetType: 'slack' | 'pr-comment'
+): boolean {
+  if (!notificationType) return false;
+  return notificationType === targetType || notificationType === 'both';
+}
+
+/**
+ * Creates PR comment notification steps (common pattern)
+ */
+function createPRCommentNotificationSteps(
+  stepId: string,
+  prCommentStep: GitHubStep
+): GitHubStep[] {
+  const steps: GitHubStep[] = [];
+
+  // Add PR status detection step
+  steps.push(
+    createPRStatusDetectionStep({
+      stepId,
+      stepName: 'Determine PR Status',
+      context: 'build',
+    })
+  );
+
+  // Add conditional CLI installation step
+  steps.push(createConditionalCLIInstallationStep(stepId));
+
+  // Add the provided PR comment step
+  steps.push(prCommentStep);
+
+  return steps;
+}
+
+/**
  * Notification step helpers
  */
 const notificationHelpers = {
@@ -187,36 +380,19 @@ const notificationHelpers = {
   createAndroidNotificationSteps(build: BuildOptions): GitHubStep[] {
     const steps: GitHubStep[] = [];
 
-    // Add Slack notification if configured - doesn't need special PR detection
-    if (build.notification === 'slack' || build.notification === 'both') {
+    // Add Slack notification if configured
+    if (shouldIncludeNotification(build.notification, 'slack')) {
       steps.push(createSlackNotificationStep(build, 'Android'));
     }
 
     // Add PR comment notification if configured
-    if (build.notification === 'pr-comment' || build.notification === 'both') {
-      // Add source detection step first if needed for PR comments
-      steps.push({
-        name: 'Determine PR Status',
-        id: 'build-source',
-        run: `
-# Determine if this is a PR or a direct push (simplified for PR comments only)
-EVENT_NAME="\${{ github.event_name }}"
-if [[ "$EVENT_NAME" == "pull_request" ]] || [[ "$EVENT_NAME" == "pull_request_target" ]]; then
-  # This is a PR - set output flag
-  echo "is_pr=true" >> $GITHUB_OUTPUT
-  echo "📌 Running on PR #\${{ github.event.pull_request.number }} from branch \${{ github.head_ref }}"
-else
-  # This is a direct push - set output flag
-  echo "is_pr=false" >> $GITHUB_OUTPUT
-  echo "📌 Running on branch \${{ github.ref_name }}"
-fi
-`,
-      });
-
-      // GitHub CLI is pre-installed on GitHub Actions runners, no setup needed
-
-      // Add PR comment step
-      steps.push(createPRCommentStep(build, 'Android'));
+    if (shouldIncludeNotification(build.notification, 'pr-comment')) {
+      steps.push(
+        ...createPRCommentNotificationSteps(
+          'build-source',
+          createPRCommentStep(build, 'Android')
+        )
+      );
     }
 
     return steps;
@@ -228,36 +404,19 @@ fi
   createIOSNotificationSteps(build: BuildOptions): GitHubStep[] {
     const steps: GitHubStep[] = [];
 
-    // Add Slack notification if configured - doesn't need special PR detection
-    if (build.notification === 'slack' || build.notification === 'both') {
+    // Add Slack notification if configured
+    if (shouldIncludeNotification(build.notification, 'slack')) {
       steps.push(createSlackNotificationStep(build, 'iOS'));
     }
 
     // Add PR comment notification if configured
-    if (build.notification === 'pr-comment' || build.notification === 'both') {
-      // Add source detection step first if needed for PR comments
-      steps.push({
-        name: 'Determine PR Status',
-        id: 'build-source',
-        run: `
-# Determine if this is a PR or a direct push (simplified for PR comments only)
-EVENT_NAME="\${{ github.event_name }}"
-if [[ "$EVENT_NAME" == "pull_request" ]] || [[ "$EVENT_NAME" == "pull_request_target" ]]; then
-  # This is a PR - set output flag
-  echo "is_pr=true" >> $GITHUB_OUTPUT
-  echo "📌 Running on PR #\${{ github.event.pull_request.number }} from branch \${{ github.head_ref }}"
-else
-  # This is a direct push - set output flag
-  echo "is_pr=false" >> $GITHUB_OUTPUT
-  echo "📌 Running on branch \${{ github.ref_name }}"
-fi
-`,
-      });
-
-      // GitHub CLI is pre-installed on GitHub Actions runners, no setup needed
-
-      // Add PR comment step
-      steps.push(createPRCommentStep(build, 'iOS'));
+    if (shouldIncludeNotification(build.notification, 'pr-comment')) {
+      steps.push(
+        ...createPRCommentNotificationSteps(
+          'build-source',
+          createPRCommentStep(build, 'iOS')
+        )
+      );
     }
 
     return steps;
@@ -269,8 +428,8 @@ fi
   createBitriseAndroidNotificationSteps(build: BuildOptions): GitHubStep[] {
     const steps: GitHubStep[] = [];
 
-    // Add Slack notification if configured - doesn't need special PR detection
-    if (build.notification === 'slack' || build.notification === 'both') {
+    // Add Slack notification if configured
+    if (shouldIncludeNotification(build.notification, 'slack')) {
       steps.push(createBitriseSlackNotificationStep(build, 'Android'));
     }
 
@@ -286,13 +445,49 @@ fi
   createBitriseIOSNotificationSteps(build: BuildOptions): GitHubStep[] {
     const steps: GitHubStep[] = [];
 
-    // Add Slack notification if configured - doesn't need special PR detection
-    if (build.notification === 'slack' || build.notification === 'both') {
+    // Add Slack notification if configured
+    if (shouldIncludeNotification(build.notification, 'slack')) {
       steps.push(createBitriseSlackNotificationStep(build, 'iOS'));
     }
 
     // Note: Bitrise doesn't use PR comments in the same way as GitHub Actions
     // PR comment notifications are handled differently in Bitrise workflows
+
+    return steps;
+  },
+
+  /**
+   * Creates static analysis notification steps based on the notification configuration
+   */
+  createStaticAnalysisNotificationSteps(
+    notificationType: string | undefined
+  ): GitHubStep[] {
+    const steps: GitHubStep[] = [];
+
+    // Add Slack notification if configured
+    if (shouldIncludeNotification(notificationType, 'slack')) {
+      steps.push(createStaticAnalysisSlackNotificationStep());
+    }
+
+    // Add PR comment notification if configured
+    if (shouldIncludeNotification(notificationType, 'pr-comment')) {
+      const stepId = 'static-analysis-source';
+
+      // Add PR status detection step
+      steps.push(
+        createPRStatusDetectionStep({
+          stepId,
+          stepName: 'Determine PR Status',
+          context: 'static analysis',
+        })
+      );
+
+      // Add conditional CLI installation step
+      steps.push(createConditionalCLIInstallationStep(stepId));
+
+      // Add static analysis PR comment step
+      steps.push(createStaticAnalysisPRCommentStep(stepId));
+    }
 
     return steps;
   },

@@ -7,7 +7,7 @@ export function buildBitriseStaticAnalysisPipeline(
     triggers,
     env,
     packageManager = 'yarn',
-    healthCheck = {
+    staticAnalysis = {
       typescript: true,
       eslint: true,
       prettier: true,
@@ -109,7 +109,7 @@ npm ci`,
   // Quality check steps
   const qualitySteps: BitriseStep[] = [];
 
-  if (healthCheck.typescript !== false) {
+  if (staticAnalysis.typescript !== false) {
     qualitySteps.push({
       'script@1': {
         title: 'TypeScript Check',
@@ -125,7 +125,7 @@ ${packageManager === 'yarn' ? 'yarn tsc --noEmit' : 'npm run tsc -- --noEmit'}`,
     });
   }
 
-  if (healthCheck.eslint !== false) {
+  if (staticAnalysis.eslint !== false) {
     qualitySteps.push({
       'script@1': {
         title: 'ESLint Check',
@@ -141,7 +141,7 @@ ${packageManager === 'yarn' ? 'yarn lint' : 'npm run lint'}`,
     });
   }
 
-  if (healthCheck.prettier !== false) {
+  if (staticAnalysis.prettier !== false) {
     qualitySteps.push({
       'script@1': {
         title: 'Prettier Check',
@@ -160,7 +160,7 @@ ${packageManager === 'yarn' ? 'yarn format:check' : 'npm run format:check'}`,
   // Test steps
   const testSteps: BitriseStep[] = [];
 
-  if (healthCheck.unitTests !== false) {
+  if (staticAnalysis.unitTests !== false) {
     testSteps.push({
       'script@1': {
         title: 'Unit Tests',
@@ -237,7 +237,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
       'rn-static-analysis': {
         title: opts.name || 'React Native Static Analysis',
         description:
-          'Run health checks including TypeScript, ESLint, Prettier, and unit tests',
+          'Run static analysis including TypeScript, ESLint, Prettier, and unit tests',
         steps: workflowSteps,
       },
     },

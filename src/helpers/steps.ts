@@ -1,5 +1,74 @@
-import { GitHubStep, PackageManager, CacheConfig } from '../types';
 import { cacheSteps } from '../helpers';
+import { StaticAnalysisOptions } from '../presets/types';
+import { CacheConfig, GitHubStep, PackageManager } from '../types';
+
+/**
+ * Creates static analysis steps for workflows
+ */
+export function buildStaticAnalysisSteps(
+  packageManager: PackageManager,
+  nodeVersion: number,
+  cache: CacheConfig | undefined,
+  staticAnalysis: StaticAnalysisOptions = {
+    typescript: true,
+    eslint: true,
+    prettier: true,
+    unitTests: true,
+  }
+): GitHubStep[] {
+  const steps: GitHubStep[] = [
+    { name: 'Checkout', uses: 'actions/checkout@v4' },
+    {
+      name: 'Setup Node',
+      uses: 'actions/setup-node@v4',
+      with: {
+        'node-version': nodeVersion,
+        cache: packageManager === 'yarn' ? 'yarn' : 'npm',
+      },
+    },
+    ...cacheSteps(packageManager, cache),
+    packageManager === 'yarn'
+      ? { name: 'Install', run: 'yarn install --immutable' }
+      : { name: 'Install', run: 'npm ci' },
+  ];
+
+  // Add configurable checks
+  if (staticAnalysis.typescript !== false) {
+    steps.push({
+      name: 'TypeScript',
+      run:
+        packageManager === 'yarn'
+          ? 'yarn tsc --noEmit'
+          : 'npm run tsc -- --noEmit',
+    });
+  }
+
+  if (staticAnalysis.eslint !== false) {
+    steps.push({
+      name: 'ESLint',
+      run: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
+    });
+  }
+
+  if (staticAnalysis.prettier !== false) {
+    steps.push({
+      name: 'Prettier',
+      run:
+        packageManager === 'yarn'
+          ? 'yarn format:check'
+          : 'npm run format:check',
+    });
+  }
+
+  if (staticAnalysis.unitTests !== false) {
+    steps.push({
+      name: 'Unit tests',
+      run: packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
+    });
+  }
+
+  return steps;
+}
 
 /**
  * Common GitHub Actions workflow step helpers

@@ -43,6 +43,11 @@ jest.mock('../../helpers/notifications', () => ({
 
 jest.mock('../../helpers/steps', () => ({
   __esModule: true,
+  buildStaticAnalysisSteps: jest.fn(() => [
+    { name: 'TypeScript', run: 'tsc --noEmit' },
+    { name: 'ESLint', run: 'npm run lint' },
+    { name: 'Unit tests', run: 'npm test -- --ci' },
+  ]),
   default: {
     createSetupSteps: jest.fn(() => [
       { name: 'Checkout', uses: 'actions/checkout@v4' },
