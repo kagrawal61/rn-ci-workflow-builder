@@ -115,15 +115,19 @@ jobs:
             echo "📌 Running on branch ${{ github.ref_name }}"
           fi
       - name: Setup GitHub CLI
+        if: steps.build-source.outputs.is_pr == 'true'
         run: |-
           # GitHub CLI is pre-installed on GitHub Actions runners
           echo "Using pre-installed GitHub CLI"
           gh --version
+          # Test auth to make sure it works
+          gh auth status || echo "GitHub CLI auth not configured yet"
           echo "GitHub CLI setup completed successfully"
-        if: steps.build-source.outputs.is_pr == 'true'
       - name: Add PR Comment via GitHub CLI
         if: steps.build-source.outputs.is_pr == 'true'
         run: |-
+          # Set up GitHub CLI authentication first
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
           # Create comment message with emojis
           EMOJI="🤖"
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
@@ -144,7 +148,7 @@ jobs:
             echo "Updating existing comment..."
             REPO="${{ github.repository }}"
             API_URL="/repos/$REPO/issues/comments/$EXISTING_COMMENT_ID"
-            gh api -X PATCH "$API_URL" -f body="$MESSAGE"
+            gh api --header "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -X PATCH "$API_URL" -f body="$MESSAGE"
           else
             echo "Creating new comment..."
             gh pr comment $PR_NUM --body "$MESSAGE"
