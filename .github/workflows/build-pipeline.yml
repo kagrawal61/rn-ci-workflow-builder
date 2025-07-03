@@ -114,45 +114,27 @@ jobs:
             echo "is_pr=false" >> $GITHUB_OUTPUT
             echo "📌 Running on branch ${{ github.ref_name }}"
           fi
-      - name: Setup GitHub CLI
-        if: steps.build-source.outputs.is_pr == 'true'
-        run: |-
-          # GitHub CLI is pre-installed on GitHub Actions runners
-          echo "Using pre-installed GitHub CLI"
-          gh --version
-          # Test auth to make sure it works
-          gh auth status || echo "GitHub CLI auth not configured yet"
-          echo "GitHub CLI setup completed successfully"
+      # GitHub CLI is pre-installed and authenticated on GitHub Actions runners
       - name: Add PR Comment via GitHub CLI
         if: steps.build-source.outputs.is_pr == 'true'
         run: |-
-          # Set up GitHub CLI authentication first
-          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
           # Create comment message with emojis
           EMOJI="🤖"
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           MESSAGE="$EMOJI **Android release build completed! ✅**
-
+          
           📥 **Download**: Available in GitHub Artifacts
-
           🔗 **Workflow**: [View Build Run](${WORKFLOW_URL})"
-
+          
           # Check if comment already exists and update it
-          PR_NUM="${{ github.event.pull_request.number }}"
+          PR_NUM="${{ github.event.number }}"
           SEARCH_TEXT="Android release build completed"
           JQ_SELECT=".comments[] | select(.body | contains(\"$SEARCH_TEXT\"))"
           JQ_FILTER="$JQ_SELECT | .id"
-          EXISTING_COMMENT_ID=$(gh pr view $PR_NUM --json comments --jq "$JQ_FILTER" | head -1)
-
-          if [ ! -z "$EXISTING_COMMENT_ID" ]; then
-            echo "Updating existing comment..."
-            REPO="${{ github.repository }}"
-            API_URL="/repos/$REPO/issues/comments/$EXISTING_COMMENT_ID"
-            gh api --header "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -X PATCH "$API_URL" -f body="$MESSAGE"
-          else
-            echo "Creating new comment..."
-            gh pr comment $PR_NUM --body "$MESSAGE"
-          fi
+          
+          echo "Creating new comment..."
+          gh pr comment $PR_NUM --body "$MESSAGE"
+          
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Send Slack Notification
