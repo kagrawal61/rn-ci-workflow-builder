@@ -99,6 +99,38 @@ jobs:
           name: android-release-apk
           path: SampleRNApp/android/app/build/outputs/apk/**/*.apk
           retention-days: 30
+      - name: Fetch Android Artifact URLs
+        id: fetch-android-artifacts
+        if: success()
+        run: >
+
+          # Fetch artifact information for this run
+          echo "Fetching artifact information..."
+          ARTIFACTS_JSON=$(gh api /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts
+          --paginate)
+          echo "artifact_data=${ARTIFACTS_JSON}" >> $GITHUB_OUTPUT
+
+
+          # Extract artifact names and IDs
+
+          echo "Extracting artifact URLs..."
+
+          ARTIFACT_LIST=""
+
+          echo "${ARTIFACTS_JSON}" | jq -r '.artifacts[] | "- [" + .name + "](\"${{ github.server_url }}/${{
+          github.repository }}/actions/runs/${{ github.run_id }}/artifacts/" + (.id|tostring) + ")"' >
+          artifact_links.txt
+
+          if [ -s artifact_links.txt ]; then
+            ARTIFACT_LIST=$(<artifact_links.txt)
+            echo "artifact_list<<EOF" >> $GITHUB_OUTPUT
+            echo "${ARTIFACT_LIST}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "artifact_list=No artifacts found" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
       - name: Determine PR Status
         id: build-source
         run: |
@@ -119,31 +151,41 @@ jobs:
         if: steps.build-source.outputs.is_pr == 'true'
         run: |-
           # Create comment message with emojis
+
           EMOJI="🤖"
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          MESSAGE="$EMOJI **Android release build completed! ✅**
-          
-          📥 **Download**: Available in GitHub Artifacts
-          🔗 **Workflow**: [View Build Run](${WORKFLOW_URL})"
-          
+
+          # Get the artifact links from previous step
+          ARTIFACT_LINKS="${{ steps.fetch-android-artifacts.outputs.artifact_list }}"
+
+          if [[ "$ARTIFACT_LINKS" == "No artifacts found" ]]; then
+            DOWNLOAD_SECTION="📥 **Download**: No artifacts available"
+          else
+            DOWNLOAD_SECTION="📥 **Downloads**:\n\n$ARTIFACT_LINKS"
+          fi
+
+          MESSAGE="$EMOJI **Android release build completed! ✅**\n\n$DOWNLOAD_SECTION\n\n🔗 **Workflow**: [View Build
+          Run](${WORKFLOW_URL})"
+
           # Check if comment already exists and update it
+
           PR_NUM="${{ github.event.number }}"
+
           SEARCH_TEXT="Android release build completed"
-          JQ_SELECT=".comments[] | select(.body | contains(\"$SEARCH_TEXT\"))"
-          JQ_FILTER="$JQ_SELECT | .id"
-          
+
           echo "Creating new comment..."
+
           gh pr comment $PR_NUM --body "$MESSAGE"
-          
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Send Slack Notification
         if: always()
         uses: slackapi/slack-github-action@v2.1.0
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK }}
           webhook-type: incoming-webhook
-          payload: |
+          payload: |-
             {
               "text": ":android: *Android release build* ${{ job.status == 'success' && ':rocket: Success' || job.status == 'failure' && ':boom: Failed' || ':warning: Warning' }}",
               "blocks": [
@@ -167,12 +209,10 @@ jobs:
                 },
                 {
                   "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Download:*\nAvailable in GitHub Artifacts"
-                    }
-                  ]
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Downloads:*\n${{ steps.fetch-android-artifacts.outputs.artifact_list }}"
+                  }
                 },
                 {
                   "type": "context",
