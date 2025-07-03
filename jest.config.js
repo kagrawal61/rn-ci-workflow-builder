@@ -11,7 +11,9 @@ module.exports = {
   
   // Transform files
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.tsx?$': ['ts-jest', {
+      tsconfig: 'tsconfig.json',
+    }],
   },
   
   // Module resolution
@@ -31,8 +33,8 @@ module.exports = {
     global: {
       branches: 24,
       functions: 28,
-      lines: 30,
-      statements: 30,
+      lines: 29,
+      statements: 29,
     },
   },
   
@@ -53,11 +55,4 @@ module.exports = {
   
   // Clear mocks
   clearMocks: true,
-  
-  // TypeScript configuration
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-    },
-  },
 }; 

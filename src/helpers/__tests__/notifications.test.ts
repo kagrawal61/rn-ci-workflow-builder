@@ -34,7 +34,7 @@ describe('Notification Helpers', () => {
       expect(slackStep.name).toBe('Send Slack Notification');
       expect(slackStep.if).toBe('always()');
       expect(slackStep.uses).toBe('slackapi/slack-github-action@v2.1.0');
-      expect(slackStep.with?.payload).toContain('Android Build Result');
+      expect(slackStep.with?.payload).toContain('Android Build debug');
       expect(slackStep.with?.['webhook-type']).toBe('incoming-webhook');
     });
 
@@ -186,7 +186,7 @@ describe('Notification Helpers', () => {
       const slackStep = steps[0];
       expect(slackStep.name).toBe('Send Slack Notification');
       expect(slackStep.uses).toBe('slackapi/slack-github-action@v2.1.0');
-      expect(slackStep.with?.payload).toContain('iOS Build Result');
+      expect(slackStep.with?.payload).toContain('iOS Build release');
     });
 
     it('should create PR comment steps for iOS', () => {
@@ -263,7 +263,7 @@ describe('Notification Helpers', () => {
 
       const slackStep = steps[0];
       expect(slackStep.uses).toBe('slackapi/slack-github-action@v2.1.0');
-      expect(slackStep.with?.payload).toContain('iOS Build Result');
+      expect(slackStep.with?.payload).toContain('iOS Build release');
       expect(slackStep.with?.['webhook-type']).toBe('incoming-webhook');
     });
 
@@ -343,7 +343,7 @@ describe('Notification Helpers', () => {
       );
 
       expect(slackStep?.uses).toBe('slackapi/slack-github-action@v2.1.0');
-      expect(slackStep?.with?.webhook).toBe('${{ secrets.SLACK_WEBHOOK_URL }}');
+      expect(slackStep?.with?.webhook).toBe('${{ secrets.SLACK_WEBHOOK }}');
       expect(commentStep?.env?.GH_TOKEN).toBe('${{ secrets.GITHUB_TOKEN }}');
     });
   });

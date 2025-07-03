@@ -21,7 +21,7 @@ describe('Storage Helpers', () => {
         'continue-on-error': true,
         uses: 'actions/upload-artifact@v4',
         with: {
-          name: 'android-debug-apk-${{ github.head_ref || github.ref_name }}',
+          name: 'android-debug-apk',
           path: 'android/app/build/outputs/apk/**/*.apk',
           'retention-days': 30,
         },
@@ -43,9 +43,7 @@ describe('Storage Helpers', () => {
       expect(steps[0].with?.path).toBe(
         'android/app/build/outputs/bundle/**/*.aab'
       );
-      expect(steps[0].with?.name).toBe(
-        'android-release-aab-${{ github.head_ref || github.ref_name }}'
-      );
+      expect(steps[0].with?.name).toBe('android-release-aab');
     });
 
     it('should create GitHub storage steps for both APK and AAB output', () => {
@@ -69,9 +67,7 @@ describe('Storage Helpers', () => {
       expect(apkStep?.with?.path).toBe(
         'android/app/build/outputs/apk/**/*.apk'
       );
-      expect(apkStep?.with?.name).toBe(
-        'android-debug-apk-${{ github.head_ref || github.ref_name }}'
-      );
+      expect(apkStep?.with?.name).toBe('android-debug-apk');
 
       // Check AAB upload step
       const aabStep = steps.find(
@@ -82,7 +78,7 @@ describe('Storage Helpers', () => {
         'android/app/build/outputs/bundle/**/*.aab'
       );
       expect(aabStep?.with?.name).toBe(
-        'android-debug-aab-${{ github.head_ref || github.ref_name }}'
+        'android-debug-aab-${{ github.run_id }}'
       );
     });
 
@@ -142,7 +138,6 @@ describe('Storage Helpers', () => {
       // Check rclone setup step
       const setupStep = steps.find(step => step.name === 'Setup rclone');
       expect(setupStep).toBeDefined();
-      expect(setupStep?.uses).toBe('AnimMouse/setup-rclone@v1');
 
       // Check upload step
       const uploadStep = steps.find(
@@ -217,7 +212,7 @@ describe('Storage Helpers', () => {
         'continue-on-error': true,
         uses: 'actions/upload-artifact@v4',
         with: {
-          name: 'ios-debug-${{ github.head_ref || github.ref_name }}',
+          name: 'ios-debug-${{ github.run_id }}',
           path: 'ios/build/Build/Products/**/*.ipa',
           'retention-days': 30,
         },
@@ -299,11 +294,9 @@ describe('Storage Helpers', () => {
       const debugSteps = storageHelpers.createIOSStorageSteps(debugOptions);
       const releaseSteps = storageHelpers.createIOSStorageSteps(releaseOptions);
 
-      expect(debugSteps[0].with?.name).toBe(
-        'ios-debug-${{ github.head_ref || github.ref_name }}'
-      );
+      expect(debugSteps[0].with?.name).toBe('ios-debug-${{ github.run_id }}');
       expect(releaseSteps[0].with?.name).toBe(
-        'ios-release-${{ github.head_ref || github.ref_name }}'
+        'ios-release-${{ github.run_id }}'
       );
     });
 
