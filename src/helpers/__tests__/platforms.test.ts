@@ -8,10 +8,12 @@ describe('Platform Helpers', () => {
       { name: 'Setup Node', uses: 'actions/setup-node@v4' },
     ];
 
-    const mockDetermineBuildSourceStep = {
-      name: 'Determine Build Source',
-      run: 'echo "Determining build source"',
-    };
+    // This step was previously used but now removed from implementation
+    // Keeping the commented version for reference in case we need to restore similar functionality
+    // const mockDetermineBuildSourceStep = {
+    //   name: 'Determine Build Source',
+    //   run: 'echo "Determining build source"',
+    // };
 
     it('should create Android build steps for debug APK', () => {
       const buildOptions: BuildOptions = {
@@ -162,10 +164,12 @@ describe('Platform Helpers', () => {
       { name: 'Setup Node', uses: 'actions/setup-node@v4' },
     ];
 
-    const mockDetermineBuildSourceStep = {
-      name: 'Determine Build Source',
-      run: 'echo "Determining build source"',
-    };
+    // This step was previously used but now removed from implementation
+    // Keeping the commented version for reference in case we need to restore similar functionality
+    // const mockDetermineBuildSourceStep = {
+    //   name: 'Determine Build Source',
+    //   run: 'echo "Determining build source"',
+    // };
 
     it('should create iOS build steps for debug build', () => {
       const buildOptions: BuildOptions = {
@@ -182,7 +186,7 @@ describe('Platform Helpers', () => {
         buildOptions
       );
 
-      expect(steps).toHaveLength(7); // setup + determine + verify + ruby + pod-install + build
+      expect(steps).toHaveLength(6); // setup (2) + verify + ruby + pod-install + build
       expect(steps[0]).toEqual(mockSetupSteps[0]);
       expect(steps[1]).toEqual(mockSetupSteps[1]);
       // Build source step removed, so not checking for it
@@ -205,7 +209,7 @@ describe('Platform Helpers', () => {
 
       const buildStep = steps.find(step => step.name === 'Run iOS Build');
       expect(buildStep).toBeDefined();
-      expect(buildStep?.run).toContain('build-ios');
+      expect(buildStep?.run).toContain('iOS build for debug');
     });
 
     it('should create iOS build steps for release build', () => {

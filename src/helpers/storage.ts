@@ -3,10 +3,26 @@ import { BuildOptions } from '../presets/types';
 
 /**
  * Storage solution step helpers
+ * 
+ * This module provides helper functions to generate workflow steps for different
+ * artifact storage solutions (GitHub Artifacts, Firebase App Distribution, 
+ * Google Drive, Amazon S3) for both Android and iOS builds.
+ * 
+ * Each storage helper:
+ * - Takes build configuration options
+ * - Returns appropriate GitHub Actions steps for storing artifacts
+ * - Handles finding and uploading the correct file types
+ * - Sets up authentication when needed (Firebase, Google Drive, S3)
  */
 const storageHelpers = {
   /**
-   * Creates storage solution steps for Android
+   * Creates storage solution steps for Android build artifacts
+   * 
+   * Generates the appropriate GitHub Actions steps to store Android build artifacts
+   * (APK and/or AAB files) in the configured storage solution.
+   * 
+   * @param build BuildOptions containing storage configuration and build variant
+   * @returns Array of GitHub workflow steps for the selected storage solution
    */
   createAndroidStorageSteps(build: BuildOptions): GitHubStep[] {
     if (build.storage === 'github') {
@@ -142,7 +158,13 @@ const storageHelpers = {
   },
 
   /**
-   * Creates storage solution steps for iOS
+   * Creates storage solution steps for iOS build artifacts
+   * 
+   * Generates the appropriate GitHub Actions steps to store iOS build artifacts
+   * (IPA files) in the configured storage solution.
+   * 
+   * @param build BuildOptions containing storage configuration and build variant
+   * @returns Array of GitHub workflow steps for the selected storage solution
    */
   createIOSStorageSteps(build: BuildOptions): GitHubStep[] {
     if (build.storage === 'github') {
