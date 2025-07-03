@@ -345,8 +345,8 @@ describe('Notification Helpers', () => {
       expect(slackStep?.env?.SLACK_WEBHOOK).toBe(
         '${{ secrets.SLACK_WEBHOOK }}'
       );
-      expect(cliStep?.env?.GITHUB_TOKEN).toBe('${{ secrets.GITHUB_TOKEN }}');
-      expect(commentStep?.env?.GITHUB_TOKEN).toBe(
+      expect(cliStep?.env?.GH_TOKEN).toBe('${{ secrets.GITHUB_TOKEN }}');
+      expect(commentStep?.env?.GH_TOKEN).toBe(
         '${{ secrets.GITHUB_TOKEN }}'
       );
     });

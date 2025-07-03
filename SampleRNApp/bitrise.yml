@@ -1,0 +1,75 @@
+format_version: 13
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: react-native
+meta:
+  bitrise.io:
+    stack: linux-docker-android-22.04
+    machine_type_id: elite
+app:
+  envs:
+    - CI: 'true'
+    - NODE_OPTIONS: '--max_old_space_size=4096'
+    - YARN_ENABLE_IMMUTABLE_INSTALLS: '1'
+workflows:
+  rn-static-analysis:
+    title: React Native Static Analysis
+    description: Run health checks including TypeScript, ESLint, Prettier, and unit tests
+    steps:
+      - git-clone@8:
+          title: Git Clone
+
+      - nvm@1:
+          title: Setup Node.js 18
+          inputs:
+            - node_version: '18'
+
+      - restore-cache@2:
+          title: Restore yarn cache
+          inputs:
+            - key: '{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}'
+
+      - yarn@0:
+          inputs:
+            - args: '--immutable'
+
+      - script@1:
+          title: TypeScript Check
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                yarn tsc --noEmit
+
+      - script@1:
+          title: ESLint Check
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                yarn lint
+
+      - script@1:
+          title: Prettier Check
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                yarn format:check
+
+      - script@1:
+          title: Unit Tests
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                yarn test --ci
+
+      - save-cache@1:
+          title: Save yarn cache
+          inputs:
+            - key: '{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}'
+            - paths: node_modules

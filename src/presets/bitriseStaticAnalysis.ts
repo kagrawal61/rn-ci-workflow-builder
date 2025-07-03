@@ -1,4 +1,4 @@
-import { WorkflowOptions, BitriseConfig, BitriseStep } from '../types';
+import { BitriseConfig, BitriseStep, WorkflowOptions } from '../types';
 
 export function buildBitriseStaticAnalysisPipeline(
   opts: WorkflowOptions
@@ -30,19 +30,31 @@ export function buildBitriseStaticAnalysisPipeline(
     });
   }
 
-  // Cache configuration step
-  const cachePullStep: BitriseStep = {
-    'cache-pull@2': {
-      title: 'Restore Cache',
+  // Modern cache configuration steps
+  const lockFileName =
+    packageManager === 'yarn' ? 'yarn.lock' : 'package-lock.json';
+  const cacheTitle = packageManager === 'yarn' ? 'yarn cache' : 'npm cache';
+
+  const restoreCacheStep: BitriseStep = {
+    'restore-cache@2': {
+      title: `Restore ${cacheTitle}`,
+      inputs: [
+        {
+          key: `{{ .OS }}-{{ .Arch }}-${packageManager}-cache-{{ checksum "${lockFileName}" }}`,
+        },
+      ],
     },
   };
 
-  const cachePushStep: BitriseStep = {
-    'cache-push@2': {
-      title: 'Save Cache',
+  const saveCacheStep: BitriseStep = {
+    'save-cache@1': {
+      title: `Save ${cacheTitle}`,
       inputs: [
         {
-          paths: `$HOME/.cache/yarn/v*`,
+          key: `{{ .OS }}-{{ .Arch }}-${packageManager}-cache-{{ checksum "${lockFileName}" }}`,
+        },
+        {
+          paths: 'node_modules',
         },
       ],
     },
@@ -50,7 +62,6 @@ export function buildBitriseStaticAnalysisPipeline(
 
   // Node setup steps
   const setupSteps: BitriseStep[] = [
-    cachePullStep,
     {
       'git-clone@8': {
         title: 'Git Clone',
@@ -66,34 +77,34 @@ export function buildBitriseStaticAnalysisPipeline(
         ],
       },
     },
-    {
-      'script@1': {
-        title: 'Enable Corepack and Activate Yarn',
-        inputs: [
-          {
-            content: `#!/usr/bin/env bash
-set -euo pipefail
-
-corepack enable
-corepack prepare ${packageManager}@stable --activate`,
-          },
-        ],
-      },
-    },
-    {
-      'script@1': {
-        title: 'Install Dependencies',
-        inputs: [
-          {
-            content: `#!/usr/bin/env bash
-set -euo pipefail
-
-${packageManager === 'yarn' ? 'yarn install --immutable' : 'npm ci'}`,
-          },
-        ],
-      },
-    },
+    restoreCacheStep,
   ];
+
+  // Dependency installation step
+  const installStep: BitriseStep =
+    packageManager === 'yarn'
+      ? {
+          'yarn@0': {
+            inputs: [
+              {
+                args: '--immutable',
+              },
+            ],
+          },
+        }
+      : {
+          'script@1': {
+            title: 'Install Dependencies',
+            inputs: [
+              {
+                content: `#!/usr/bin/env bash
+set -euo pipefail
+
+npm ci`,
+              },
+            ],
+          },
+        };
 
   // Quality check steps
   const qualitySteps: BitriseStep[] = [];
@@ -165,23 +176,14 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
     });
   }
 
-  // Report and artifact steps
-  const reportSteps: BitriseStep[] = [
-    {
-      'deploy-to-bitrise-io@2': {
-        title: 'Upload Test Results',
-        inputs: [
-          {
-            deploy_path: './coverage',
-          },
-        ],
-      },
-    },
-    cachePushStep,
-  ];
-
   // Combine all steps
-  const workflowSteps = [...setupSteps, ...qualitySteps, ...testSteps, ...reportSteps];
+  const workflowSteps = [
+    ...setupSteps,
+    installStep,
+    ...qualitySteps,
+    ...testSteps,
+    saveCacheStep,
+  ];
 
   // Platform configuration
   const workflow_meta = {
@@ -223,7 +225,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
   }
 
   return {
-    format_version: 11,
+    format_version: 13,
     default_step_lib_source:
       'https://github.com/bitrise-io/bitrise-steplib.git',
     project_type: 'react-native',

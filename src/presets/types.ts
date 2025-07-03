@@ -78,13 +78,18 @@ export interface BuildOptions {
   notification: NotificationType;
 
   /**
-   * Include health check steps
+   * Include static analysis steps (type checking, linting, tests)
+   */
+  includeStaticAnalysis?: boolean;
+  
+  /**
+   * @deprecated Use includeStaticAnalysis instead
    */
   includeHealthCheck?: boolean;
 
   /**
    * Health check options for configuring which checks to run
-   * Only used when includeHealthCheck is true
+   * Only used when includeStaticAnalysis is true
    */
   healthCheckOptions?: HealthCheckOptions;
 

@@ -224,7 +224,8 @@ Build Time|$BITRISE_BUILD_DURATION`,
       'comment-on-github-pull-request@0': {
         title: `Add ${platform} Build Comment to PR`,
         inputs: [
-          { body: `## ${platform} ${build.variant} Build Results
+          {
+            body: `## ${platform} ${build.variant} Build Results
 
 ✅ Build completed successfully!
 
@@ -238,7 +239,8 @@ Build Time|$BITRISE_BUILD_DURATION`,
 - Commit: $BITRISE_GIT_COMMIT
 - Build Time: $BITRISE_BUILD_DURATION
 
-> Build generated via React Native CI Workflow Builder` },
+> Build generated via React Native CI Workflow Builder`,
+          },
           { personal_access_token: '$GITHUB_TOKEN' },
         ],
         is_always_run: false,
@@ -283,19 +285,31 @@ export function buildBitriseBuildPipeline(
     });
   }
 
-  // Cache configuration steps
-  const cachePullStep: BitriseStep = {
-    'cache-pull@2': {
-      title: 'Restore Cache',
+  // Modern cache configuration steps
+  const lockFileName =
+    packageManager === 'yarn' ? 'yarn.lock' : 'package-lock.json';
+  const cacheTitle = packageManager === 'yarn' ? 'yarn cache' : 'npm cache';
+
+  const restoreCacheStep: BitriseStep = {
+    'restore-cache@2': {
+      title: `Restore ${cacheTitle}`,
+      inputs: [
+        {
+          key: `{{ .OS }}-{{ .Arch }}-${packageManager}-cache-{{ checksum "${lockFileName}" }}`,
+        },
+      ],
     },
   };
 
-  const cachePushStep: BitriseStep = {
-    'cache-push@2': {
-      title: 'Save Cache',
+  const saveCacheStep: BitriseStep = {
+    'save-cache@1': {
+      title: `Save ${cacheTitle}`,
       inputs: [
         {
-          paths: `$HOME/.cache/yarn/v*`,
+          key: `{{ .OS }}-{{ .Arch }}-${packageManager}-cache-{{ checksum "${lockFileName}" }}`,
+        },
+        {
+          paths: 'node_modules',
         },
       ],
     },
@@ -303,7 +317,6 @@ export function buildBitriseBuildPipeline(
 
   // Common setup steps
   const setupSteps: BitriseStep[] = [
-    cachePullStep,
     {
       'git-clone@8': {
         title: 'Git Clone',
@@ -319,34 +332,34 @@ export function buildBitriseBuildPipeline(
         ],
       },
     },
-    {
-      'script@1': {
-        title: 'Enable Corepack and Activate Yarn',
-        inputs: [
-          {
-            content: `#!/usr/bin/env bash
-set -euo pipefail
-
-corepack enable
-corepack prepare ${packageManager}@stable --activate`,
-          },
-        ],
-      },
-    },
-    {
-      'script@1': {
-        title: 'Install Dependencies',
-        inputs: [
-          {
-            content: `#!/usr/bin/env bash
-set -euo pipefail
-
-${packageManager === 'yarn' ? 'yarn install --immutable' : 'npm ci'}`,
-          },
-        ],
-      },
-    },
+    restoreCacheStep,
   ];
+
+  // Dependency installation step
+  const installStep: BitriseStep =
+    packageManager === 'yarn'
+      ? {
+          'yarn@0': {
+            inputs: [
+              {
+                args: '--immutable',
+              },
+            ],
+          },
+        }
+      : {
+          'script@1': {
+            title: 'Install Dependencies',
+            inputs: [
+              {
+                content: `#!/usr/bin/env bash
+set -euo pipefail
+
+npm ci`,
+              },
+            ],
+          },
+        };
 
   // Platform-specific configuration
   const androidMeta = {
@@ -414,6 +427,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
   if (build.platform === 'android' || build.platform === 'both') {
     const androidSteps = [
       ...setupSteps,
+      installStep,
       ...healthCheckSteps,
       {
         'script@1': {
@@ -447,7 +461,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
         inputs: [
           { notify_user_groups: 'everyone' },
           // Enable public install page for builds when notifications are needed
-          { is_enable_public_page: 'true' }
+          { is_enable_public_page: 'true' },
         ],
       },
     });
@@ -460,7 +474,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
     androidSteps.push(...androidNotificationSteps);
 
     // Add cache push step as final step
-    androidSteps.push(cachePushStep);
+    androidSteps.push(saveCacheStep);
 
     workflows['rn-android-build'] = {
       title: 'Build Android',
@@ -473,6 +487,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
   if (build.platform === 'ios' || build.platform === 'both') {
     const iosSteps = [
       ...setupSteps,
+      installStep,
       ...healthCheckSteps,
       {
         'cocoapods-install@2': {
@@ -509,7 +524,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
           inputs: [
             { notify_user_groups: 'everyone' },
             // Enable public install page for builds when notifications are needed
-            { is_enable_public_page: 'true' }
+            { is_enable_public_page: 'true' },
           ],
         },
       },
@@ -517,7 +532,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
       // Add custom notification steps based on configuration
       ...generateBitriseNotificationSteps(build, 'iOS'),
 
-      cachePushStep,
+      saveCacheStep,
     ];
 
     workflows['rn-ios-build'] = {
@@ -582,7 +597,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
   }
 
   return {
-    format_version: 11,
+    format_version: 13,
     default_step_lib_source:
       'https://github.com/bitrise-io/bitrise-steplib.git',
     project_type: 'react-native',

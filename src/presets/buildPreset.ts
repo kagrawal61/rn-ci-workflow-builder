@@ -5,11 +5,17 @@ import commonSteps from '../helpers/steps';
 import platformHelpers from '../helpers/platforms';
 import storageHelpers from '../helpers/storage';
 import notificationHelpers from '../helpers/notifications';
-
-// Types moved to src/presets/types.ts
+// Import iOS implementation utilities for future use
+// import { createIOSBuildJob, setupIOSJobDependencies } from './iosImplementation';
 
 /**
  * Build workflow preset for PR/branch builds
+ * 
+ * Creates GitHub Actions workflow configurations for React Native app builds
+ * with support for Android and quality checks.
+ * 
+ * @param opts Workflow generator options including platform, variant and notification settings
+ * @returns Complete GitHub workflow configuration
  */
 export function buildBuildPipeline(
   opts: WorkflowOptions & { build?: BuildOptions }
@@ -27,7 +33,7 @@ export function buildBuildPipeline(
       variant: 'release',
       storage: 'github',
       notification: 'pr-comment',
-      includeHealthCheck: true, // Will be renamed to includeStaticAnalysis in the future
+      includeStaticAnalysis: true,
     },
   } = opts;
 
@@ -67,41 +73,24 @@ export function buildBuildPipeline(
     };
   }
 
-  // iOS build steps - temporarily disabled
-  // TEMPORARILY DISABLED: iOS platform support is coming soon
-  // This block is disabled to prevent iOS job creation even if 'both' is selected in config
-  // Uncomment and restore this block when iOS support is ready
-  /*
-  if (build.platform === 'ios' || build.platform === 'both') {
-    // Create base iOS build steps
-    let iosBuildSteps = platformHelpers.createIOSBuildSteps(
-      setupSteps,
-      packageManager,
-      buildParams,
-      build
-    );
+  // iOS build support is coming soon
+  // The implementation has been moved to iosImplementation.ts
+  // When iOS support is ready, uncomment the import at the top of this file
+  // and add the following code:
+  //
+  // if (build.platform === 'ios' || build.platform === 'both') {
+  //   const iosJobs = createIOSBuildJob(opts, setupSteps, buildParams);
+  //   jobs = { ...jobs, ...iosJobs };
+  // }
 
-    // Add storage-specific steps
-    const storageSteps = storageHelpers.createIOSStorageSteps(build);
-    iosBuildSteps = [...iosBuildSteps, ...storageSteps];
-
-    // Add notification steps
-    const notificationSteps =
-      notificationHelpers.createIOSNotificationSteps(build);
-    iosBuildSteps = [...iosBuildSteps, ...notificationSteps];
-
-    // Add the iOS build job
-    jobs['build-ios'] = {
-      name: 'Build iOS',
-      'runs-on': 'macos-latest', // iOS builds require macOS
-      steps: iosBuildSteps,
-    };
-  }
-  */
-
-  // Add quality check job if health checks are included
-  if (build.includeHealthCheck) {
-    // Create a separate job for health checks to avoid duplication
+  // Determine if static analysis should be included
+  const includeStaticAnalysis = build.includeStaticAnalysis !== undefined 
+    ? build.includeStaticAnalysis 
+    : build.includeHealthCheck;
+  
+  // Add quality check job if static analysis is included
+  if (includeStaticAnalysis) {
+    // Create a separate job for static analysis checks to avoid duplication
     jobs['quality-check'] = {
       name: 'Quality Checks',
       'runs-on': runsOn,
@@ -146,13 +135,30 @@ export function buildBuildPipeline(
   }
 
   // Set up dependencies between jobs
-  if (build.includeHealthCheck) {
+  if (includeStaticAnalysis) {
     // Build jobs depend on quality check
-    // iOS job dependencies removed as iOS support is coming soon
+    // iOS job dependencies will be handled by setupIOSJobDependencies when iOS support is ready
     if (build.platform === 'android' || build.platform === 'both' || build.platform === 'ios') {
       jobs['build-android'].needs = ['quality-check'];
     }
   }
+
+  /**
+   * Add explicit GitHub workflow permissions when PR comments are enabled
+   * 
+   * GitHub Actions uses a least-privilege approach for workflow token permissions.
+   * When commenting on PRs, the workflow requires specific permissions:
+   * - contents:read - For accessing repository contents
+   * - pull-requests:write - For adding/updating comments on PRs
+   * - issues:write - For interacting with issues (some PR operations require this)
+   */
+  const permissions = build.notification === 'pr-comment' || build.notification === 'both'
+    ? {
+        contents: 'read',
+        'pull-requests': 'write',
+        issues: 'write',
+      } as const
+    : undefined;
 
   return {
     name:
@@ -160,6 +166,7 @@ export function buildBuildPipeline(
       `React Native ${build.platform === 'both' ? 'App' : build.platform} Build`,
     on: buildTriggers(triggers),
     env: buildEnv(env, secrets),
+    permissions,
     jobs,
   };
 }
