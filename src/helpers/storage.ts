@@ -1,13 +1,13 @@
-import { GitHubStep } from '../types';
 import { BuildOptions } from '../presets/types';
+import { GitHubStep } from '../types';
 
 /**
  * Storage solution step helpers
- * 
+ *
  * This module provides helper functions to generate workflow steps for different
- * artifact storage solutions (GitHub Artifacts, Firebase App Distribution, 
+ * artifact storage solutions (GitHub Artifacts, Firebase App Distribution,
  * Google Drive, Amazon S3) for both Android and iOS builds.
- * 
+ *
  * Each storage helper:
  * - Takes build configuration options
  * - Returns appropriate GitHub Actions steps for storing artifacts
@@ -17,10 +17,10 @@ import { BuildOptions } from '../presets/types';
 const storageHelpers = {
   /**
    * Creates storage solution steps for Android build artifacts
-   * 
+   *
    * Generates the appropriate GitHub Actions steps to store Android build artifacts
    * (APK and/or AAB files) in the configured storage solution.
-   * 
+   *
    * @param build BuildOptions containing storage configuration and build variant
    * @returns Array of GitHub workflow steps for the selected storage solution
    */
@@ -37,10 +37,7 @@ const storageHelpers = {
             'continue-on-error': true,
             uses: 'actions/upload-artifact@v4',
             with: {
-              name:
-                'android-' +
-                build.variant +
-                '-apk-${{ github.head_ref || github.ref_name }}',
+              name: 'android-' + build.variant + '-apk',
               path: 'android/app/build/outputs/apk/**/*.apk',
               'retention-days': 30,
             },
@@ -75,8 +72,7 @@ const storageHelpers = {
                 'android-' +
                 build.variant +
                 '-' +
-                (build.androidOutputType || 'apk') +
-                '-${{ github.head_ref || github.ref_name }}',
+                (build.androidOutputType || 'apk'),
               path:
                 build.androidOutputType === 'aab'
                   ? 'android/app/build/outputs/bundle/**/*.aab'
@@ -159,10 +155,10 @@ const storageHelpers = {
 
   /**
    * Creates storage solution steps for iOS build artifacts
-   * 
+   *
    * Generates the appropriate GitHub Actions steps to store iOS build artifacts
    * (IPA files) in the configured storage solution.
-   * 
+   *
    * @param build BuildOptions containing storage configuration and build variant
    * @returns Array of GitHub workflow steps for the selected storage solution
    */
