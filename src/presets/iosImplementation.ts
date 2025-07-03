@@ -1,9 +1,9 @@
 /**
  * iOS workflow implementation for React Native builds
- * 
+ *
  * This file contains the iOS-specific workflow implementation that will be integrated
  * into the main build pipeline when iOS support is fully implemented.
- * 
+ *
  * IMPORTANT: This implementation is currently in development and not yet active in the main workflow.
  * When iOS support is ready, these functions should be imported and used in buildPreset.ts.
  */
@@ -16,7 +16,7 @@ import notificationHelpers from '../helpers/notifications';
 
 /**
  * Creates an iOS build job configuration that will be added to the workflow
- * 
+ *
  * @param opts Workflow configuration options
  * @param setupSteps Common setup steps to include at the start of the job
  * @param buildParams Build parameters string
@@ -24,11 +24,18 @@ import notificationHelpers from '../helpers/notifications';
  */
 export function createIOSBuildJob(
   opts: WorkflowOptions & { build?: BuildOptions },
-  setupSteps: GitHubStep[], 
+  setupSteps: GitHubStep[],
   buildParams: string
 ): { 'build-ios': GitHubJob } {
-  const { build = { platform: 'ios', variant: 'release', storage: 'github', notification: 'none' } } = opts;
-  
+  const {
+    build = {
+      platform: 'ios',
+      variant: 'release',
+      storage: 'github',
+      notification: 'none',
+    },
+  } = opts;
+
   // Create base iOS build steps
   let iosBuildSteps = platformHelpers.createIOSBuildSteps(
     setupSteps,
@@ -52,13 +59,13 @@ export function createIOSBuildJob(
       name: 'Build iOS',
       'runs-on': 'macos-latest', // iOS builds require macOS
       steps: iosBuildSteps,
-    }
+    },
   };
 }
 
 /**
  * Sets up job dependencies for iOS build if health/static analysis checks are enabled
- * 
+ *
  * @param jobs The current jobs collection
  * @param includeStaticAnalysis Whether static analysis is included in the workflow
  */

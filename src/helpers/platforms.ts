@@ -7,10 +7,10 @@ import { BuildOptions } from '../presets/types';
 const platformHelpers = {
   /**
    * Creates Android-specific build steps for GitHub Actions workflow
-   * 
+   *
    * @param setupSteps Common setup steps like checkout and Node setup
    * @param packageManager DEPRECATED: No longer used directly, kept for API compatibility
-   * @param buildParams DEPRECATED: No longer used directly, kept for API compatibility 
+   * @param buildParams DEPRECATED: No longer used directly, kept for API compatibility
    * @param build Build options specifying platform, variant, and output type
    * @returns Array of GitHub Actions workflow steps
    */
@@ -83,21 +83,21 @@ echo "Building Android app using official React Native CLI..."
 ${(() => {
   /**
    * This IIFE dynamically generates the Gradle build commands based on the specified variant and output type.
-   * 
+   *
    * The complex logic handles:
    * 1. Different build variants (debug/release)
    * 2. Different output formats (APK/AAB/both)
    * 3. Appropriate Gradle tasks for each combination
    * 4. Proper error handling for each build command
    */
-  
+
   // Determine the appropriate Gradle task based on variant and output type
   const variant = build.variant;
   const outputType = build.androidOutputType || 'apk'; // Default to APK if not specified
 
   if (outputType === 'both') {
     // When building both APK and AAB formats, we need to run two separate Gradle tasks
-    
+
     // Select the appropriate task name based on build variant
     const apkTask = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
     const aabTask = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
@@ -128,7 +128,7 @@ cd ..
   } else {
     // For single output type (either APK or AAB)
     let task = '';
-    
+
     if (outputType === 'apk') {
       // APK format (standard Android package)
       task = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
@@ -157,12 +157,12 @@ echo "✅ Android build completed successfully"
 ${(() => {
   /**
    * Verifies that build outputs were generated properly based on the selected output type.
-   * 
+   *
    * This code dynamically checks for:
    * - APK files in the correct output directory (for APK output type)
-   * - AAB files in the bundle directory (for AAB output type) 
+   * - AAB files in the bundle directory (for AAB output type)
    * - Both file types when both output formats are requested
-   * 
+   *
    * If files aren't found, a warning is shown but the workflow continues,
    * as some build setups may place files in different locations.
    */
@@ -206,10 +206,10 @@ fi`;
 
   /**
    * Creates iOS-specific build steps for GitHub Actions workflow
-   * 
+   *
    * @param setupSteps Common setup steps like checkout and Node setup
    * @param packageManager DEPRECATED: No longer used directly, kept for API compatibility
-   * @param buildParams DEPRECATED: No longer used directly, kept for API compatibility 
+   * @param buildParams DEPRECATED: No longer used directly, kept for API compatibility
    * @param build Build options specifying platform and variant
    * @returns Array of GitHub Actions workflow steps
    */
