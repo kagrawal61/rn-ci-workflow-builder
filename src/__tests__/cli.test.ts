@@ -10,11 +10,7 @@ jest.mock('../generator', () => ({
   generateWorkflow: jest.fn(),
   generateWorkflowForCli: jest.fn(),
   writeWorkflowFile: jest.fn(),
-  getAvailablePresets: jest.fn(() => [
-    'build',
-    'static-analysis',
-    'health-check',
-  ]),
+  getAvailablePresets: jest.fn(() => ['build', 'static-analysis']),
 }));
 
 // Mock the presets registration
@@ -247,18 +243,18 @@ options:
 
     it('should override preset from config file', () => {
       const configPreset = 'static-analysis';
-      const commandLinePreset = 'health-check';
+      const commandLinePreset = 'static-analysis';
 
       // Command line should take precedence
       const finalPreset = commandLinePreset || configPreset;
-      expect(finalPreset).toBe('health-check');
+      expect(finalPreset).toBe('static-analysis');
     });
 
     it('should get available presets', () => {
       const { getAvailablePresets } = require('../generator');
       const presets = getAvailablePresets();
 
-      expect(presets).toEqual(['build', 'static-analysis', 'health-check']);
+      expect(presets).toEqual(['build', 'static-analysis']);
     });
   });
 
@@ -289,6 +285,22 @@ options:
       const result = writeWorkflowFile(config, customDir);
 
       expect(result.filePath).toContain('custom-dir');
+    });
+  });
+
+  describe('generateWorkflowFromArgs', () => {
+    it('should generate workflow with static-analysis preset when config has different preset', () => {
+      const configPreset = 'static-analysis';
+      const commandLinePreset = 'static-analysis';
+
+      const finalPreset = commandLinePreset || configPreset;
+      expect(finalPreset).toBe('static-analysis');
+    });
+
+    it('should return list of available presets', () => {
+      const { getAvailablePresets } = require('../generator');
+      const presets = getAvailablePresets();
+      expect(presets).toEqual(['build', 'static-analysis']);
     });
   });
 });

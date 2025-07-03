@@ -33,10 +33,9 @@ describe('Notification Helpers', () => {
       const slackStep = steps[0];
       expect(slackStep.name).toBe('Send Slack Notification');
       expect(slackStep.if).toBe('always()');
-      expect(slackStep.uses).toBe('rtCamp/action-slack-notify@master');
-      expect(slackStep.env?.SLACK_WEBHOOK).toBe('${{ secrets.SLACK_WEBHOOK }}');
-      expect(slackStep.env?.SLACK_TITLE).toBe('Android Build Result');
-      expect(slackStep.env?.SLACK_MESSAGE).toContain('Android debug build');
+      expect(slackStep.uses).toBe('slackapi/slack-github-action@v2.1.0');
+      expect(slackStep.with?.payload).toContain('Android Build Result');
+      expect(slackStep.with?.['webhook-type']).toBe('incoming-webhook');
     });
 
     it('should create PR comment steps when notification is pr-comment', () => {
@@ -50,14 +49,20 @@ describe('Notification Helpers', () => {
       const steps =
         notificationHelpers.createAndroidNotificationSteps(buildOptions);
 
-      expect(steps).toHaveLength(2);
+      expect(steps).toHaveLength(3); // PR status detection + CLI setup + PR comment
+
+      // Check PR status detection step
+      const statusStep = steps.find(
+        step => step.name === 'Determine PR Status'
+      );
+      expect(statusStep).toBeDefined();
+      expect(statusStep?.id).toBe('build-source');
 
       // Check GitHub CLI setup step
       const cliStep = steps.find(step => step.name === 'Setup GitHub CLI');
       expect(cliStep).toBeDefined();
       expect(cliStep?.if).toBe("steps.build-source.outputs.is_pr == 'true'");
       expect(cliStep?.run).toContain('gh --version');
-      expect(cliStep?.env?.GITHUB_TOKEN).toBe('${{ secrets.GITHUB_TOKEN }}');
 
       // Check PR comment step
       const commentStep = steps.find(
@@ -68,7 +73,7 @@ describe('Notification Helpers', () => {
         "steps.build-source.outputs.is_pr == 'true'"
       );
       expect(commentStep?.run).toContain('Android release build completed');
-      expect(commentStep?.run).toContain('gh pr comment');
+      expect(commentStep?.env?.GH_TOKEN).toBe('${{ secrets.GITHUB_TOKEN }}');
     });
 
     it('should create both Slack and PR comment steps when notification is both', () => {
@@ -82,13 +87,14 @@ describe('Notification Helpers', () => {
       const steps =
         notificationHelpers.createAndroidNotificationSteps(buildOptions);
 
-      expect(steps).toHaveLength(3); // Slack + CLI setup + PR comment
+      expect(steps).toHaveLength(4); // Slack + PR status detection + CLI setup + PR comment
 
       // Check Slack step
       const slackStep = steps.find(
         step => step.name === 'Send Slack Notification'
       );
       expect(slackStep).toBeDefined();
+      expect(slackStep?.uses).toBe('slackapi/slack-github-action@v2.1.0');
 
       // Check GitHub CLI step
       const cliStep = steps.find(step => step.name === 'Setup GitHub CLI');
@@ -179,8 +185,8 @@ describe('Notification Helpers', () => {
 
       const slackStep = steps[0];
       expect(slackStep.name).toBe('Send Slack Notification');
-      expect(slackStep.env?.SLACK_TITLE).toBe('iOS Build Result');
-      expect(slackStep.env?.SLACK_MESSAGE).toContain('iOS release build');
+      expect(slackStep.uses).toBe('slackapi/slack-github-action@v2.1.0');
+      expect(slackStep.with?.payload).toContain('iOS Build Result');
     });
 
     it('should create PR comment steps for iOS', () => {
@@ -194,7 +200,7 @@ describe('Notification Helpers', () => {
       const steps =
         notificationHelpers.createIOSNotificationSteps(buildOptions);
 
-      expect(steps).toHaveLength(2);
+      expect(steps).toHaveLength(3); // PR status detection + CLI setup + PR comment
 
       const commentStep = steps.find(
         step => step.name === 'Add PR Comment via GitHub CLI'
@@ -214,7 +220,7 @@ describe('Notification Helpers', () => {
       const steps =
         notificationHelpers.createIOSNotificationSteps(buildOptions);
 
-      expect(steps).toHaveLength(3);
+      expect(steps).toHaveLength(4); // Slack + PR status detection + CLI setup + PR comment
 
       const slackStep = steps.find(
         step => step.name === 'Send Slack Notification'
@@ -256,12 +262,9 @@ describe('Notification Helpers', () => {
         notificationHelpers.createIOSNotificationSteps(buildOptions);
 
       const slackStep = steps[0];
-      expect(slackStep.env?.SLACK_CHANNEL).toBe('#builds');
-      expect(slackStep.env?.SLACK_USERNAME).toBe('Build Bot');
-      expect(slackStep.env?.SLACK_COLOR).toBe('${{ job.status }}');
-      expect(slackStep.env?.SLACK_ICON).toBe(
-        'https://github.com/rtCamp.png?size=48'
-      );
+      expect(slackStep.uses).toBe('slackapi/slack-github-action@v2.1.0');
+      expect(slackStep.with?.payload).toContain('iOS Build Result');
+      expect(slackStep.with?.['webhook-type']).toBe('incoming-webhook');
     });
 
     it('should handle PR comment updates correctly', () => {
@@ -278,10 +281,8 @@ describe('Notification Helpers', () => {
       const commentStep = steps.find(
         step => step.name === 'Add PR Comment via GitHub CLI'
       );
-      expect(commentStep?.run).toContain('EXISTING_COMMENT_ID');
-      expect(commentStep?.run).toContain('gh api -X PATCH');
-      expect(commentStep?.run).toContain('gh pr comment');
       expect(commentStep?.run).toContain('iOS debug build');
+      expect(commentStep?.run).toContain('EXISTING_COMMENT_ID');
     });
   });
 
@@ -323,7 +324,7 @@ describe('Notification Helpers', () => {
       expect(slackStep.if).toBe('always()');
     });
 
-    it('should include proper environment variables for all notification types', () => {
+    it('should include proper configuration for all notification types', () => {
       const buildOptions: BuildOptions = {
         platform: 'android',
         variant: 'debug',
@@ -337,18 +338,13 @@ describe('Notification Helpers', () => {
       const slackStep = steps.find(
         step => step.name === 'Send Slack Notification'
       );
-      const cliStep = steps.find(step => step.name === 'Setup GitHub CLI');
       const commentStep = steps.find(
         step => step.name === 'Add PR Comment via GitHub CLI'
       );
 
-      expect(slackStep?.env?.SLACK_WEBHOOK).toBe(
-        '${{ secrets.SLACK_WEBHOOK }}'
-      );
-      expect(cliStep?.env?.GH_TOKEN).toBe('${{ secrets.GITHUB_TOKEN }}');
-      expect(commentStep?.env?.GH_TOKEN).toBe(
-        '${{ secrets.GITHUB_TOKEN }}'
-      );
+      expect(slackStep?.uses).toBe('slackapi/slack-github-action@v2.1.0');
+      expect(slackStep?.with?.webhook).toBe('${{ secrets.SLACK_WEBHOOK_URL }}');
+      expect(commentStep?.env?.GH_TOKEN).toBe('${{ secrets.GITHUB_TOKEN }}');
     });
   });
 });

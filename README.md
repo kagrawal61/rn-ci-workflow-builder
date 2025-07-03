@@ -136,11 +136,11 @@ You can also use the workflow generator programmatically in your own scripts:
 ```typescript
 import { generateWorkflow, writeWorkflowFile } from 'rn-ci-workflow-builder';
 
-// Generate a health-check workflow
+// Generate a static-analysis workflow
 const config = {
-  kind: 'health-check',
+  kind: 'static-analysis',
   options: {
-    name: 'Custom Health Check',
+    name: 'Custom Static Analysis',
     triggers: {
       push: {
         branches: ['main', 'dev'],
@@ -170,7 +170,7 @@ if (secretsSummary) {
 const { filePath, secretsSummary: summary } = writeWorkflowFile(
   config, 
   '.github/workflows', 
-  'custom-health-check.yml'
+  'custom-static-analysis.yml'
 );
 console.log(`Workflow written to ${filePath}`);
 ```

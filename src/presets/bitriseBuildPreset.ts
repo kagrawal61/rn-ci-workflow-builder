@@ -265,8 +265,8 @@ export function buildBitriseBuildPipeline(
       variant: 'release',
       androidOutputType: 'apk', // Add support for androidOutputType
       storage: 'bitrise',
-      notification: 'none',
-      includeHealthCheck: true,
+      notification: 'pr-comment',
+      includeStaticAnalysis: true,
     },
   } = opts;
 
@@ -376,8 +376,8 @@ npm ci`,
     },
   };
 
-  // Health check steps (optional)
-  const healthCheckSteps: BitriseStep[] = build.includeHealthCheck
+  // Static analysis steps (optional)
+  const staticAnalysisSteps: BitriseStep[] = build.includeStaticAnalysis
     ? [
         {
           'script@1': {
@@ -428,7 +428,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
     const androidSteps = [
       ...setupSteps,
       installStep,
-      ...healthCheckSteps,
+      ...staticAnalysisSteps,
       {
         'script@1': {
           title: 'Build Android App',
@@ -488,7 +488,7 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
     const iosSteps = [
       ...setupSteps,
       installStep,
-      ...healthCheckSteps,
+      ...staticAnalysisSteps,
       {
         'cocoapods-install@2': {
           title: 'Install CocoaPods',

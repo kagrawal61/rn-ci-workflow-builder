@@ -2,11 +2,11 @@
  * Workflow presets exports
  */
 import { registerBuilder } from '../generator';
-import { buildStaticAnalysisPipeline } from './staticAnalysis';
-import { buildBuildPipeline } from './buildPreset';
-import { buildBitriseStaticAnalysisPipeline } from './bitriseStaticAnalysis';
-import { buildBitriseBuildPipeline } from './bitriseBuildPreset';
 import { WorkflowOptions } from '../types';
+import { buildBitriseBuildPipeline } from './bitriseBuildPreset';
+import { buildBitriseStaticAnalysisPipeline } from './bitriseStaticAnalysis';
+import { buildBuildPipeline } from './buildPreset';
+import { buildStaticAnalysisPipeline } from './staticAnalysis';
 
 // Register all built-in presets here
 export function registerBuiltInPresets(): void {
@@ -32,12 +32,14 @@ export function registerBuiltInPresets(): void {
   });
 }
 
-// Re-export all preset builders for easy access
-export * from './staticAnalysis';
-export * from './buildPreset';
-export * from './bitriseStaticAnalysis';
+// Export built-in presets
 export * from './bitriseBuildPreset';
+export * from './bitriseStaticAnalysis';
+export * from './buildPreset';
+export * from './staticAnalysis';
+export * from './types';
 
 // Export preset names for enum usage in types
 export const presetKinds = ['static-analysis', 'build'] as const;
+
 export type PresetKind = (typeof presetKinds)[number];

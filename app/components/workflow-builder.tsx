@@ -1,25 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { WorkflowFormValues } from './workflow-form';
-import { motion } from 'framer-motion';
-import {
-  Settings2,
-  PlayCircle,
-  ChevronRight,
-  Database,
-  Zap,
-} from 'lucide-react';
 import {
   createConfigFromFormValues,
-  createDefaultHealthCheckConfig,
   createDefaultBuildConfig,
+  createDefaultStaticAnalysisConfig,
   generateWorkflowYaml,
 } from '@/utils/workflow-service';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { motion } from 'framer-motion';
+import {
+  ChevronRight,
+  Database,
+  PlayCircle,
+  Settings2,
+  Zap,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { WorkflowForm, WorkflowFormValues } from './workflow-form';
 import { YamlPreview } from './yaml-preview';
-import { WorkflowForm } from './workflow-form';
 
 export function WorkflowBuilder() {
   const [formValues, setFormValues] = useState<WorkflowFormValues>(() => {
@@ -79,13 +78,14 @@ export function WorkflowBuilder() {
       buildVariant: 'release',
       buildStorage: 'github',
       buildNotification: 'pr-comment',
-      includeHealthCheck: true, // Will be renamed to includeStaticAnalysis in the future
+      includeStaticAnalysis: true,
 
       // Static analysis settings
+      staticAnalysisNotification: 'pr-comment',
       typescriptCheck: true,
       eslintCheck: true,
       prettierCheck: true,
-      unitTestsCheck: true,
+      unitTestsCheck: true
     };
   });
 
@@ -116,7 +116,7 @@ export function WorkflowBuilder() {
       const defaultConfig =
         newValues.preset === 'build'
           ? createDefaultBuildConfig()
-          : createDefaultHealthCheckConfig();
+          : createDefaultStaticAnalysisConfig();
 
       // Update form values with defaults from the selected preset
       setFormValues((prev: WorkflowFormValues) => {

@@ -1,25 +1,27 @@
 {
-  "kind": "health-check",
+  "kind": "static-analysis",
   "options": {
-    "name": "Basic React Native Workflow",
+    "name": "React Native Static Analysis",
     "triggers": {
       "push": {
-        "branches": ["main", "develop"],
-        "ignorePaths": ["**.md"]
+        "branches": ["main"]
       },
       "pullRequest": {
-        "branches": ["main", "develop"]
+        "branches": ["main"]
       },
       "workflowDispatch": true
     },
-    "env": {
-      "NODE_ENV": "test"
-    },
-    "runsOn": "ubuntu-latest",
     "nodeVersions": [20],
     "packageManager": "yarn",
+    "runsOn": "ubuntu-latest",
     "cache": {
       "enabled": true
+    },
+    "staticAnalysis": {
+      "typescript": true,
+      "eslint": true,
+      "prettier": true,
+      "unitTests": true
     }
   }
 }

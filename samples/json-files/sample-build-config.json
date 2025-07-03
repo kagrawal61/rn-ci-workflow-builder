@@ -21,7 +21,7 @@
       "variant": "debug",
       "storage": "github",
       "notification": "pr-comment",
-      "includeHealthCheck": true
+      "includeStaticAnalysis": true
     }
   }
 }

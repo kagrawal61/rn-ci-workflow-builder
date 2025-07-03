@@ -28,7 +28,7 @@
       "variant": "release",
       "storage": "s3",
       "notification": "both",
-      "includeHealthCheck": true
+      "includeStaticAnalysis": true
     }
   }
 }

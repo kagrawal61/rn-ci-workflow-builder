@@ -1,9 +1,9 @@
-import { generateWorkflow, WorkflowConfig, getAvailablePresets } from './lib';
-import { BuildOptions, HealthCheckOptions, Platform, Variant, AndroidOutputType, StorageSolution, NotificationType } from '../../src/presets/types';
-import { PackageManager, CIPlatform } from '../../src/types';
+import { AndroidOutputType, BuildOptions, NotificationType, Platform, StaticAnalysisOptions, StorageSolution, Variant } from '../../src/presets/types';
+import { CIPlatform, PackageManager } from '../../src/types';
+import { generateWorkflow, getAvailablePresets, WorkflowConfig } from './lib';
 
 // Helper to create a default static analysis configuration
-export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
+export const createDefaultStaticAnalysisConfig = (): WorkflowConfig => {
   return {
     kind: 'static-analysis',
     options: {
@@ -22,11 +22,12 @@ export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
       packageManager: 'yarn',
       runsOn: 'ubuntu-latest',
       cache: { enabled: true },
-      healthCheck: {
+      staticAnalysis: {
         typescript: true,
         eslint: true,
         prettier: true,
         unitTests: true,
+        notification: 'pr-comment',
       },
     },
   };
@@ -57,32 +58,16 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
         variant: 'release',
         storage: 'github',
         notification: 'pr-comment',
-        includeHealthCheck: true,
+        includeStaticAnalysis: true,
         androidOutputType: 'apk',
-      },
-      healthCheck: {
-        typescript: true,
-        eslint: true,
-        prettier: true,
-        unitTests: true,
       },
     },
   };
 };
 
-// Generate workflow YAML
-export const generateWorkflowYaml = (
-  config: WorkflowConfig
-): { yaml: string; secretsSummary?: string } => {
-  try {
-    const result = generateWorkflow(config);
-    return result;
-  } catch (error) {
-    console.error('Error generating workflow:', error);
-    throw new Error(
-      `Failed to generate workflow: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
-  }
+// Helper to generate workflow YAML
+export const generateWorkflowYaml = (config: WorkflowConfig): { yaml: string; secretsSummary?: string } => {
+  return generateWorkflow(config);
 };
 
 // Helper to get all preset kinds
@@ -106,7 +91,7 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
       cache: { enabled: false },
       env: {},
       secrets: [],
-      healthCheck: {
+      staticAnalysis: {
         typescript: true,
         eslint: true,
         prettier: true,
@@ -156,28 +141,17 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
     config.options.nodeVersions = [20];
   }
 
-  // Package manager
-  config.options.packageManager = (formValues.packageManager as PackageManager) || 'yarn';
+  // Handle package manager
+  if (formValues.packageManager) {
+    config.options.packageManager = formValues.packageManager as PackageManager;
+  }
 
-  // Runner OS - since we only support Android for now, always use ubuntu-latest
-  // This will be updated when iOS support is added
-  config.options.runsOn = 'ubuntu-latest';
-
-  // Cache configuration is enabled by default
-  config.options.cache = {
-    enabled: true,
-    paths:
-      (formValues.cachePaths as string)?.split(',').map((p: string) => p.trim()) ||
-      undefined,
-    key: (formValues.cacheKey as string) || undefined,
-  };
-
-  // Environment variables
+  // Handle environment variables
   if (formValues.envVars && typeof formValues.envVars === 'object') {
     config.options.env = formValues.envVars as Record<string, string>;
   }
 
-  // Secrets
+  // Handle secrets
   if (formValues.secrets && Array.isArray(formValues.secrets)) {
     config.options.secrets = formValues.secrets as string[];
   }
@@ -194,9 +168,9 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
       variant: (formValues.buildVariant as Variant) || 'release',
       storage: (formValues.buildStorage as StorageSolution) || 'github',
       notification: (formValues.buildNotification as NotificationType) || 'pr-comment',
-      includeHealthCheck:
-        typeof formValues.includeHealthCheck === 'boolean'
-          ? formValues.includeHealthCheck
+      includeStaticAnalysis:
+        typeof formValues.includeStaticAnalysis === 'boolean'
+          ? formValues.includeStaticAnalysis
           : true,
       androidOutputType: (formValues.androidOutputType as AndroidOutputType) || 'apk', // 'apk', 'aab', or 'both'
     };
@@ -204,9 +178,9 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
     // Add the build config to options
     config.options.build = buildConfig;
     
-    // Add health check options if include health check is enabled
-    if (buildConfig.includeHealthCheck) {
-      config.options.healthCheck = {
+    // Add static analysis options if include static analysis is enabled
+    if (buildConfig.includeStaticAnalysis) {
+      config.options.staticAnalysis = {
         typescript: formValues.typescriptCheck === false ? false : true,
         eslint: formValues.eslintCheck === false ? false : true,
         prettier: formValues.prettierCheck === false ? false : true,
@@ -215,15 +189,16 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
     }
   } else if (formValues.preset === 'static-analysis') {
     // Static analysis preset configuration
-    const healthCheckConfig: HealthCheckOptions = {
+    const staticAnalysisConfig: StaticAnalysisOptions = {
       typescript: formValues.typescriptCheck === false ? false : true,
       eslint: formValues.eslintCheck === false ? false : true,
       prettier: formValues.prettierCheck === false ? false : true,
       unitTests: formValues.unitTestsCheck === false ? false : true,
+      notification: (formValues.staticAnalysisNotification as NotificationType) || 'pr-comment',
     };
 
-    // Add the health check config to options
-    config.options.healthCheck = healthCheckConfig;
+    // Add the static analysis config to options
+    config.options.staticAnalysis = staticAnalysisConfig;
   }
 
   return config;
