@@ -113,18 +113,8 @@ function createPRCommentStep(
       ' ' +
       build.variant +
       ' build completed"\n' +
-      'JQ_SELECT=".comments[] | select(.body | contains(\\"$SEARCH_TEXT\\"))"\n' +
-      'JQ_FILTER="$JQ_SELECT | .id"\n' +
-      'EXISTING_COMMENT_ID=$(gh pr view $PR_NUM --json comments --jq "$JQ_FILTER" | head -1)\n\n' +
-      'if [ ! -z "$EXISTING_COMMENT_ID" ]; then\n' +
-      '  echo "Updating existing comment..."\n' +
-      '  REPO="${{ github.repository }}"\n' +
-      '  API_URL="/repos/$REPO/issues/comments/$EXISTING_COMMENT_ID"\n' +
-      '  gh api -X PATCH "$API_URL" -f body="$MESSAGE"\n' +
-      'else\n' +
-      '  echo "Creating new comment..."\n' +
-      '  gh pr comment $PR_NUM --body "$MESSAGE"\n' +
-      'fi',
+      'echo "Creating new comment..."\n' +
+      'gh pr comment $PR_NUM --body "$MESSAGE"\n',
     env: {
       GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}',
     },
@@ -151,18 +141,8 @@ function createStaticAnalysisPRCommentStep(stepId: string): GitHubStep {
       '# Check if comment already exists and update it\n' +
       'PR_NUM="${{ github.event.number }}"\n' +
       'SEARCH_TEXT="Static Analysis Results"\n' +
-      'JQ_SELECT=".comments[] | select(.body | contains(\\"$SEARCH_TEXT\\"))"\n' +
-      'JQ_FILTER="$JQ_SELECT | .id"\n' +
-      'EXISTING_COMMENT_ID=$(gh pr view $PR_NUM --json comments --jq "$JQ_FILTER" | head -1)\n\n' +
-      'if [ ! -z "$EXISTING_COMMENT_ID" ]; then\n' +
-      '  echo "Updating existing comment..."\n' +
-      '  REPO="${{ github.repository }}"\n' +
-      '  API_URL="/repos/$REPO/issues/comments/$EXISTING_COMMENT_ID"\n' +
-      '  gh api -X PATCH "$API_URL" -f body="$MESSAGE"\n' +
-      'else\n' +
-      '  echo "Creating new comment..."\n' +
-      '  gh pr comment $PR_NUM --body "$MESSAGE"\n' +
-      'fi',
+      'echo "Creating new comment..."\n' +
+      'gh pr comment $PR_NUM --body "$MESSAGE"\n',
     env: {
       GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}',
     },
@@ -232,29 +212,47 @@ function createSlackNotificationStep(
 
   // Enhanced Slack notification with emojis and streamlined content
   const platformEmoji = platform === 'Android' ? ':android:' : ':apple:';
-  const payloadYaml = [
-    `text: "${platformEmoji} *${platform} ${build.variant} build* \${{ job.status == 'success' && ':rocket: Success' || job.status == 'failure' && ':boom: Failed' || ':warning: Warning' }}"`,
-    'blocks:',
-    '  - type: header',
-    '    text:',
-    '      type: plain_text',
-    `      text: ${platformEmoji} ${platform} Build ${build.variant}`,
-    '      emoji: true',
-    '  - type: section',
-    '    text:',
-    '      type: mrkdwn',
-    `      text: "\${{ job.status == 'success' && ':white_check_mark: *Success*' || job.status == 'failure' && ':x: *Failed*' || ':warning: *Warning*' }} | <\${{ github.server_url }}/\${{ github.repository }}/actions/runs/\${{ github.run_id }}|View Workflow Run>"`,
-    '  - type: divider',
-    '  - type: section',
-    '    fields:',
-    '      - type: mrkdwn',
-    `        text: "*Download:*\\n${downloadLocation}"`,
-    '  - type: context',
-    '    elements:',
-    '      - type: mrkdwn',
-    `        text: "Build #\${{ github.run_number }} | \${{ github.workflow }} workflow | <\${{ github.server_url }}/\${{ github.repository }}|${platform.toLowerCase()}-${build.variant}>"`,
-    '    ]',
-  ].join('\n');
+  const payloadString = `{
+              "text": "${platformEmoji} *${platform} ${build.variant} build* \${{ job.status == 'success' && ':rocket: Success' || job.status == 'failure' && ':boom: Failed' || ':warning: Warning' }}",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "${platformEmoji} ${platform} Build ${build.variant}",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "\${{ job.status == 'success' && ':white_check_mark: *Success*' || job.status == 'failure' && ':x: *Failed*' || ':warning: *Warning*' }} | <\${{ github.server_url }}/\${{ github.repository }}/actions/runs/\${{ github.run_id }}|View Workflow Run>"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Download:*\\n${downloadLocation}"
+                    }
+                  ]
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "Build #\${{ github.run_number }} | \${{ github.workflow }} workflow | <\${{ github.server_url }}/\${{ github.repository }}|${platform.toLowerCase()}-${build.variant}>"
+                    }
+                  ]
+                }
+              ]
+            }`;
 
   return {
     name: 'Send Slack Notification',
@@ -263,7 +261,7 @@ function createSlackNotificationStep(
     with: {
       webhook: '${{ secrets.SLACK_WEBHOOK }}',
       'webhook-type': 'incoming-webhook',
-      payload: payloadYaml,
+      payload: payloadString,
     },
   };
 }
