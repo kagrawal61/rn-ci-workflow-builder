@@ -130,6 +130,18 @@ export interface GitHubJob {
 }
 
 /**
+ * GitHub workflow permissions configuration
+ */
+export interface GitHubPermissions {
+  /** Permission for accessing repository contents */
+  contents?: 'read' | 'write';
+  /** Permission for interacting with pull requests */
+  'pull-requests'?: 'read' | 'write';
+  /** Permission for interacting with issues */
+  issues?: 'read' | 'write';
+}
+
+/**
  * Complete GitHub Actions workflow
  */
 export interface GitHubWorkflow {
@@ -137,6 +149,8 @@ export interface GitHubWorkflow {
   name: string;
   /** Workflow triggers */
   on: Record<string, unknown>;
+  /** Workflow permissions */
+  permissions?: GitHubPermissions;
   /** Workflow environment variables */
   env?: Record<string, string>;
   /** Workflow concurrency settings */
