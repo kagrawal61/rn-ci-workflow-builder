@@ -114,6 +114,13 @@ jobs:
             echo "is_pr=false" >> $GITHUB_OUTPUT
             echo "📌 Running on branch ${{ github.ref_name }}"
           fi
+      - name: Setup GitHub CLI
+        run: |-
+          # GitHub CLI is pre-installed on GitHub Actions runners
+          echo "Using pre-installed GitHub CLI"
+          gh --version
+          echo "GitHub CLI setup completed successfully"
+        if: steps.build-source.outputs.is_pr == 'true'
       - name: Add PR Comment via GitHub CLI
         if: steps.build-source.outputs.is_pr == 'true'
         run: |-
@@ -173,4 +180,3 @@ jobs:
                 elements:
                   - type: mrkdwn
                     text: "Build #${{ github.run_number }} | ${{ github.workflow }} workflow | <${{ github.server_url }}/${{ github.repository }}|android-release>"
-                ]
