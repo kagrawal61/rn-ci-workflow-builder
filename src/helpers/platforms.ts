@@ -6,12 +6,20 @@ import { BuildOptions } from '../presets/types';
  */
 const platformHelpers = {
   /**
-   * Creates Android-specific build steps with improved error handling
+   * Creates Android-specific build steps for GitHub Actions workflow
+   * 
+   * @param setupSteps Common setup steps like checkout and Node setup
+   * @param packageManager DEPRECATED: No longer used directly, kept for API compatibility
+   * @param buildParams DEPRECATED: No longer used directly, kept for API compatibility 
+   * @param build Build options specifying platform, variant, and output type
+   * @returns Array of GitHub Actions workflow steps
    */
   createAndroidBuildSteps(
     setupSteps: GitHubStep[],
-    _packageManager: PackageManager, // Not used after switch to npx, kept for API compatibility
-    _buildParams: string, // Not used after switch to official CLI, kept for API compatibility
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    packageManager: PackageManager,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    buildParams: string,
     build: BuildOptions
   ): GitHubStep[] {
     return [
@@ -73,18 +81,30 @@ echo "Building Android app using official React Native CLI..."
 
 # Using direct Gradle commands for more reliable builds
 ${(() => {
+  /**
+   * This IIFE dynamically generates the Gradle build commands based on the specified variant and output type.
+   * 
+   * The complex logic handles:
+   * 1. Different build variants (debug/release)
+   * 2. Different output formats (APK/AAB/both)
+   * 3. Appropriate Gradle tasks for each combination
+   * 4. Proper error handling for each build command
+   */
+  
   // Determine the appropriate Gradle task based on variant and output type
   const variant = build.variant;
   const outputType = build.androidOutputType || 'apk'; // Default to APK if not specified
 
   if (outputType === 'both') {
-    // For both APK and AAB, run both tasks
+    // When building both APK and AAB formats, we need to run two separate Gradle tasks
+    
+    // Select the appropriate task name based on build variant
     const apkTask = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
     const aabTask = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
 
     return `echo "Generating both APK and AAB formats for ${variant} build"
 
-# First generate APK
+# First generate APK (installable app format)
 echo "Using Gradle task: ${apkTask} for ${variant} build with APK output format"
 cd android
 ./gradlew ${apkTask} || {
@@ -95,7 +115,7 @@ cd android
 cd ..
 
 
-# Then generate AAB
+# Then generate AAB (app bundle format for Play Store)
 echo "Using Gradle task: ${aabTask} for ${variant} build with AAB output format"
 cd android
 ./gradlew ${aabTask} || {
@@ -106,12 +126,14 @@ cd android
 cd ..
 `;
   } else {
-    // For single output type (APK or AAB)
+    // For single output type (either APK or AAB)
     let task = '';
+    
     if (outputType === 'apk') {
+      // APK format (standard Android package)
       task = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
     } else {
-      // For AAB (Android App Bundle)
+      // AAB format (Android App Bundle for Google Play)
       task = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
     }
 
@@ -133,9 +155,21 @@ echo "✅ Android build completed successfully"
 
 # Verify the expected outputs based on output type
 ${(() => {
+  /**
+   * Verifies that build outputs were generated properly based on the selected output type.
+   * 
+   * This code dynamically checks for:
+   * - APK files in the correct output directory (for APK output type)
+   * - AAB files in the bundle directory (for AAB output type) 
+   * - Both file types when both output formats are requested
+   * 
+   * If files aren't found, a warning is shown but the workflow continues,
+   * as some build setups may place files in different locations.
+   */
   const outputType = build.androidOutputType || 'apk';
 
   if (outputType === 'both') {
+    // When building both formats, check for both file types
     return `# Check for both APK and AAB files
 if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
   echo "✅ APK files generated successfully"
@@ -149,12 +183,14 @@ else
   echo "⚠️ Warning: Expected AAB files not found. Storage steps may fail."
 fi`;
   } else if (outputType === 'apk') {
+    // For APK only output, check just the APK files
     return `if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
   echo "✅ APK files generated successfully"
 else
   echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
 fi`;
   } else {
+    // For AAB only output, check just the AAB files
     return `if ls android/app/build/outputs/bundle/**/*.aab 1> /dev/null 2>&1; then
   echo "✅ AAB files generated successfully"
 else
@@ -169,13 +205,21 @@ fi`;
   },
 
   /**
-   * Creates iOS-specific build steps with improved error handling
+   * Creates iOS-specific build steps for GitHub Actions workflow
+   * 
+   * @param setupSteps Common setup steps like checkout and Node setup
+   * @param packageManager DEPRECATED: No longer used directly, kept for API compatibility
+   * @param buildParams DEPRECATED: No longer used directly, kept for API compatibility 
+   * @param build Build options specifying platform and variant
+   * @returns Array of GitHub Actions workflow steps
    */
   createIOSBuildSteps(
     setupSteps: GitHubStep[],
-    _packageManager: PackageManager, // Not used after switch to npx, kept for API compatibility
-    _buildParams: string, // Not used after switch to official CLI, kept for API compatibility
-    build: BuildOptions // Adding build options parameter to access variant
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    packageManager: PackageManager,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    buildParams: string,
+    build: BuildOptions
   ): GitHubStep[] {
     return [
       ...setupSteps,

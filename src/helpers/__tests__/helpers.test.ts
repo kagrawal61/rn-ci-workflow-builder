@@ -1,4 +1,4 @@
-import { CacheConfig, PackageManager } from '../../types';
+import { CacheConfig } from '../../types';
 import { cacheSteps } from '../../helpers';
 
 describe('Helper Functions', () => {
