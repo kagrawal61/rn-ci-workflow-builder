@@ -51,6 +51,11 @@ export interface HealthCheckOptions {
    * Run unit tests
    */
   unitTests?: boolean;
+
+  /**
+   * Notification type for static analysis results
+   */
+  notification?: NotificationType;
 }
 
 /**

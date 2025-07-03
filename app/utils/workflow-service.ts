@@ -1,6 +1,6 @@
-import { generateWorkflow, WorkflowConfig, getAvailablePresets } from './lib';
-import { BuildOptions, HealthCheckOptions, Platform, Variant, AndroidOutputType, StorageSolution, NotificationType } from '../../src/presets/types';
-import { PackageManager, CIPlatform } from '../../src/types';
+import { AndroidOutputType, BuildOptions, HealthCheckOptions, NotificationType, Platform, StorageSolution, Variant } from '../../src/presets/types';
+import { CIPlatform, PackageManager } from '../../src/types';
+import { generateWorkflow, getAvailablePresets, WorkflowConfig } from './lib';
 
 // Helper to create a default static analysis configuration
 export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
@@ -27,6 +27,7 @@ export const createDefaultHealthCheckConfig = (): WorkflowConfig => {
         eslint: true,
         prettier: true,
         unitTests: true,
+        notification: 'pr-comment',
       },
     },
   };
@@ -220,6 +221,7 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
       eslint: formValues.eslintCheck === false ? false : true,
       prettier: formValues.prettierCheck === false ? false : true,
       unitTests: formValues.unitTestsCheck === false ? false : true,
+      notification: (formValues.staticAnalysisNotification as NotificationType) || 'pr-comment',
     };
 
     // Add the health check config to options

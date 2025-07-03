@@ -1,25 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { WorkflowFormValues } from './workflow-form';
-import { motion } from 'framer-motion';
-import {
-  Settings2,
-  PlayCircle,
-  ChevronRight,
-  Database,
-  Zap,
-} from 'lucide-react';
 import {
   createConfigFromFormValues,
-  createDefaultHealthCheckConfig,
   createDefaultBuildConfig,
+  createDefaultHealthCheckConfig,
   generateWorkflowYaml,
 } from '@/utils/workflow-service';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { motion } from 'framer-motion';
+import {
+  ChevronRight,
+  Database,
+  PlayCircle,
+  Settings2,
+  Zap,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { WorkflowForm, WorkflowFormValues } from './workflow-form';
 import { YamlPreview } from './yaml-preview';
-import { WorkflowForm } from './workflow-form';
 
 export function WorkflowBuilder() {
   const [formValues, setFormValues] = useState<WorkflowFormValues>(() => {
@@ -82,6 +81,7 @@ export function WorkflowBuilder() {
       includeHealthCheck: true, // Will be renamed to includeStaticAnalysis in the future
 
       // Static analysis settings
+      staticAnalysisNotification: 'pr-comment',
       typescriptCheck: true,
       eslintCheck: true,
       prettierCheck: true,

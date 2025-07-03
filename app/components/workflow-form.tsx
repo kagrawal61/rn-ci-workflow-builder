@@ -47,6 +47,7 @@ export interface WorkflowFormValues {
   androidOutputType?: string;
   buildStorage?: string;
   buildNotification?: string;
+  staticAnalysisNotification?: string;
   includeHealthCheck?: boolean;
   typescriptCheck?: boolean;
   eslintCheck?: boolean;
@@ -343,6 +344,46 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                     </svg>
                     At least one check must remain selected
                   </div>
+                </div>
+
+                {/* Static Analysis Notification */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="static-analysis-notification">Notifications</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 rounded-full p-0"
+                        >
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                          <span className="sr-only">Info</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        How to notify about static analysis results
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Select
+                    value={values.staticAnalysisNotification || 'pr-comment'}
+                    onValueChange={value =>
+                      handleInputChange('staticAnalysisNotification', value)
+                    }
+                  >
+                    <SelectTrigger id="static-analysis-notification">
+                      <SelectValue placeholder="Select notification method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pr-comment">PR Comment</SelectItem>
+                      <SelectItem value="slack">Slack</SelectItem>
+                      <SelectItem value="both">
+                        Both PR Comment & Slack
+                      </SelectItem>
+                      <SelectItem value="none">No Notifications</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             )}

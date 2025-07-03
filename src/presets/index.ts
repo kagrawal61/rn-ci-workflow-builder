@@ -2,11 +2,13 @@
  * Workflow presets exports
  */
 import { registerBuilder } from '../generator';
-import { buildStaticAnalysisPipeline } from './staticAnalysis';
-import { buildBuildPipeline } from './buildPreset';
-import { buildBitriseStaticAnalysisPipeline } from './bitriseStaticAnalysis';
-import { buildBitriseBuildPipeline } from './bitriseBuildPreset';
 import { WorkflowOptions } from '../types';
+import { buildBitriseBuildPipeline } from './bitriseBuildPreset';
+import { buildBitriseHealthCheckPipeline } from './bitriseHealthCheck';
+import { buildBitriseStaticAnalysisPipeline } from './bitriseStaticAnalysis';
+import { buildBuildPipeline } from './buildPreset';
+import { buildHealthCheckPipeline } from './healthCheck';
+import { buildStaticAnalysisPipeline } from './staticAnalysis';
 
 // Register all built-in presets here
 export function registerBuiltInPresets(): void {
@@ -17,6 +19,16 @@ export function registerBuiltInPresets(): void {
       return buildStaticAnalysisPipeline(opts);
     } else if (opts.platform === 'bitrise') {
       return buildBitriseStaticAnalysisPipeline(opts);
+    }
+    throw new Error(`Unsupported platform: ${opts.platform}`);
+  });
+
+  registerBuilder('health-check', (opts: WorkflowOptions) => {
+    // Default to GitHub Actions if no platform specified
+    if (!opts.platform || opts.platform === 'github') {
+      return buildHealthCheckPipeline(opts);
+    } else if (opts.platform === 'bitrise') {
+      return buildBitriseHealthCheckPipeline(opts);
     }
     throw new Error(`Unsupported platform: ${opts.platform}`);
   });
@@ -33,11 +45,17 @@ export function registerBuiltInPresets(): void {
 }
 
 // Re-export all preset builders for easy access
-export * from './staticAnalysis';
-export * from './buildPreset';
-export * from './bitriseStaticAnalysis';
 export * from './bitriseBuildPreset';
+export * from './bitriseHealthCheck';
+export * from './bitriseStaticAnalysis';
+export * from './buildPreset';
+export * from './healthCheck';
+export * from './staticAnalysis';
 
 // Export preset names for enum usage in types
-export const presetKinds = ['static-analysis', 'build'] as const;
+export const presetKinds = [
+  'static-analysis',
+  'health-check',
+  'build',
+] as const;
 export type PresetKind = (typeof presetKinds)[number];

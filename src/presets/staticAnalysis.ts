@@ -1,10 +1,11 @@
+import { buildEnv, buildTriggers, cacheSteps } from '../helpers';
+import notificationHelpers from '../helpers/notifications';
 import {
-  WorkflowOptions,
-  GitHubStep,
   GitHubJob,
+  GitHubStep,
   GitHubWorkflow,
+  WorkflowOptions,
 } from '../types';
-import { buildTriggers, buildEnv, cacheSteps } from '../helpers';
 
 export function buildStaticAnalysisPipeline(
   opts: WorkflowOptions
@@ -22,8 +23,28 @@ export function buildStaticAnalysisPipeline(
       eslint: true,
       prettier: true,
       unitTests: true,
+      notification: 'pr-comment',
     },
   } = opts;
+
+  // Add required secrets for notifications
+  const requiredSecrets = [...(secrets || [])];
+  if (
+    healthCheck.notification === 'slack' ||
+    healthCheck.notification === 'both'
+  ) {
+    if (!requiredSecrets.includes('SLACK_WEBHOOK_URL')) {
+      requiredSecrets.push('SLACK_WEBHOOK_URL');
+    }
+  }
+  if (
+    healthCheck.notification === 'pr-comment' ||
+    healthCheck.notification === 'both'
+  ) {
+    if (!requiredSecrets.includes('GITHUB_TOKEN')) {
+      requiredSecrets.push('GITHUB_TOKEN');
+    }
+  }
 
   const testSteps: GitHubStep[] = [
     { name: 'Checkout', uses: 'actions/checkout@v4' },
@@ -76,6 +97,15 @@ export function buildStaticAnalysisPipeline(
     });
   }
 
+  // Add notification steps if configured
+  if (healthCheck.notification && healthCheck.notification !== 'none') {
+    const notificationSteps =
+      notificationHelpers.createStaticAnalysisNotificationSteps(
+        healthCheck.notification
+      );
+    testSteps.push(...notificationSteps);
+  }
+
   // Static analysis job configuration
   const testJob: GitHubJob = {
     name: 'Run Static Analysis',
@@ -92,7 +122,7 @@ export function buildStaticAnalysisPipeline(
   return {
     name: opts.name ?? 'Static Analysis',
     on: buildTriggers(triggers),
-    env: buildEnv(env, secrets),
+    env: buildEnv(env, requiredSecrets),
     jobs,
   };
 }

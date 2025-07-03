@@ -4,12 +4,15 @@
  */
 import * as yaml from 'js-yaml';
 
-import { WorkflowConfig, WorkflowOptions } from '../../src/types';
 import { injectSecrets, validateWorkflowConfig } from '../../src/helpers';
-import { buildHealthCheckPipeline } from '../../src/presets/healthCheck';
-import { buildBuildPipeline } from '../../src/presets/buildPreset';
-import { buildBitriseHealthCheckPipeline } from '../../src/presets/bitriseHealthCheck';
+import { generateSecretsSummary } from '../../src/helpers/secretsManager';
 import { buildBitriseBuildPipeline } from '../../src/presets/bitriseBuildPreset';
+import { buildBitriseHealthCheckPipeline } from '../../src/presets/bitriseHealthCheck';
+import { buildBitriseStaticAnalysisPipeline } from '../../src/presets/bitriseStaticAnalysis';
+import { buildBuildPipeline } from '../../src/presets/buildPreset';
+import { buildHealthCheckPipeline } from '../../src/presets/healthCheck';
+import { buildStaticAnalysisPipeline } from '../../src/presets/staticAnalysis';
+import { WorkflowConfig, WorkflowOptions } from '../../src/types';
 
 // Map of pipeline builders (copied from generator.ts but without Node.js dependencies)
 // Support both GitHub Actions and Bitrise configurations
@@ -79,11 +82,7 @@ export function generateWorkflow(cfg: WorkflowConfig): {
     validatedConfig.options.build
   ) {
     try {
-      // Import from the src directory directly
-      // Note: This works in browser because we're using Next.js which bundles everything together
-      const {
-        generateSecretsSummary,
-      } = require('../../src/helpers/secretsManager');
+      // Use the imported generateSecretsSummary function
       if (validatedConfig.options && validatedConfig.options.build) {
         secretsSummary = generateSecretsSummary(validatedConfig.options.build);
       }
@@ -100,6 +99,16 @@ export function generateWorkflow(cfg: WorkflowConfig): {
 
 // Register the built-in presets with platform selection logic
 registerBuilder('static-analysis', (opts: WorkflowOptions) => {
+  // Default to GitHub Actions if no platform specified
+  if (!opts.platform || opts.platform === 'github') {
+    return buildStaticAnalysisPipeline(opts);
+  } else if (opts.platform === 'bitrise') {
+    return buildBitriseStaticAnalysisPipeline(opts);
+  }
+  throw new Error(`Unsupported platform: ${opts.platform}`);
+});
+
+registerBuilder('health-check', (opts: WorkflowOptions) => {
   // Default to GitHub Actions if no platform specified
   if (!opts.platform || opts.platform === 'github') {
     return buildHealthCheckPipeline(opts);
