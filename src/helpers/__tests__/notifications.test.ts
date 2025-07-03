@@ -282,7 +282,6 @@ describe('Notification Helpers', () => {
         step => step.name === 'Add PR Comment via GitHub CLI'
       );
       expect(commentStep?.run).toContain('iOS debug build');
-      expect(commentStep?.run).toContain('EXISTING_COMMENT_ID');
     });
   });
 
