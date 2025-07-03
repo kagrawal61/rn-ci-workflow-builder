@@ -134,7 +134,7 @@ jobs:
           🔗 **Workflow**: [View Build Run](${WORKFLOW_URL})"
 
           # Check if comment already exists and update it
-          PR_NUM="${{ github.event.number }}"
+          PR_NUM="${{ github.event.pull_request.number }}"
           SEARCH_TEXT="Android release build completed"
           JQ_SELECT=".comments[] | select(.body | contains(\"$SEARCH_TEXT\"))"
           JQ_FILTER="$JQ_SELECT | .id"
@@ -157,26 +157,45 @@ jobs:
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK }}
           webhook-type: incoming-webhook
-          payload: >-
-            text: ":android: *Android release build* ${{ job.status == 'success' && ':rocket: Success' || job.status ==
-            'failure' && ':boom: Failed' || ':warning: Warning' }}"
-
-            blocks:
-              - type: header
-                text:
-                  type: plain_text
-                  text: :android: Android Build release
-                  emoji: true
-              - type: section
-                text:
-                  type: mrkdwn
-                  text: "${{ job.status == 'success' && ':white_check_mark: *Success*' || job.status == 'failure' && ':x: *Failed*' || ':warning: *Warning*' }} | <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
-              - type: divider
-              - type: section
-                fields:
-                  - type: mrkdwn
-                    text: "*Download:*\nAvailable in GitHub Artifacts"
-              - type: context
-                elements:
-                  - type: mrkdwn
-                    text: "Build #${{ github.run_number }} | ${{ github.workflow }} workflow | <${{ github.server_url }}/${{ github.repository }}|android-release>"
+          payload: |
+            {
+              "text": ":android: *Android release build* ${{ job.status == 'success' && ':rocket: Success' || job.status == 'failure' && ':boom: Failed' || ':warning: Warning' }}",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": ":android: Android Build release",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ job.status == 'success' && ':white_check_mark: *Success*' || job.status == 'failure' && ':x: *Failed*' || ':warning: *Warning*' }} | <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Download:*\nAvailable in GitHub Artifacts"
+                    }
+                  ]
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "Build #${{ github.run_number }} | ${{ github.workflow }} workflow | <${{ github.server_url }}/${{ github.repository }}|android-release>"
+                    }
+                  ]
+                }
+              ]
+            }
