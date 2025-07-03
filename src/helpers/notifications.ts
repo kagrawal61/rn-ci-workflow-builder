@@ -38,10 +38,7 @@ function getDownloadLocation(build: BuildOptions, platform: string): string {
       return 'Google Drive';
     case 's3': {
       const s3Path =
-        platformPath +
-        '/' +
-        build.variant +
-        '/${{ github.head_ref || github.ref_name }}';
+        platformPath + '/' + build.variant + '/${{ github.run_id }}';
       return '${{ secrets.S3_BASE_URL }}/' + s3Path;
     }
     default:
@@ -98,14 +95,16 @@ function createPRCommentStep(
     name: 'Add PR Comment via GitHub CLI',
     if: "steps.build-source.outputs.is_pr == 'true'",
     run:
-      '# Create comment message\n' +
+      '# Create comment message with emojis\n' +
+      `EMOJI="${platform === 'Android' ? '🤖' : '🍎'}"\n` +
+      'WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"\n' +
       'MESSAGE="' +
-      platform +
-      ' ' +
-      build.variant +
-      ' build completed!\n\n' +
-      'Download: ' +
+      `$EMOJI **${platform} ${build.variant} build completed! ✅**\n\n` +
+      '📥 **Download**: ' +
       downloadLocation +
+      '\n\n' +
+      '🔗 **Workflow**: [View Build Run](' +
+      '${WORKFLOW_URL})' +
       '"\n\n' +
       '# Check if comment already exists and update it\n' +
       'PR_NUM="${{ github.event.number }}"\n' +
@@ -113,7 +112,7 @@ function createPRCommentStep(
       platform +
       ' ' +
       build.variant +
-      ' build"\n' +
+      ' build completed"\n' +
       'JQ_SELECT=".comments[] | select(.body | contains(\\"$SEARCH_TEXT\\"))"\n' +
       'JQ_FILTER="$JQ_SELECT | .id"\n' +
       'EXISTING_COMMENT_ID=$(gh pr view $PR_NUM --json comments --jq "$JQ_FILTER" | head -1)\n\n' +
@@ -231,103 +230,41 @@ function createSlackNotificationStep(
 ): GitHubStep {
   const downloadLocation = getDownloadLocation(build, platform);
 
-  const withConfig: Record<string, string> = {
-    webhook: '${{ secrets.SLACK_WEBHOOK_URL }}',
-    payload: JSON.stringify({
-      text:
-        '*' +
-        platform +
-        ' ' +
-        build.variant +
-        ' build result*: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}',
-      blocks: [
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: platform + ' Build Result',
-            emoji: true,
-          },
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text:
-              "*Build Status:* ${{ job.status == 'success' && ':white_check_mark: Success' || job.status == 'failure' && ':x: Failed' || ':warning: Warning' }}\n*Platform:* " +
-              platform +
-              '\n*Variant:* ' +
-              build.variant +
-              '\n*Branch/PR:* ${{ github.head_ref || github.ref_name }}',
-          },
-        },
-        {
-          type: 'section',
-          fields: [
-            {
-              type: 'mrkdwn',
-              text: '*Repository:*\n${{ github.repository }}',
-            },
-            {
-              type: 'mrkdwn',
-              text: '*Commit:*\n${{ github.sha }}',
-            },
-            {
-              type: 'mrkdwn',
-              text: '*Workflow:*\n${{ github.workflow }}',
-            },
-            {
-              type: 'mrkdwn',
-              text: '*Download:*\n' + downloadLocation,
-            },
-          ],
-        },
-        {
-          type: 'actions',
-          elements: [
-            {
-              type: 'button',
-              text: {
-                type: 'plain_text',
-                text: 'View Workflow',
-                emoji: true,
-              },
-              url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
-              action_id: 'view_workflow',
-            },
-            {
-              type: 'button',
-              text: {
-                type: 'plain_text',
-                text: 'View Commit',
-                emoji: true,
-              },
-              url: '${{ github.event.pull_request.html_url || github.event.head_commit.url }}',
-              action_id: 'view_commit',
-            },
-          ],
-        },
-        {
-          type: 'context',
-          elements: [
-            {
-              type: 'mrkdwn',
-              text: 'Triggered by *${{ github.actor }}* • ${{ github.event_name }} • <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>',
-            },
-          ],
-        },
-      ],
-    }),
-  };
-
-  // Add webhook-type property using bracket notation to avoid TypeScript issues
-  withConfig['webhook-type'] = 'incoming-webhook';
+  // Enhanced Slack notification with emojis and streamlined content
+  const platformEmoji = platform === 'Android' ? ':android:' : ':apple:';
+  const payloadYaml = [
+    `text: "${platformEmoji} *${platform} ${build.variant} build* \${{ job.status == 'success' && ':rocket: Success' || job.status == 'failure' && ':boom: Failed' || ':warning: Warning' }}"`,
+    'blocks:',
+    '  - type: header',
+    '    text:',
+    '      type: plain_text',
+    `      text: ${platformEmoji} ${platform} Build ${build.variant}`,
+    '      emoji: true',
+    '  - type: section',
+    '    text:',
+    '      type: mrkdwn',
+    `      text: "\${{ job.status == 'success' && ':white_check_mark: *Success*' || job.status == 'failure' && ':x: *Failed*' || ':warning: *Warning*' }} | <\${{ github.server_url }}/\${{ github.repository }}/actions/runs/\${{ github.run_id }}|View Workflow Run>"`,
+    '  - type: divider',
+    '  - type: section',
+    '    fields:',
+    '      - type: mrkdwn',
+    `        text: "*Download:*\\n${downloadLocation}"`,
+    '  - type: context',
+    '    elements:',
+    '      - type: mrkdwn',
+    `        text: "Build #\${{ github.run_number }} | \${{ github.workflow }} workflow | <\${{ github.server_url }}/\${{ github.repository }}|${platform.toLowerCase()}-${build.variant}>"`,
+    '    ]',
+  ].join('\n');
 
   return {
     name: 'Send Slack Notification',
     if: 'always()',
     uses: 'slackapi/slack-github-action@v2.1.0',
-    with: withConfig,
+    with: {
+      webhook: '${{ secrets.SLACK_WEBHOOK }}',
+      'webhook-type': 'incoming-webhook',
+      payload: payloadYaml,
+    },
   };
 }
 

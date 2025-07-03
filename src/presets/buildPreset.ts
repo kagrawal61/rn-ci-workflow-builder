@@ -14,6 +14,12 @@ import {
 
 /**
  * Build workflow preset for PR/branch builds
+ *
+ * Creates GitHub Actions workflow configurations for React Native app builds
+ * with support for Android and quality checks.
+ *
+ * @param opts Workflow generator options including platform, variant and notification settings
+ * @returns Complete GitHub workflow configuration
  */
 export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
   const {
@@ -181,10 +187,29 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
     jobs.build = buildJob;
   }
 
+  /**
+   * Add explicit GitHub workflow permissions when PR comments are enabled
+   *
+   * GitHub Actions uses a least-privilege approach for workflow token permissions.
+   * When commenting on PRs, the workflow requires specific permissions:
+   * - contents:read - For accessing repository contents
+   * - pull-requests:write - For adding/updating comments on PRs
+   * - issues:write - For interacting with issues (some PR operations require this)
+   */
+  const permissions =
+    build.notification === 'pr-comment' || build.notification === 'both'
+      ? ({
+          contents: 'read',
+          'pull-requests': 'write',
+          issues: 'write',
+        } as const)
+      : undefined;
+
   return {
     name: opts.name ?? 'Build Pipeline',
     on: buildTriggers(triggers),
-    env: buildEnv(env, requiredSecrets),
+    env: buildEnv(env, secrets),
+    permissions,
     jobs,
   };
 }
