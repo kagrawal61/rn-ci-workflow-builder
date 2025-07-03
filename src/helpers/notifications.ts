@@ -399,9 +399,10 @@ function createStaticAnalysisSlackNotificationStep(): GitHubStep {
  * Helper function to check if notification type includes a specific type
  */
 function shouldIncludeNotification(
-  notificationType: string,
+  notificationType: string | undefined,
   targetType: 'slack' | 'pr-comment'
 ): boolean {
+  if (!notificationType) return false;
   return notificationType === targetType || notificationType === 'both';
 }
 
@@ -522,7 +523,7 @@ const notificationHelpers = {
    * Creates static analysis notification steps based on the notification configuration
    */
   createStaticAnalysisNotificationSteps(
-    notificationType: string
+    notificationType: string | undefined
   ): GitHubStep[] {
     const steps: GitHubStep[] = [];
 

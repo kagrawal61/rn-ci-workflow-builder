@@ -1,24 +1,33 @@
 {
-  "kind": "health-check",
+  "kind": "static-analysis",
   "options": {
-    "name": "React Native Health Check",
+    "name": "React Native Static Analysis",
+    "platform": "github",
+    "nodeVersions": [20],
+    "packageManager": "yarn",
+    "runsOn": "ubuntu-latest",
     "triggers": {
       "push": {
-        "branches": ["main", "master"],
-        "ignorePaths": ["**.md", "LICENSE", "docs/**"]
+        "branches": ["main", "develop"],
+        "ignorePaths": ["docs/**", "*.md"]
       },
       "pullRequest": {
-        "branches": ["main", "master"]
+        "branches": ["main", "develop"]
       },
       "workflowDispatch": true
     },
-    "env": {},
-    "secrets": ["EXPO_TOKEN"],
-    "runsOn": "ubuntu-latest",
-    "nodeVersions": [20],
-    "packageManager": "yarn",
     "cache": {
       "enabled": true
+    },
+    "env": {
+      "NODE_ENV": "test"
+    },
+    "staticAnalysis": {
+      "typescript": true,
+      "eslint": true,
+      "prettier": true,
+      "unitTests": true,
+      "notification": "pr-comment"
     }
   }
 }

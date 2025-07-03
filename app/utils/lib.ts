@@ -7,10 +7,8 @@ import * as yaml from 'js-yaml';
 import { injectSecrets, validateWorkflowConfig } from '../../src/helpers';
 import { generateSecretsSummary } from '../../src/helpers/secretsManager';
 import { buildBitriseBuildPipeline } from '../../src/presets/bitriseBuildPreset';
-import { buildBitriseHealthCheckPipeline } from '../../src/presets/bitriseHealthCheck';
 import { buildBitriseStaticAnalysisPipeline } from '../../src/presets/bitriseStaticAnalysis';
 import { buildBuildPipeline } from '../../src/presets/buildPreset';
-import { buildHealthCheckPipeline } from '../../src/presets/healthCheck';
 import { buildStaticAnalysisPipeline } from '../../src/presets/staticAnalysis';
 import { WorkflowConfig, WorkflowOptions } from '../../src/types';
 
@@ -108,12 +106,13 @@ registerBuilder('static-analysis', (opts: WorkflowOptions) => {
   throw new Error(`Unsupported platform: ${opts.platform}`);
 });
 
+// Keep health-check preset for backward compatibility by mapping it to static-analysis
 registerBuilder('health-check', (opts: WorkflowOptions) => {
   // Default to GitHub Actions if no platform specified
   if (!opts.platform || opts.platform === 'github') {
-    return buildHealthCheckPipeline(opts);
+    return buildStaticAnalysisPipeline(opts);
   } else if (opts.platform === 'bitrise') {
-    return buildBitriseHealthCheckPipeline(opts);
+    return buildBitriseStaticAnalysisPipeline(opts);
   }
   throw new Error(`Unsupported platform: ${opts.platform}`);
 });

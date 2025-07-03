@@ -2,7 +2,7 @@
 
 import { Label } from '@radix-ui/react-label';
 import { motion } from 'framer-motion';
-import { Info, Plus, Trash } from 'lucide-react';
+import { Info, Plus, Settings2, Trash } from 'lucide-react';
 import { useState } from 'react';
 import {
   Accordion,
@@ -48,7 +48,7 @@ export interface WorkflowFormValues {
   buildStorage?: string;
   buildNotification?: string;
   staticAnalysisNotification?: string;
-  includeHealthCheck?: boolean;
+  includeStaticAnalysis?: boolean;
   typescriptCheck?: boolean;
   eslintCheck?: boolean;
   prettierCheck?: boolean;
@@ -79,7 +79,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
   const [secretName, setSecretName] = useState('');
 
   const handleInputChange = (field: string, value: unknown) => {
-    // Special validation for health check options to ensure at least one is selected
+    // Special validation for static analysis options to ensure at least one is selected
     if (
       field === 'typescriptCheck' ||
       field === 'eslintCheck' ||
@@ -496,12 +496,16 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
         {values.preset === 'build' && (
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle className="text-xl">Build Configuration</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Settings2 className="h-5 w-5" />
+                Build Configuration
+              </CardTitle>
               <CardDescription>
-                Configure the build options for your React Native app
+                Configure your build process, including platforms, variants, and
+                storage options
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               {/* Platform Selection */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -856,9 +860,9 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="include-static-analysis"
-                    checked={values.includeHealthCheck}
+                    checked={values.includeStaticAnalysis}
                     onCheckedChange={checked =>
-                      handleInputChange('includeHealthCheck', checked)
+                      handleInputChange('includeStaticAnalysis', checked)
                     }
                   />
                   <div className="grid gap-1">
@@ -871,7 +875,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   </div>
                 </div>
 
-                {values.includeHealthCheck && (
+                {values.includeStaticAnalysis && (
                   <div className="ml-6 space-y-4 rounded-md border p-4">
                     <p className="text-sm font-medium">
                       Select which checks to include:
@@ -921,26 +925,6 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                         }
                       />
                       <Label htmlFor="unit-tests-check-build">Unit Tests</Label>
-                    </div>
-
-                    <div className="mt-2 flex items-center border-t pt-2 text-xs text-amber-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="mr-2"
-                      >
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                      </svg>
-                      At least one check must remain selected
                     </div>
                   </div>
                 )}

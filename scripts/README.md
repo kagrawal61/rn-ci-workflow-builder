@@ -6,8 +6,8 @@ This script generates all possible combinations of CI/CD workflows based on the 
 
 The combination generator creates workflow configurations for:
 
-- **Static Analysis workflows**: All combinations of health check options across different platforms
-- **Build workflows**: All combinations of platforms, variants, storage solutions, notification types, and health check integrations
+- **Static Analysis workflows**: All combinations of static analysis options across different platforms
+- **Build workflows**: All combinations of platforms, variants, storage solutions, notification types, and static analysis integrations
 
 ## Usage
 
@@ -63,7 +63,7 @@ The script generates:
 - **CI Platforms**: GitHub Actions, Bitrise
 - **Package Managers**: yarn, npm
 - **Node Versions**: [18], [20], [18, 20]
-- **Health Check Options**: Various combinations of TypeScript, ESLint, Prettier, and unit tests
+- **Static Analysis Options**: Various combinations of TypeScript, ESLint, Prettier, and unit tests
 
 #### Build Workflows
 - **CI Platforms**: GitHub Actions, Bitrise
@@ -72,7 +72,7 @@ The script generates:
 - **Storage Solutions**: GitHub, Google Drive, Firebase, AWS S3, Bitrise
 - **Notification Types**: Slack, PR Comment, Both, None
 - **Android Output Types**: APK, AAB, Both (when applicable)
-- **Health Check Integration**: With or without health checks
+- **Static Analysis Integration**: With or without static analysis
 - **Package Managers**: yarn, npm
 - **Node Versions**: [18], [20], [18, 20]
 
@@ -93,7 +93,7 @@ Each generated configuration file follows this naming pattern:
 Examples:
 - `static-analysis-github-yarn-node20-0001.json`
 - `build-github-android-release-s3-slack-yarn-node18-20-0042.json`
-- `build-bitrise-both-debug-bitrise-none-with-health-check-npm-node20-0156.json`
+- `build-bitrise-both-debug-bitrise-none-with-static-analysis-npm-node20-0156.json`
 
 ## Using Generated Configurations
 
@@ -114,7 +114,7 @@ npx rn-ci-workflow-builder generate -c generated-combinations/[filename].json -o
 
 The script typically generates several thousand combinations covering:
 - All valid platform and storage combinations
-- Comprehensive health check variations
+- Comprehensive static analysis variations
 - Multiple Node.js version configurations
 - Different package manager options
 

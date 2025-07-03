@@ -3,7 +3,7 @@
 import {
   createConfigFromFormValues,
   createDefaultBuildConfig,
-  createDefaultHealthCheckConfig,
+  createDefaultStaticAnalysisConfig,
   generateWorkflowYaml,
 } from '@/utils/workflow-service';
 import { motion } from 'framer-motion';
@@ -78,14 +78,14 @@ export function WorkflowBuilder() {
       buildVariant: 'release',
       buildStorage: 'github',
       buildNotification: 'pr-comment',
-      includeHealthCheck: true, // Will be renamed to includeStaticAnalysis in the future
+      includeStaticAnalysis: true,
 
       // Static analysis settings
       staticAnalysisNotification: 'pr-comment',
       typescriptCheck: true,
       eslintCheck: true,
       prettierCheck: true,
-      unitTestsCheck: true,
+      unitTestsCheck: true
     };
   });
 
@@ -116,7 +116,7 @@ export function WorkflowBuilder() {
       const defaultConfig =
         newValues.preset === 'build'
           ? createDefaultBuildConfig()
-          : createDefaultHealthCheckConfig();
+          : createDefaultStaticAnalysisConfig();
 
       // Update form values with defaults from the selected preset
       setFormValues((prev: WorkflowFormValues) => {

@@ -1,16 +1,12 @@
 import { CacheConfig, PackageManager } from '../../types';
 import commonSteps from '../steps';
 
-// Mock the cacheSteps helper
+// Mock the cacheSteps helper - now returns empty array since setup-node handles caching
 jest.mock('../index', () => ({
-  cacheSteps: jest.fn(
-    (packageManager: PackageManager, cache: CacheConfig | undefined) => {
-      if (cache?.enabled) {
-        return [{ name: 'Cache Dependencies', uses: 'actions/cache@v3' }];
-      }
-      return [];
-    }
-  ),
+  cacheSteps: jest.fn(() => {
+    // Always return empty array since setup-node@v4 handles caching internally
+    return [];
+  }),
 }));
 
 describe('Common Steps', () => {
@@ -21,7 +17,7 @@ describe('Common Steps', () => {
 
       const steps = commonSteps.createSetupSteps(packageManager, cache);
 
-      expect(steps).toHaveLength(5); // checkout + setup-node + cache-dir + cache + install
+      expect(steps).toHaveLength(3); // checkout + setup-node + install (cache handled by setup-node)
 
       // Check checkout step
       expect(steps[0]).toEqual({
@@ -53,7 +49,7 @@ describe('Common Steps', () => {
 
       const steps = commonSteps.createSetupSteps(packageManager, cache);
 
-      expect(steps).toHaveLength(5);
+      expect(steps).toHaveLength(3); // checkout + setup-node + install
 
       // Check setup node step uses yarn cache
       expect(steps[1]).toEqual({
@@ -91,7 +87,7 @@ describe('Common Steps', () => {
 
       const steps = commonSteps.createSetupSteps(packageManager, cache);
 
-      expect(steps).toHaveLength(5); // checkout + setup-node + cache-dir + cache + install (cache enabled by default)
+      expect(steps).toHaveLength(3); // checkout + setup-node + install (caching handled by setup-node)
     });
 
     it('should use Node.js version 20', () => {
@@ -104,14 +100,14 @@ describe('Common Steps', () => {
       expect(setupNodeStep?.with?.['node-version']).toBe('20');
     });
 
-    it('should include cache step when cache is enabled', () => {
+    it('should handle caching through setup-node action', () => {
       const packageManager: PackageManager = 'npm';
       const cache: CacheConfig = { enabled: true };
 
       const steps = commonSteps.createSetupSteps(packageManager, cache);
 
-      const cacheStep = steps.find(step => step.name === 'Setup cache');
-      expect(cacheStep).toBeDefined();
+      const setupNodeStep = steps.find(step => step.name === 'Setup Node');
+      expect(setupNodeStep?.with?.cache).toBe('npm');
     });
   });
 

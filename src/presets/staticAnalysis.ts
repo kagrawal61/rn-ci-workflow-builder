@@ -18,7 +18,7 @@ export function buildStaticAnalysisPipeline(
     runsOn = 'ubuntu-latest',
     nodeVersions = [20],
     packageManager = 'yarn',
-    healthCheck = {
+    staticAnalysis = {
       typescript: true,
       eslint: true,
       prettier: true,
@@ -30,16 +30,16 @@ export function buildStaticAnalysisPipeline(
   // Add required secrets for notifications
   const requiredSecrets = [...(secrets || [])];
   if (
-    healthCheck.notification === 'slack' ||
-    healthCheck.notification === 'both'
+    staticAnalysis.notification === 'slack' ||
+    staticAnalysis.notification === 'both'
   ) {
     if (!requiredSecrets.includes('SLACK_WEBHOOK_URL')) {
       requiredSecrets.push('SLACK_WEBHOOK_URL');
     }
   }
   if (
-    healthCheck.notification === 'pr-comment' ||
-    healthCheck.notification === 'both'
+    staticAnalysis.notification === 'pr-comment' ||
+    staticAnalysis.notification === 'both'
   ) {
     if (!requiredSecrets.includes('GITHUB_TOKEN')) {
       requiredSecrets.push('GITHUB_TOKEN');
@@ -63,7 +63,7 @@ export function buildStaticAnalysisPipeline(
   ];
 
   // Add configurable checks
-  if (healthCheck.typescript !== false) {
+  if (staticAnalysis.typescript !== false) {
     testSteps.push({
       name: 'TypeScript',
       run:
@@ -73,14 +73,14 @@ export function buildStaticAnalysisPipeline(
     });
   }
 
-  if (healthCheck.eslint !== false) {
+  if (staticAnalysis.eslint !== false) {
     testSteps.push({
       name: 'ESLint',
       run: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
     });
   }
 
-  if (healthCheck.prettier !== false) {
+  if (staticAnalysis.prettier !== false) {
     testSteps.push({
       name: 'Prettier',
       run:
@@ -90,7 +90,7 @@ export function buildStaticAnalysisPipeline(
     });
   }
 
-  if (healthCheck.unitTests !== false) {
+  if (staticAnalysis.unitTests !== false) {
     testSteps.push({
       name: 'Unit tests',
       run: packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
@@ -98,10 +98,10 @@ export function buildStaticAnalysisPipeline(
   }
 
   // Add notification steps if configured
-  if (healthCheck.notification && healthCheck.notification !== 'none') {
+  if (staticAnalysis.notification && staticAnalysis.notification !== 'none') {
     const notificationSteps =
       notificationHelpers.createStaticAnalysisNotificationSteps(
-        healthCheck.notification
+        staticAnalysis.notification
       );
     testSteps.push(...notificationSteps);
   }

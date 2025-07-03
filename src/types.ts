@@ -146,7 +146,7 @@ export interface GitHubWorkflow {
 }
 
 // Import preset options
-import { BuildOptions, HealthCheckOptions } from './presets/types';
+import { BuildOptions, StaticAnalysisOptions } from './presets/types';
 
 /**
  * Bitrise workflow step
@@ -232,33 +232,61 @@ export interface BitriseConfig {
 }
 
 /**
- * Workflow generator options
+ * Workflow configuration options
  */
 export interface WorkflowOptions {
-  /** Workflow name */
+  /**
+   * Name of the workflow
+   */
   name?: string;
-  /** CI Platform to generate for */
+
+  /**
+   * CI/CD platform to target
+   */
   platform?: CIPlatform;
-  /** Workflow triggers configuration */
+
+  /**
+   * Triggers for the workflow
+   */
   triggers?: TriggerOptions;
-  /** Workflow environment variables */
+
+  /**
+   * Environment variables to set
+   */
   env?: Record<string, string>;
-  /** Secret names to include in workflow */
+
+  /**
+   * Secrets to make available
+   */
   secrets?: string[];
-  /** Cache configuration */
-  cache?: CacheConfig;
-  /** Runner OS/platform */
-  runsOn?: string;
-  /** Node.js versions to test with */
-  nodeVersions?: (string | number)[];
-  /** Package manager to use */
+
+  /**
+   * Node.js versions to test against
+   */
+  nodeVersions?: number[];
+
+  /**
+   * Package manager to use
+   */
   packageManager?: PackageManager;
-  /** Concurrency settings */
-  concurrency?: ConcurrencyConfig;
-  /** Build-specific options (for build preset) */
+
+  /**
+   * Runner to use for the workflow
+   */
+  runsOn?: string;
+
+  /**
+   * Cache configuration
+   */
+  cache?: CacheConfig;
+
+  /**
+   * Build-specific configuration
+   */
   build?: BuildOptions;
+
   /** Static analysis specific options */
-  healthCheck?: HealthCheckOptions;
+  staticAnalysis?: StaticAnalysisOptions;
 }
 
 /**

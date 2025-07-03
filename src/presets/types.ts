@@ -31,7 +31,7 @@ export type AndroidOutputType = 'apk' | 'aab' | 'both';
 /**
  * Static analysis preset specific options
  */
-export interface HealthCheckOptions {
+export interface StaticAnalysisOptions {
   /**
    * Run TypeScript type checking
    */
@@ -65,37 +65,36 @@ export interface BuildOptions {
   /**
    * Platform to build for
    */
-  platform: Platform;
+  platform?: Platform;
 
   /**
-   * Build variant
+   * Build variant (debug or release)
    */
-  variant: Variant;
+  variant?: Variant;
 
   /**
-   * Storage solution for artifacts
-   */
-  storage: StorageSolution;
-
-  /**
-   * Notification type
-   */
-  notification: NotificationType;
-
-  /**
-   * Include health check steps
-   */
-  includeHealthCheck?: boolean;
-
-  /**
-   * Health check options for configuring which checks to run
-   * Only used when includeHealthCheck is true
-   */
-  healthCheckOptions?: HealthCheckOptions;
-
-  /**
-   * Android build output type (apk or aab)
-   * Only applicable when platform is 'android' or 'both'
+   * Android output type
    */
   androidOutputType?: AndroidOutputType;
+
+  /**
+   * Storage solution for build artifacts
+   */
+  storage?: StorageSolution;
+
+  /**
+   * Notification type for build results
+   */
+  notification?: NotificationType;
+
+  /**
+   * Include static analysis steps
+   */
+  includeStaticAnalysis?: boolean;
+
+  /**
+   * Static analysis options for configuring which checks to run
+   * Only used when includeStaticAnalysis is true
+   */
+  staticAnalysisOptions?: StaticAnalysisOptions;
 }
