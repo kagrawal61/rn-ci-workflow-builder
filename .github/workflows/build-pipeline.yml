@@ -4,14 +4,11 @@ name: React Native Build Pipeline
     branches:
       - develop
   workflow_dispatch: {}
-
-# Add explicit permissions
+env: {}
 permissions:
   contents: read
   pull-requests: write
   issues: write
-
-env: {}
 jobs:
   build-android:
     name: Build Android
@@ -83,7 +80,6 @@ jobs:
             echo "::error::Android build failed. Check logs for details."
             exit 1
           }
-
           cd ..
 
           echo "✅ Android build completed successfully"
@@ -118,24 +114,21 @@ jobs:
             echo "is_pr=false" >> $GITHUB_OUTPUT
             echo "📌 Running on branch ${{ github.ref_name }}"
           fi
-      - name: Setup GitHub CLI
-        run: |-
-          # GitHub CLI is pre-installed on GitHub Actions runners
-          echo "Using pre-installed GitHub CLI"
-          gh --version
-          echo "GitHub CLI setup completed successfully"
-        if: steps.build-source.outputs.is_pr == 'true'
       - name: Add PR Comment via GitHub CLI
         if: steps.build-source.outputs.is_pr == 'true'
         run: |-
-          # Create comment message
-          MESSAGE="Android release build completed!
+          # Create comment message with emojis
+          EMOJI="🤖"
+          WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          MESSAGE="$EMOJI **Android release build completed! ✅**
 
-          Download: Available in GitHub Artifacts"
+          📥 **Download**: Available in GitHub Artifacts
+
+          🔗 **Workflow**: [View Build Run](${WORKFLOW_URL})"
 
           # Check if comment already exists and update it
           PR_NUM="${{ github.event.number }}"
-          SEARCH_TEXT="Android release build"
+          SEARCH_TEXT="Android release build completed"
           JQ_SELECT=".comments[] | select(.body | contains(\"$SEARCH_TEXT\"))"
           JQ_FILTER="$JQ_SELECT | .id"
           EXISTING_COMMENT_ID=$(gh pr view $PR_NUM --json comments --jq "$JQ_FILTER" | head -1)
@@ -151,3 +144,33 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Send Slack Notification
+        if: always()
+        uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: >-
+            text: ":android: *Android release build* ${{ job.status == 'success' && ':rocket: Success' || job.status ==
+            'failure' && ':boom: Failed' || ':warning: Warning' }}"
+
+            blocks:
+              - type: header
+                text:
+                  type: plain_text
+                  text: :android: Android Build release
+                  emoji: true
+              - type: section
+                text:
+                  type: mrkdwn
+                  text: "${{ job.status == 'success' && ':white_check_mark: *Success*' || job.status == 'failure' && ':x: *Failed*' || ':warning: *Warning*' }} | <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+              - type: divider
+              - type: section
+                fields:
+                  - type: mrkdwn
+                    text: "*Download:*\nAvailable in GitHub Artifacts"
+              - type: context
+                elements:
+                  - type: mrkdwn
+                    text: "Build #${{ github.run_number }} | ${{ github.workflow }} workflow | <${{ github.server_url }}/${{ github.repository }}|android-release>"
+                ]
