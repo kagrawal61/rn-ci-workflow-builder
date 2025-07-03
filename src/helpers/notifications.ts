@@ -96,50 +96,105 @@ function createSlackNotificationStep(
   build: BuildOptions,
   platform: string
 ): GitHubStep {
+  const downloadLocation = getDownloadLocation(build, platform);
+
+  const withConfig: Record<string, string> = {
+    webhook: '${{ secrets.SLACK_WEBHOOK_URL }}',
+    payload: JSON.stringify({
+      text:
+        '*' +
+        platform +
+        ' ' +
+        build.variant +
+        ' build result*: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}',
+      blocks: [
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: platform + ' Build Result',
+            emoji: true,
+          },
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text:
+              "*Build Status:* ${{ job.status == 'success' && ':white_check_mark: Success' || job.status == 'failure' && ':x: Failed' || ':warning: Warning' }}\n*Platform:* " +
+              platform +
+              '\n*Variant:* ' +
+              build.variant +
+              '\n*Branch/PR:* ${{ github.head_ref || github.ref_name }}',
+          },
+        },
+        {
+          type: 'section',
+          fields: [
+            {
+              type: 'mrkdwn',
+              text: '*Repository:*\n${{ github.repository }}',
+            },
+            {
+              type: 'mrkdwn',
+              text: '*Commit:*\n${{ github.sha }}',
+            },
+            {
+              type: 'mrkdwn',
+              text: '*Workflow:*\n${{ github.workflow }}',
+            },
+            {
+              type: 'mrkdwn',
+              text: '*Download:*\n' + downloadLocation,
+            },
+          ],
+        },
+        {
+          type: 'actions',
+          elements: [
+            {
+              type: 'button',
+              text: {
+                type: 'plain_text',
+                text: 'View Workflow',
+                emoji: true,
+              },
+              url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
+              action_id: 'view_workflow',
+            },
+            {
+              type: 'button',
+              text: {
+                type: 'plain_text',
+                text: 'View Commit',
+                emoji: true,
+              },
+              url: '${{ github.event.pull_request.html_url || github.event.head_commit.url }}',
+              action_id: 'view_commit',
+            },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
+            {
+              type: 'mrkdwn',
+              text: 'Triggered by *${{ github.actor }}* • ${{ github.event_name }} • <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>',
+            },
+          ],
+        },
+      ],
+    }),
+  };
+
+  // Add webhook-type property using bracket notation to avoid TypeScript issues
+  withConfig['webhook-type'] = 'incoming-webhook';
+
   return {
     name: 'Send Slack Notification',
     if: 'always()',
-    uses: 'slackapi/slack-github-action@v1.24.0',
-    with: {
-      payload: JSON.stringify({
-        text: platform + " " + build.variant + " build for ${{ github.head_ref || github.ref_name }} completed with status: ${{ job.status }}",
-        channel: '#builds',
-        username: 'Build Bot',
-        icon_emoji: ':robot_face:',
-        attachments: [
-          {
-            color: "${{ job.status == 'success' && 'good' || job.status == 'failure' && 'danger' || 'warning' }}",
-            title: platform + ' Build Result',
-            fields: [
-              {
-                title: "Repository",
-                value: "${{ github.repository }}",
-                short: true
-              },
-              {
-                title: "Branch/PR",
-                value: "${{ github.head_ref || github.ref_name }}",
-                short: true
-              },
-              {
-                title: "Commit",
-                value: "${{ github.sha }}",
-                short: true
-              },
-              {
-                title: "Build Variant",
-                value: build.variant,
-                short: true
-              }
-            ]
-          }
-        ]
-      })
-    },
-    env: {
-      SLACK_WEBHOOK_URL: '${{ secrets.SLACK_WEBHOOK }}',
-      SLACK_WEBHOOK_TYPE: 'INCOMING_WEBHOOK'
-    },
+    uses: 'slackapi/slack-github-action@v2.1.0',
+    with: withConfig,
   };
 }
 
@@ -152,7 +207,7 @@ const notificationHelpers = {
    */
   createAndroidNotificationSteps(build: BuildOptions): GitHubStep[] {
     const steps: GitHubStep[] = [];
-    
+
     // Add Slack notification if configured - doesn't need special PR detection
     if (build.notification === 'slack' || build.notification === 'both') {
       steps.push(createSlackNotificationStep(build, 'Android'));
@@ -222,7 +277,7 @@ else
 fi
 `,
       });
-      
+
       // Add GitHub CLI installation step (platform-agnostic)
       const cliInstallStep = createGitHubCLIInstallationStep();
       cliInstallStep.if = "steps.build-source.outputs.is_pr == 'true'";
