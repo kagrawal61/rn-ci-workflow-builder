@@ -186,7 +186,12 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="github">GitHub Actions</SelectItem>
-                  <SelectItem value="bitrise">Bitrise</SelectItem>
+                  <SelectItem value="bitrise" disabled={true}>
+                    Bitrise
+                    <span className="ml-2 rounded-full bg-amber-200 px-2 py-0.5 text-xs font-medium text-amber-800">
+                      Coming Soon
+                    </span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">

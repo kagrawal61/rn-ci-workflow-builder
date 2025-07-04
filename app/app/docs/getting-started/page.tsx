@@ -58,6 +58,8 @@ export default function GettingStartedPage() {
                     </h3>
                     <Link
                       href="/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-primary-foreground shadow-md transition-colors hover:bg-primary/90"
                     >
                       Open Web App <ExternalLink className="h-4 w-4" />
