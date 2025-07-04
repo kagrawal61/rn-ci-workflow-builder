@@ -6,6 +6,7 @@ import {
   createDefaultStaticAnalysisConfig,
   generateWorkflowYaml,
 } from '@/utils/workflow-service';
+import { trackTabChanged, trackWorkflowGenerated } from '@/utils/analytics';
 import { motion } from 'framer-motion';
 import {
   ChevronRight,
@@ -153,6 +154,14 @@ export function WorkflowBuilder() {
       setSecretsSummary(result.secretsSummary);
       setActiveTab('preview');
       
+      // Track workflow generation event
+      trackWorkflowGenerated({
+        platform: formValues.platform || 'github',
+        preset: formValues.preset || 'build',
+        buildPlatform: formValues.buildPlatform,
+        buildVariant: formValues.buildVariant
+      });
+      
       // Scroll to the top of the workflow builder section when switching tabs
       const workflowBuilderSection = document.getElementById('workflow-builder');
       if (workflowBuilderSection) {
@@ -184,7 +193,11 @@ export function WorkflowBuilder() {
 
         <Tabs
           value={activeTab}
-          onValueChange={setActiveTab}
+          onValueChange={(tab) => {
+            setActiveTab(tab);
+            // Track tab change
+            trackTabChanged({ tab });
+          }}
           className="mx-auto"
         >
           <TabsList className="mb-8 grid w-full grid-cols-2">
