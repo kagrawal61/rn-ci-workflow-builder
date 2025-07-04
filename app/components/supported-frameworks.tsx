@@ -101,7 +101,7 @@ export function SupportedFrameworks() {
                     </span>
                   </div>
                   <p className="mt-2 text-muted-foreground">
-                    Preconfigured GitHub Actions and Bitrise integration with automated code signing, cache management, and simplified deployment pipelines
+                    Preconfigured GitHub Actions with automated code signing, cache management, and simplified deployment pipelines
                   </p>
                   <div className="mt-4">
                     <Button
