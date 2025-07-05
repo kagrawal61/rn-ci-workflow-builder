@@ -51,7 +51,7 @@ export function HeroSection() {
           whileInView={{ scale: [0.98, 1] }}
           viewport={{ once: true }}
         >
-          {PROJECT_DESCRIPTION} 
+          {PROJECT_DESCRIPTION} <span className="font-semibold text-green-500">Generate production-ready workflows instantly </span> and  <span className="font-semibold text-primary">save $2,000–$6,000 per project</span> — no more time wasted on manual configuration.
         </motion.p>
 
         <motion.div

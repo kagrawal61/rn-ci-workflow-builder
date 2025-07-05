@@ -6,10 +6,9 @@ import {
   CheckCircle,
   Clock,
   DollarSign,
-  TrendingUp,
-  Users
+  Plug,
+  TrendingUp
 } from "lucide-react";
-import { Badge } from "./ui/badge";
 import { Card } from "./ui/card";
 
 export function BenefitsSection() {
@@ -23,18 +22,11 @@ export function BenefitsSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <Badge className="mb-4 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-            <DollarSign className="h-3 w-3 mr-1" />
-            Honest Estimates
-          </Badge>
           <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
             Realistic Benefits for React Native Teams
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Genuine time and cost savings for teams new to CI/CD automation.
-          </p>
-          <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
-            <em>Conservative estimates based on real-world scenarios.</em>
           </p>
         </motion.div>
 
@@ -71,12 +63,12 @@ export function BenefitsSection() {
 }
 
 const benefits = [
-  {
-    title: "Setup Time",
-    metric: "85-95% Faster",
-    description: "Reduce initial CI/CD setup from 2-4 days to 1-2 hours. Generate workflows in 30-60 minutes vs 4-8 hours manually.",
-    icon: Clock,
-  },
+{
+  title: "Setup Time",
+  metric: "85-95% Faster",
+  description: "Create workflows in under 10 minutes, significantly reducing the hours typically spent on manual setup.",
+  icon: Clock,
+},
   {
     title: "Cost Savings",
     metric: "$1.2K-4.8K",
@@ -96,15 +88,15 @@ const benefits = [
     icon: TrendingUp,
   },
   {
-    title: "For New Teams",
-    metric: "Major Advantage",
-    description: "Biggest benefits for teams new to CI/CD. Experienced teams will see smaller improvements.",
-    icon: Users,
+    title: "Seamless Integration",
+    metric: "Effortless Transition",
+    description: "Integrate seamlessly with existing workflows, minimizing disruption and maximizing efficiency for teams transitioning to CI/CD.",
+    icon: Plug,
   },
   {
     title: "Annual Impact",
     metric: "$2K-15K",
-    description: "Small teams (1-2 projects): $2K-6K annually. Active teams (3-6 projects): $6K-15K annually.",
+    description: "For small teams managing 1-2 projects, the annual savings range from $2,000 to $6,000. For more active teams handling 3-6 projects, the savings can increase to $6,000 to $15,000 annually.",
     icon: BarChart3,
   },
 ];

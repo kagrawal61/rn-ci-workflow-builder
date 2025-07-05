@@ -61,14 +61,14 @@ export default function DocsPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <Link
           href="/docs/benefits"
-          className="group rounded-lg border-2 border-blue-200 bg-blue-50 p-4 transition-colors hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
+          className="group rounded-lg border-2 border-green-200 bg-green-50 p-4 transition-colors hover:bg-green-100 dark:border-green-800 dark:bg-green-900/20 dark:hover:bg-green-900/30"
         >
           <div className="mb-1 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-blue-800 dark:text-blue-200">⏰ Time & Cost Savings</h2>
-            <ArrowRight className="h-5 w-5 text-blue-600 transition-colors group-hover:text-blue-800 dark:text-blue-400 dark:group-hover:text-blue-200" />
+            <h2 className="text-xl font-semibold text-green-800 dark:text-green-200">⏰ Time & Cost Savings</h2>
+            <ArrowRight className="h-5 w-5 text-green-600 transition-colors group-hover:text-green-800 dark:text-green-400 dark:group-hover:text-green-200" />
           </div>
-          <p className="text-blue-700 dark:text-blue-300">
-            Realistic benefits: 85-95% setup time reduction and helpful for teams new to CI/CD
+          <p className="text-green-700 dark:text-green-300">
+             85-95% setup time reduction and helpful for teams setting up CI/CD
           </p>
         </Link>
 
