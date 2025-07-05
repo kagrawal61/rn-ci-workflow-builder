@@ -6,7 +6,6 @@ import {
   CheckCircle,
   Clock,
   DollarSign,
-  Timer,
   TrendingUp,
   Users
 } from "lucide-react";
@@ -32,10 +31,10 @@ export function BenefitsSection() {
             Realistic Benefits for React Native Teams
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Genuine time and cost savings, especially for teams new to CI/CD automation.
+            Genuine time and cost savings for teams new to CI/CD automation.
           </p>
           <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
-            <em>Conservative estimates based on real-world scenarios. Your results will vary.</em>
+            <em>Conservative estimates based on real-world scenarios.</em>
           </p>
         </motion.div>
 
@@ -66,68 +65,6 @@ export function BenefitsSection() {
           ))}
         </div>
 
-        {/* ROI Comparison */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          viewport={{ once: true }}
-          className="mb-16"
-        >
-          <Card className="p-8 border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-green-500/5">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold mb-2">Manual Setup vs Workflow Builder</h3>
-              <p className="text-muted-foreground">See the dramatic difference in time and cost</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                  <Timer className="h-4 w-4" />
-                  <span className="font-semibold">Manual Setup</span>
-                </div>
-                {manualSetupItems.map((item, index) => (
-                  <div key={index} className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                  <CheckCircle className="h-4 w-4" />
-                  <span className="font-semibold">With Workflow Builder</span>
-                </div>
-                {workflowBuilderItems.map((item, index) => (
-                  <div key={index} className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Impact Numbers */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <h3 className="text-2xl font-bold mb-8">Real-World Impact</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {impactMetrics.map((metric, index) => (
-              <div key={index} className="space-y-2">
-                <div className="text-3xl font-bold text-primary">{metric.value}</div>
-                <div className="text-sm text-muted-foreground">{metric.label}</div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
       </div>
     </div>
   );
@@ -136,7 +73,7 @@ export function BenefitsSection() {
 const benefits = [
   {
     title: "Setup Time",
-    metric: "75-85% Faster",
+    metric: "85-95% Faster",
     description: "Reduce initial CI/CD setup from 2-4 days to 1-2 hours. Generate workflows in 30-60 minutes vs 4-8 hours manually.",
     icon: Clock,
   },
@@ -171,36 +108,3 @@ const benefits = [
     icon: BarChart3,
   },
 ];
-
-const manualSetupItems = [
-  "2-4 days initial setup",
-  "4-8 hours per workflow", 
-  "Requires learning YAML syntax",
-  "High syntax error rate",
-  "Manual secret management",
-  "Platform-specific knowledge needed"
-];
-
-const workflowBuilderItems = [
-  "1-2 hours setup",
-  "30-60 minutes per workflow",
-  "Visual form interface",
-  "Validation prevents syntax errors", 
-  "Auto-detected secrets guide",
-  "Cross-platform templates"
-];
-
-const impactMetrics = [
-  {
-    value: "$2K-6K",
-    label: "Small teams (1-2 projects/year)"
-  },
-  {
-    value: "$6K-15K", 
-    label: "Active teams (3-6 projects/year)"
-  },
-  {
-    value: "1-2 hours",
-    label: "Typical setup time"
-  }
-]; 

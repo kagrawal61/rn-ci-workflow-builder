@@ -8,7 +8,7 @@
 // Project metadata
 export const PROJECT_NAME = 'React Native CI/CD Workflow Builder';
 export const PROJECT_DESCRIPTION =
-  'Visual interface for creating React Native CI/CD workflows without learning YAML syntax. Especially helpful for teams new to GitHub Actions.';
+  'Streamline your React Native development with powerful, customizable CI/CD workflows that just work';
 
 // Repository information
 export const REPO_OWNER = 'mobile-dev-ci';

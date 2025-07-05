@@ -68,7 +68,7 @@ export default function DocsPage() {
             <ArrowRight className="h-5 w-5 text-blue-600 transition-colors group-hover:text-blue-800 dark:text-blue-400 dark:group-hover:text-blue-200" />
           </div>
           <p className="text-blue-700 dark:text-blue-300">
-            Realistic benefits: 75-85% setup time reduction, especially helpful for teams new to CI/CD
+            Realistic benefits: 85-95% setup time reduction and helpful for teams new to CI/CD
           </p>
         </Link>
 
