@@ -15,19 +15,19 @@ export function HeroSection() {
           transition={{ duration: 0.5, ease: 'easeOut' }}
         >
           <div className="flex items-center justify-center gap-4">
-            <div className="flex items-center justify-center gap-2 rounded-full bg-green-100 px-4 py-1 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300">
+            <div className="flex items-center justify-center gap-2 rounded-full bg-blue-100 px-4 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
               <div className="flex h-3.5 w-3.5 items-center justify-center">
                 <Clock size={14} />
               </div>
-              <span>95% Time Savings</span>
+              <span>75-85% Time Savings</span>
             </div>
-            <div className="flex items-center justify-center gap-2 rounded-full bg-blue-100 px-4 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+            <div className="flex items-center justify-center gap-2 rounded-full bg-green-100 px-4 py-1 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300">
               <Code className="h-3.5 w-3.5" />
-              <span>$2K-6K Saved Per Project</span>
+              <span>$1.2K-4.8K Saved</span>
             </div>
-            <div className="flex items-center justify-center gap-2 rounded-full bg-amber-100 px-4 py-1 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+            <div className="flex items-center justify-center gap-2 rounded-full bg-purple-100 px-4 py-1 text-sm text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
               <Zap className="h-3.5 w-3.5" />
-              <span>300-500% ROI</span>
+              <span>Best for New Teams</span>
             </div>
           </div>
         </motion.div>
@@ -51,7 +51,7 @@ export function HeroSection() {
           whileInView={{ scale: [0.98, 1] }}
           viewport={{ once: true }}
         >
-          {PROJECT_DESCRIPTION} <span className="font-semibold text-primary">Stop wasting 2-3 days on manual CI/CD setup.</span> Generate production-ready workflows in 15 minutes and save thousands in developer costs.
+          {PROJECT_DESCRIPTION} <span className="font-semibold text-primary">Reduce setup from 2-4 days to 1-2 hours.</span> Visual interface eliminates the need to learn complex YAML syntax.
         </motion.p>
 
         <motion.div

@@ -8,7 +8,7 @@
 // Project metadata
 export const PROJECT_NAME = 'React Native CI/CD Workflow Builder';
 export const PROJECT_DESCRIPTION =
-  'Transform weeks of CI/CD setup into minutes. Save $2,000-6,000 per project with automated workflow generation.';
+  'Visual interface for creating React Native CI/CD workflows without learning YAML syntax. Especially helpful for teams new to GitHub Actions.';
 
 // Repository information
 export const REPO_OWNER = 'mobile-dev-ci';

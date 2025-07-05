@@ -1,87 +1,91 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { CheckCircle, Clock, DollarSign, Target, TrendingUp, Users } from 'lucide-react';
+import { AlertTriangle, Book, Clock, Target, Users } from 'lucide-react';
 
 export default function BenefitsPage() {
   return (
     <div className="space-y-8">
       <div>
         <h1 className="scroll-m-20 text-4xl font-bold tracking-tight">
-          ROI & Benefits Analysis
+          Honest Assessment: What This Tool Actually Does
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          Quantifiable benefits of using the React Native CI Workflow Builder
+          Realistic benefits, limitations, and who should (and shouldn't) use this tool
         </p>
       </div>
 
-      <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-6">
-        <h2 className="mb-4 text-xl font-semibold">Executive Summary</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary">300-500%</div>
-            <div className="text-sm text-muted-foreground">Typical ROI within Q1</div>
+      <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-6 dark:border-blue-800 dark:bg-blue-900/20">
+        <h2 className="mb-4 text-xl font-semibold text-blue-800 dark:text-blue-200">Who Benefits Most</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="font-semibold text-green-700 dark:text-green-300 mb-2">✅ Great For:</h3>
+            <ul className="space-y-1 text-sm">
+              <li>• Teams new to GitHub Actions/Bitrise</li>
+              <li>• Developers who avoid CI/CD due to complexity</li>
+              <li>• Projects needing standard React Native workflows</li>
+              <li>• Teams wanting consistent setup across projects</li>
+            </ul>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary">$25K-50K</div>
-            <div className="text-sm text-muted-foreground">Annual savings (5-person team)</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary">95%</div>
-            <div className="text-sm text-muted-foreground">Faster CI/CD setup</div>
+          <div>
+            <h3 className="font-semibold text-orange-700 dark:text-orange-300 mb-2">⚠️ Limited Benefit For:</h3>
+            <ul className="space-y-1 text-sm">
+              <li>• Teams already expert in CI/CD</li>
+              <li>• Projects needing heavy customization</li>
+              <li>• Complex enterprise requirements</li>
+              <li>• Teams preferring full YAML control</li>
+            </ul>
           </div>
         </div>
       </div>
 
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold">Detailed Cost-Benefit Analysis</h2>
+        <h2 className="text-2xl font-semibold">Measurable Benefits</h2>
         
         <div className="grid gap-6 md:grid-cols-2">
           <Card className="p-6">
             <div className="mb-4 flex items-center gap-2">
               <Clock className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold">Time Savings</h3>
+              <h3 className="text-lg font-semibold">Time Savings (Real Numbers)</h3>
             </div>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm">Initial CI/CD Setup</span>
-                <Badge variant="outline">2-3 days → 15 min</Badge>
+                <span className="text-sm">Initial Setup (New Teams)</span>
+                <Badge variant="outline">2-4 days → 1-2 hours</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">Per Workflow Configuration</span>
-                <Badge variant="outline">2-4 hours → 5-10 min</Badge>
+                <span className="text-sm">Per Workflow (First Time)</span>
+                <Badge variant="outline">4-8 hours → 30-60 min</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">Documentation & Secrets</span>
-                <Badge variant="outline">30-60 min → Auto-generated</Badge>
+                <span className="text-sm">YAML Learning Curve</span>
+                <Badge variant="outline">Eliminated</Badge>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Debugging & Fixes</span>
-                <Badge variant="outline">80% reduction</Badge>
+              <div className="text-xs text-muted-foreground">
+                <strong>Note:</strong> Experienced teams see minimal time savings
               </div>
             </div>
           </Card>
 
           <Card className="p-6">
             <div className="mb-4 flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold">Cost Savings</h3>
+              <Book className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-semibold">Learning Benefits</h3>
             </div>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm">Developer Time (@$100/hr)</span>
-                <Badge variant="outline">$2,000-6,000/project</Badge>
+                <span className="text-sm">GitHub Actions YAML</span>
+                <Badge variant="outline">Not required</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">DevOps Expertise Need</span>
-                <Badge variant="outline">70% reduction</Badge>
+                <span className="text-sm">Syntax Errors</span>
+                <Badge variant="outline">Reduced</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">CI/CD Runtime Costs</span>
-                <Badge variant="outline">30-40% reduction</Badge>
+                <span className="text-sm">Secret Management</span>
+                <Badge variant="outline">Guided</Badge>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Maintenance Overhead</span>
-                <Badge variant="outline">50% reduction</Badge>
+              <div className="text-xs text-muted-foreground">
+                <strong>Limitation:</strong> Templates may not cover all use cases
               </div>
             </div>
           </Card>
@@ -89,74 +93,54 @@ export default function BenefitsPage() {
 
         <Card className="p-6">
           <div className="mb-4 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Efficiency Improvements</h3>
+            <Target className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">Cost Analysis (Conservative)</h3>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-3">
-              <div className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 mt-0.5 text-green-500" />
-                <div>
-                  <div className="font-medium">Faster Time-to-Market</div>
-                  <div className="text-sm text-muted-foreground">Deploy 2-3 weeks earlier with automated CI/CD</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 mt-0.5 text-green-500" />
-                <div>
-                  <div className="font-medium">90% Fewer Configuration Errors</div>
-                  <div className="text-sm text-muted-foreground">Pre-validated templates eliminate common mistakes</div>
-                </div>
-              </div>
+          <div className="space-y-4">
+            <div className="text-sm">
+              <strong>For teams NEW to CI/CD:</strong>
+              <ul className="ml-4 mt-1 space-y-1">
+                <li>• Save 12-48 hours per project setup</li>
+                <li>• At $100/hour = $1,200-4,800 per project</li>
+                <li>• One-time learning investment vs repeated manual work</li>
+              </ul>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 mt-0.5 text-green-500" />
-                <div>
-                  <div className="font-medium">40% Faster Development Cycles</div>
-                  <div className="text-sm text-muted-foreground">Reliable automated workflows boost productivity</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 mt-0.5 text-green-500" />
-                <div>
-                  <div className="font-medium">10x Project Scalability</div>
-                  <div className="text-sm text-muted-foreground">Handle more projects with same resources</div>
-                </div>
-              </div>
+            <div className="text-sm">
+              <strong>For experienced teams:</strong>
+              <ul className="ml-4 mt-1 space-y-1">
+                <li>• Minimal time savings (maybe 2-4 hours)</li>
+                <li>• Consistency benefits across projects</li>
+                <li>• Faster onboarding of new team members</li>
+              </ul>
             </div>
           </div>
         </Card>
       </div>
 
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold">ROI by Team Size</h2>
+        <h2 className="text-2xl font-semibold">Realistic Annual Impact</h2>
         
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="p-6">
             <div className="mb-4 flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold">Small Team (2-5 devs)</h3>
+              <h3 className="text-lg font-semibold">Small Team (New to CI/CD)</h3>
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm">Annual Setup Cost Savings</span>
-                  <span className="font-medium">$8K-15K</span>
+                  <span className="text-sm">1-2 projects/year</span>
+                  <span className="font-medium">$1.2K-4.8K</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Maintenance Savings</span>
-                  <span className="font-medium">$5K-10K</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Faster Delivery Value</span>
-                  <span className="font-medium">$10K-25K</span>
+                  <span className="text-sm">Plus: Consistency benefits</span>
+                  <span className="font-medium">Qualitative</span>
                 </div>
               </div>
               <div className="pt-2 border-t">
                 <div className="flex justify-between font-semibold">
-                  <span>Total Annual Savings</span>
-                  <span className="text-primary">$23K-50K</span>
+                  <span>Annual Savings</span>
+                  <span className="text-primary">$1.2K-4.8K</span>
                 </div>
               </div>
             </div>
@@ -165,27 +149,23 @@ export default function BenefitsPage() {
           <Card className="p-6">
             <div className="mb-4 flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold">Medium Team (6-15 devs)</h3>
+              <h3 className="text-lg font-semibold">Active Team (Some CI/CD experience)</h3>
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm">Annual Setup Cost Savings</span>
-                  <span className="font-medium">$20K-40K</span>
+                  <span className="text-sm">3-6 projects/year</span>
+                  <span className="font-medium">$3.6K-14.4K</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Maintenance Savings</span>
-                  <span className="font-medium">$15K-30K</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Faster Delivery Value</span>
-                  <span className="font-medium">$25K-60K</span>
+                  <span className="text-sm">Reduced if team learns YAML</span>
+                  <span className="font-medium">Variable</span>
                 </div>
               </div>
               <div className="pt-2 border-t">
                 <div className="flex justify-between font-semibold">
-                  <span>Total Annual Savings</span>
-                  <span className="text-primary">$60K-130K</span>
+                  <span>Annual Savings</span>
+                  <span className="text-primary">$3.6K-14.4K</span>
                 </div>
               </div>
             </div>
@@ -194,27 +174,23 @@ export default function BenefitsPage() {
           <Card className="p-6">
             <div className="mb-4 flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold">Enterprise (15+ devs)</h3>
+              <h3 className="text-lg font-semibold">Expert Team</h3>
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm">Annual Setup Cost Savings</span>
-                  <span className="font-medium">$50K-100K</span>
+                  <span className="text-sm">Minimal time savings</span>
+                  <span className="font-medium">$500-2K</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Maintenance Savings</span>
-                  <span className="font-medium">$30K-60K</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Faster Delivery Value</span>
-                  <span className="font-medium">$100K-200K</span>
+                  <span className="text-sm">Main benefit: consistency</span>
+                  <span className="font-medium">Qualitative</span>
                 </div>
               </div>
               <div className="pt-2 border-t">
                 <div className="flex justify-between font-semibold">
-                  <span>Total Annual Savings</span>
-                  <span className="text-primary">$180K-360K</span>
+                  <span>Annual Savings</span>
+                  <span className="text-primary">$500-2K</span>
                 </div>
               </div>
             </div>
@@ -223,7 +199,7 @@ export default function BenefitsPage() {
       </div>
 
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold">Manual vs Automated Comparison</h2>
+        <h2 className="text-2xl font-semibold">Honest Comparison</h2>
         
         <div className="overflow-x-auto">
           <table className="w-full border-collapse border border-gray-200 dark:border-gray-700">
@@ -231,65 +207,59 @@ export default function BenefitsPage() {
               <tr className="bg-muted/50">
                 <th className="border border-gray-200 dark:border-gray-700 p-3 text-left">Aspect</th>
                 <th className="border border-gray-200 dark:border-gray-700 p-3 text-left">Manual Setup</th>
-                <th className="border border-gray-200 dark:border-gray-700 p-3 text-left">Workflow Builder</th>
-                <th className="border border-gray-200 dark:border-gray-700 p-3 text-left">Improvement</th>
+                <th className="border border-gray-200 dark:border-gray-700 p-3 text-left">This Tool</th>
+                <th className="border border-gray-200 dark:border-gray-700 p-3 text-left">Reality Check</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="border border-gray-200 dark:border-gray-700 p-3 font-medium">Initial Setup Time</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3">2-3 days</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3">15 minutes</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3 text-green-600 font-medium">95% faster</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3 font-medium">Learning Curve</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3">Must learn YAML syntax</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3">Visual form interface</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3 text-green-600 font-medium">Major advantage</td>
               </tr>
               <tr className="bg-muted/25">
-                <td className="border border-gray-200 dark:border-gray-700 p-3 font-medium">Per Workflow Time</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3">4-8 hours</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3">5-10 minutes</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3 text-green-600 font-medium">96% faster</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3 font-medium">First-time Setup</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3">2-4 days (new teams)</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3">1-2 hours</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3 text-green-600 font-medium">Substantial savings</td>
               </tr>
               <tr>
-                <td className="border border-gray-200 dark:border-gray-700 p-3 font-medium">Error Rate</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3">30-40%</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3">&lt;5%</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3 text-green-600 font-medium">90% reduction</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3 font-medium">Customization</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3">Unlimited</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3">Template-limited</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3 text-orange-600 font-medium">Trade-off</td>
               </tr>
               <tr className="bg-muted/25">
-                <td className="border border-gray-200 dark:border-gray-700 p-3 font-medium">Expertise Required</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3">DevOps specialist</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3">Any developer</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3 text-green-600 font-medium">70% less expertise</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-200 dark:border-gray-700 p-3 font-medium">Maintenance Effort</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3">High</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3">Low</td>
-                <td className="border border-gray-200 dark:border-gray-700 p-3 text-green-600 font-medium">50% reduction</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3 font-medium">For Expert Teams</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3">Preferred workflow</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3">Minimal benefit</td>
+                <td className="border border-gray-200 dark:border-gray-700 p-3 text-orange-600 font-medium">Honest assessment</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <Card className="p-6 bg-gradient-to-r from-primary/10 to-green-500/10">
+      <Card className="p-6 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
         <div className="flex items-center gap-2 mb-4">
-          <Target className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold">Ready to Start Saving?</h3>
+          <AlertTriangle className="h-5 w-5 text-blue-600" />
+          <h3 className="text-lg font-semibold">Bottom Line</h3>
         </div>
-        <p className="text-muted-foreground mb-4">
-          The numbers speak for themselves. Start generating workflows today and see immediate 
-          impact on your team's productivity and your project's bottom line.
-        </p>
-        <div className="flex gap-4">
-          <Badge className="bg-primary text-primary-foreground">
-            First workflow: 15 minutes
-          </Badge>
-          <Badge className="bg-green-500 text-white">
-            Immediate 95% time savings
-          </Badge>
-          <Badge className="bg-blue-500 text-white">
-            $2K-6K saved per project
-          </Badge>
+        <div className="space-y-3">
+          <p className="text-muted-foreground">
+            This tool genuinely helps teams get started with React Native CI/CD by eliminating the YAML learning curve 
+            and providing working templates. The biggest benefits are for teams new to CI/CD automation.
+          </p>
+          <p className="text-muted-foreground">
+            If your team already knows GitHub Actions well, you'll see minimal time savings. The main value would be 
+            consistency across projects and faster onboarding of new team members.
+          </p>
+          <div className="flex gap-2 pt-2">
+            <Badge className="bg-green-500 text-white">Best for: New CI/CD teams</Badge>
+            <Badge className="bg-blue-500 text-white">Good for: Consistency needs</Badge>
+            <Badge className="bg-gray-500 text-white">Limited for: Expert teams</Badge>
+          </div>
         </div>
       </Card>
     </div>

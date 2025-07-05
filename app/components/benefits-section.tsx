@@ -24,15 +24,18 @@ export function BenefitsSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <Badge className="mb-4 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+          <Badge className="mb-4 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
             <DollarSign className="h-3 w-3 mr-1" />
-            Quantifiable ROI
+            Honest Estimates
           </Badge>
           <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
-            Why Teams Choose Our Workflow Builder
+            Realistic Benefits for React Native Teams
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Stop spending weeks on CI/CD setup. Get quantifiable results that impact your bottom line.
+            Genuine time and cost savings, especially for teams new to CI/CD automation.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
+            <em>Conservative estimates based on real-world scenarios. Your results will vary.</em>
           </p>
         </motion.div>
 
@@ -132,74 +135,72 @@ export function BenefitsSection() {
 
 const benefits = [
   {
-    title: "Time Savings",
-    metric: "95% Faster",
-    description: "Reduce CI/CD setup from 2-3 days to just 15 minutes. Generate complex workflows in 5-10 minutes vs 2-4 hours manually.",
+    title: "Setup Time",
+    metric: "75-85% Faster",
+    description: "Reduce initial CI/CD setup from 2-4 days to 1-2 hours. Generate workflows in 30-60 minutes vs 4-8 hours manually.",
     icon: Clock,
   },
   {
-    title: "Cost Reduction",
-    metric: "$2K-6K Saved",
-    description: "Save $2,000-6,000 per project in developer costs. Reduce need for specialized DevOps engineers by 70%.",
+    title: "Cost Savings",
+    metric: "$1.2K-4.8K",
+    description: "Save $1,200-4,800 per project in developer time (12-48 hours × $100/hour). Most benefit for teams new to CI/CD.",
     icon: DollarSign,
   },
   {
-    title: "Error Reduction",
-    metric: "90% Fewer Errors",
-    description: "Pre-validated configurations and templates eliminate 90% of common configuration errors and debugging time.",
+    title: "Learning Curve",
+    metric: "Faster Onboarding",
+    description: "Visual interface eliminates need to learn GitHub Actions YAML syntax. Reduces syntax errors through validation.",
     icon: CheckCircle,
   },
   {
-    title: "Team Productivity",
-    metric: "40% Faster Cycles",
-    description: "Accelerate development cycles by 40% with reliable automated workflows and faster deployments.",
+    title: "Consistency",
+    metric: "Standardized Setup",
+    description: "Templates ensure similar configuration across projects. Auto-detects required secrets and provides guidance.",
     icon: TrendingUp,
   },
   {
-    title: "Scalability",
-    metric: "10x More Projects",
-    description: "Scale to 10x more projects with same DevOps resources. Standardized workflows reduce maintenance by 50%.",
+    title: "For New Teams",
+    metric: "Major Advantage",
+    description: "Biggest benefits for teams new to CI/CD. Experienced teams will see smaller improvements.",
     icon: Users,
   },
   {
-    title: "ROI",
-    metric: "300-500% ROI",
-    description: "Typical 300-500% return on investment within the first quarter. Faster time-to-market by 2-3 weeks.",
+    title: "Annual Impact",
+    metric: "$2K-15K",
+    description: "Small teams (1-2 projects): $2K-6K annually. Active teams (3-6 projects): $6K-15K annually.",
     icon: BarChart3,
   },
 ];
 
 const manualSetupItems = [
-  "2-3 days initial setup",
-  "4-8 hours per workflow",
-  "High error rate (30-40%)",
-  "Requires DevOps expertise",
-  "Complex YAML debugging",
+  "2-4 days initial setup",
+  "4-8 hours per workflow", 
+  "Requires learning YAML syntax",
+  "High syntax error rate",
   "Manual secret management",
-  "Platform-specific configs"
+  "Platform-specific knowledge needed"
 ];
 
 const workflowBuilderItems = [
-  "15 minutes setup",
-  "5-10 minutes per workflow",
-  "<5% error rate",
-  "No specialized knowledge needed",
-  "Visual interface with validation",
+  "1-2 hours setup",
+  "30-60 minutes per workflow",
+  "Visual form interface",
+  "Validation prevents syntax errors", 
   "Auto-detected secrets guide",
   "Cross-platform templates"
 ];
 
 const impactMetrics = [
   {
-    value: "$25K-50K",
-    label: "Annual savings for 5-person team"
+    value: "$2K-6K",
+    label: "Small teams (1-2 projects/year)"
   },
   {
-    value: "$100K+",
-    label: "Enterprise cost reduction"
+    value: "$6K-15K", 
+    label: "Active teams (3-6 projects/year)"
   },
   {
-    value: "2-3 weeks",
-    label: "Faster time-to-market"
+    value: "1-2 hours",
+    label: "Typical setup time"
   }
 ]; 
