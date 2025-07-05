@@ -1,11 +1,11 @@
+import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
-import { Analytics } from '@vercel/analytics/react';
 
-import { cn } from '@/utils/cn';
-import './globals.css';
 import { ThemeProvider } from '@/providers/theme-provider';
+import { cn } from '@/utils/cn';
 import { Toaster } from 'sonner';
+import './globals.css';
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -16,6 +16,15 @@ export const metadata: Metadata = {
   title: 'React Native CI/CD Workflow Builder',
   description:
     'Generate GitHub Actions workflows for your React Native projects',
+  icons: {
+    icon: [
+      { url: '/logo.svg', sizes: '192x192', type: 'image/svg' },
+      { url: '/logo.svg', sizes: '512x512', type: 'image/svg' },
+    ],
+    apple: [
+      { url: '/logo.svg' },
+    ],
+  },
 };
 
 export default function RootLayout({
