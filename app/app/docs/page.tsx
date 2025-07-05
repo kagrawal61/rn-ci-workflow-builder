@@ -60,6 +60,19 @@ export default function DocsPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Link
+          href="/docs/benefits"
+          className="group rounded-lg border-2 border-green-200 bg-green-50 p-4 transition-colors hover:bg-green-100 dark:border-green-800 dark:bg-green-900/20 dark:hover:bg-green-900/30"
+        >
+          <div className="mb-1 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-green-800 dark:text-green-200">💰 ROI & Benefits</h2>
+            <ArrowRight className="h-5 w-5 text-green-600 transition-colors group-hover:text-green-800 dark:text-green-400 dark:group-hover:text-green-200" />
+          </div>
+          <p className="text-green-700 dark:text-green-300">
+            Quantifiable savings: $2K-6K per project, 95% faster setup, 300-500% ROI
+          </p>
+        </Link>
+
+        <Link
           href="/docs/getting-started"
           className="group rounded-lg border p-4 transition-colors hover:bg-accent"
         >

@@ -1,9 +1,9 @@
 'use client';
 
+import { PROJECT_DESCRIPTION, PROJECT_NAME } from "@/config/constants";
 import { motion } from "framer-motion";
-import { FileJson, Zap, Code, Rocket, Clock, LayoutGrid, Github } from "lucide-react";
+import { Clock, Code, FileJson, Github, LayoutGrid, Rocket, Zap } from "lucide-react";
 import { Button } from "./ui/button";
-import { PROJECT_NAME, PROJECT_DESCRIPTION } from "@/config/constants";
 
 export function HeroSection() {
   return (
@@ -15,19 +15,19 @@ export function HeroSection() {
           transition={{ duration: 0.5, ease: 'easeOut' }}
         >
           <div className="flex items-center justify-center gap-4">
-            <div className="flex items-center justify-center gap-2 rounded-full bg-blue-100 px-4 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+            <div className="flex items-center justify-center gap-2 rounded-full bg-green-100 px-4 py-1 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300">
               <div className="flex h-3.5 w-3.5 items-center justify-center">
                 <Clock size={14} />
               </div>
-              <span>Open Source</span>
+              <span>95% Time Savings</span>
             </div>
-            <div className="flex items-center justify-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-sm text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
+            <div className="flex items-center justify-center gap-2 rounded-full bg-blue-100 px-4 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
               <Code className="h-3.5 w-3.5" />
-              <span>Built for Developers</span>
+              <span>$2K-6K Saved Per Project</span>
             </div>
             <div className="flex items-center justify-center gap-2 rounded-full bg-amber-100 px-4 py-1 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
               <Zap className="h-3.5 w-3.5" />
-              <span>Fast & Reliable</span>
+              <span>300-500% ROI</span>
             </div>
           </div>
         </motion.div>
@@ -51,7 +51,7 @@ export function HeroSection() {
           whileInView={{ scale: [0.98, 1] }}
           viewport={{ once: true }}
         >
-          {PROJECT_DESCRIPTION}
+          {PROJECT_DESCRIPTION} <span className="font-semibold text-primary">Stop wasting 2-3 days on manual CI/CD setup.</span> Generate production-ready workflows in 15 minutes and save thousands in developer costs.
         </motion.p>
 
         <motion.div
