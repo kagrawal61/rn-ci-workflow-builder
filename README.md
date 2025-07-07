@@ -43,7 +43,6 @@
 
 ### 💵 Cost Savings
 - **Developer Time**: Save **$1,200-4,800** per project (12-48 hours × $100/hour)
-- **Annual Savings**: Small teams (1-2 projects): **$2,000-6,000**, Active teams (3-6 projects): **$6,000-15,000**
 - **One-time Investment**: Learn once, apply across all projects vs repeated manual work
 
 ### 🚀 Efficiency Improvements
@@ -135,8 +134,8 @@ rn-ci-workflow-builder list-presets
 Comprehensive documentation is available to help you get the most out of the workflow builder:
 
 - [📃 CLI Commands Reference](docs/README.md#cli-commands-reference) - Detailed information about all available commands
-- [🔒 Secret Management Guide](https://mobilecibuilder.vercel.app/docs/secrets-management) - Working with secrets for different platforms and services
-- [🏗️ Environment Configuration](https://mobilecibuilder.vercel.app/docs/configuration) - Managing environment variables and .env files
+- [🔒 Secret Management Guide](https://mobilecibuilder.com/docs/secrets-management) - Working with secrets for different platforms and services
+- [🏗️ Environment Configuration](https://mobilecibuilder.com/docs/configuration) - Managing environment variables and .env files
 
 ### 💼 Programmatic Usage
 
@@ -198,7 +197,7 @@ The workflow builder supports a wide range of configuration options:
 - 🎨 **Static Analysis**: Run TypeScript checks, ESLint, Prettier, and unit tests
 - 🏗️ **Build**: Generate platform-specific build workflows for Android and/or iOS
 
-For complete configuration details, refer to the [📒 configuration documentation](https://mobilecibuilder.vercel.app/docs/configuration) and [🗜️ workflow presets documentation](https://mobilecibuilder.vercel.app/docs/workflow-presets).
+For complete configuration details, refer to the [📒 configuration documentation](https://mobilecibuilder.com/docs/configuration) and [🗜️ workflow presets documentation](https://mobilecibuilder.com/docs/workflow-presets).
 
 ## 💻 Development
 
@@ -281,7 +280,7 @@ yarn test
 
 ## 🔗 Extending & Web Interface
 
-The workflow builder is designed to be extensible. You can create custom workflow presets for specific CI/CD scenarios. For detailed instructions on creating custom presets, see the [🛠️ core concepts guide](https://mobilecibuilder.vercel.app/docs/core-concepts).
+The workflow builder is designed to be extensible. You can create custom workflow presets for specific CI/CD scenarios. For detailed instructions on creating custom presets, see the [🛠️ core concepts guide](https://mobilecibuilder.com/docs/core-concepts).
 
 **Web Application:** The project includes a web-based interface with user-friendly forms, real-time YAML preview, and validation. To run locally:
 
