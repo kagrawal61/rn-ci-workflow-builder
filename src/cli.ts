@@ -29,14 +29,17 @@ const program = new Command();
 program
   .name('rn-ci-workflow-builder')
   .description(
-    'Generate GitHub Actions workflows for React Native CI/CD pipelines'
+    'Generate GitHub Actions workflows for React Native CI/CD pipelines.\n' +
+      '⚡ Visual interface eliminates YAML syntax learning • 🎯 Especially helpful for teams new to CI/CD'
   )
   .version('0.1.0');
 
 // Generate command
 program
   .command('generate [preset]')
-  .description('Generate workflow YAML based on preset')
+  .description(
+    'Generate workflow YAML using templates (saves setup time vs manual configuration)'
+  )
   .option('-c, --config <path>', 'Path to config file (JSON or YAML)')
   .option('-o, --output <path>', 'Output file path')
   .option(

@@ -1,9 +1,9 @@
 'use client';
 
+import { PROJECT_DESCRIPTION, PROJECT_NAME } from "@/config/constants";
 import { motion } from "framer-motion";
-import { FileJson, Zap, Code, Rocket, Clock, LayoutGrid, Github } from "lucide-react";
+import { Clock, Code, FileJson, Github, LayoutGrid, Rocket, Zap } from "lucide-react";
 import { Button } from "./ui/button";
-import { PROJECT_NAME, PROJECT_DESCRIPTION } from "@/config/constants";
 
 export function HeroSection() {
   return (
@@ -21,11 +21,11 @@ export function HeroSection() {
               </div>
               <span>Open Source</span>
             </div>
-            <div className="flex items-center justify-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-sm text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
+            <div className="flex items-center justify-center gap-2 rounded-full bg-green-100 px-4 py-1 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300">
               <Code className="h-3.5 w-3.5" />
               <span>Built for Developers</span>
             </div>
-            <div className="flex items-center justify-center gap-2 rounded-full bg-amber-100 px-4 py-1 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+            <div className="flex items-center justify-center gap-2 rounded-full bg-purple-100 px-4 py-1 text-sm text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
               <Zap className="h-3.5 w-3.5" />
               <span>Fast & Reliable</span>
             </div>
@@ -51,7 +51,7 @@ export function HeroSection() {
           whileInView={{ scale: [0.98, 1] }}
           viewport={{ once: true }}
         >
-          {PROJECT_DESCRIPTION}
+          {PROJECT_DESCRIPTION} <span className="font-semibold text-green-500">Generate production-ready workflows instantly </span> and  <span className="font-semibold text-primary">save $2,000–$6,000 per project</span> — no more time wasted on manual configuration.
         </motion.p>
 
         <motion.div
