@@ -1,7 +1,7 @@
 'use client';
 
-import { HeartHandshake, Github } from "lucide-react";
 import { PROJECT_NAME } from "@/config/constants";
+import { Github, HeartHandshake, TwitterIcon } from "lucide-react";
 
 export function FooterSection() {
   return (
@@ -19,6 +19,24 @@ export function FooterSection() {
           >
             <Github className="h-4 w-4" />
             <span>GitHub</span>
+          </a>
+          <a 
+            href="https://twitter.com/KushalAgrawal14"
+            target="_blank"
+            rel="noopener noreferrer" 
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            <TwitterIcon className="h-4 w-4" />
+            <span>@KushalAgrawal14</span>
+          </a>
+          <a 
+            href="https://twitter.com/nikhil200816"
+            target="_blank"
+            rel="noopener noreferrer" 
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            <TwitterIcon className="h-4 w-4" />
+            <span>@nikhil200816</span>
           </a>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <span>Made with</span>

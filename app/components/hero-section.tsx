@@ -104,7 +104,7 @@ export function HeroSection() {
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}
-              className="rounded-lg border bg-card p-6 shadow-sm transition-all hover:scale-105 hover:border-primary/50 hover:shadow-md"
+              className={`rounded-lg border bg-card p-6 shadow-sm transition-all hover:scale-105 hover:border-${feature.color}-500/50 hover:shadow-md`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -114,16 +114,24 @@ export function HeroSection() {
               }}
               whileHover={{ y: -5 }}
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-indigo-400/20 p-3">
-                {feature.icon === FileJson ? (
-                  <FileJson className="h-6 w-6 text-primary" />
-                ) : (
-                  <Rocket className="h-6 w-6 text-primary" />
-                )}
+              <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${
+                feature.color === 'blue' ? 'from-blue-200/60 to-blue-400/20 dark:from-blue-900/30 dark:to-blue-800/20' : 
+                feature.color === 'green' ? 'from-green-200/60 to-green-400/20 dark:from-green-900/30 dark:to-green-800/20' : 
+                'from-purple-200/60 to-purple-400/20 dark:from-purple-900/30 dark:to-purple-800/20'
+              } p-3`}>
+                <feature.icon className={`h-6 w-6 ${
+                  feature.color === 'blue' ? 'text-blue-600 dark:text-blue-400' : 
+                  feature.color === 'green' ? 'text-green-600 dark:text-green-400' : 
+                  'text-purple-600 dark:text-purple-400'
+                }`} />
               </div>
               <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
               <p className="text-muted-foreground">{feature.description}</p>
-              <div className="mt-4 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-indigo-400"></div>
+              <div className={`mt-4 h-1 w-12 rounded-full bg-gradient-to-r ${
+                feature.color === 'blue' ? 'from-blue-500 to-blue-400' : 
+                feature.color === 'green' ? 'from-green-500 to-green-400' : 
+                'from-purple-500 to-purple-400'
+              }`}></div>
             </motion.div>
           ))}
         </motion.div>
@@ -138,17 +146,20 @@ const features = [
     description:
       'Tailored workflows for React Native projects with best-practice defaults and optimized performance',
     icon: FileJson,
+    color: 'blue',
   },
   {
     title: 'CI/CD Integration',
     description:
       'Create workflows that run automatically with full TypeScript support and real-time feedback',
     icon: LayoutGrid,
+    color: 'green',
   },
   {
     title: 'Customizable Configuration',
     description:
       'Tailor your CI/CD pipeline with flexible options, triggers, and environment settings that scale with your team',
     icon: Rocket,
+    color: 'purple',
   },
 ];
