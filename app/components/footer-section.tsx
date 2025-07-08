@@ -30,13 +30,13 @@ export function FooterSection() {
             <span>@KushalAgrawal14</span>
           </a>
           <a 
-            href="https://twitter.com/nikhil200816"
+            href="https://twitter.com/NikhilVDev"
             target="_blank"
             rel="noopener noreferrer" 
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             <TwitterIcon className="h-4 w-4" />
-            <span>@nikhil200816</span>
+            <span>@NikhilVDev</span>
           </a>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <span>Made with</span>
