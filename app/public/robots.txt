@@ -1,0 +1,6 @@
+# robots.txt for React Native CI/CD Workflow Builder
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://mobilecibuilder.com/sitemap.xml
