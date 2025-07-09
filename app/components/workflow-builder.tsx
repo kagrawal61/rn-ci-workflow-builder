@@ -32,6 +32,9 @@ export function WorkflowBuilder() {
 
       // Platform selection
       platform: 'github',
+      
+      // Framework selection
+      framework: 'react-native-cli',
 
       // Basic settings
       name: defaultConfig.options?.name || 'React Native Static Analysis',
@@ -158,6 +161,7 @@ export function WorkflowBuilder() {
       trackWorkflowGenerated({
         platform: formValues.platform || 'github',
         preset: formValues.preset || 'build',
+        framework: formValues.framework || 'react-native-cli',
         buildPlatform: formValues.buildPlatform,
         buildVariant: formValues.buildVariant
       });

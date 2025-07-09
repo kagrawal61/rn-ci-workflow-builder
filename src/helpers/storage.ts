@@ -16,6 +16,143 @@ import { GitHubStep } from '../types';
  */
 const storageHelpers = {
   /**
+   * Creates storage solution steps for Expo build artifacts
+   *
+   * Generates the appropriate GitHub Actions steps to store Expo build artifacts
+   * (APK and/or AAB files) in the configured storage solution.
+   *
+   * @param build BuildOptions containing storage configuration and output type
+   * @returns Array of GitHub workflow steps for the selected storage solution
+   */
+  createExpoStorageSteps(build: BuildOptions): GitHubStep[] {
+    const outputType = build.androidOutputType || 'apk';
+    const platform = build.platform || 'android';
+    
+    // Build artifact paths
+    const artifactPaths = [];
+    
+    // Add APK path
+    if (outputType === 'apk' || outputType === 'both') {
+      artifactPaths.push(`./android-builds/app-production.apk`);
+    }
+    
+    // Add AAB path
+    if (outputType === 'aab' || outputType === 'both') {
+      artifactPaths.push(`./android-builds/app-production.aab`);
+    }
+
+    if (build.storage === 'github') {
+      return [
+        {
+          name: 'Upload Expo Build Artifacts to GitHub',
+          id: 'expo-artifact-upload',
+          if: 'success()',
+          'continue-on-error': true,
+          uses: 'actions/upload-artifact@v4',
+          with: {
+            name: `expo-${platform}-builds`,
+            path: artifactPaths.join('\n'),
+            'retention-days': 7,
+          },
+        },
+      ];
+    } else if (build.storage === 'firebase') {
+      // Filter only APK paths for Firebase (doesn't support AAB)
+      const apkPaths = artifactPaths.filter(path => path.endsWith('.apk'));
+      
+      if (apkPaths.length === 0) {
+        return [{
+          name: 'Firebase Upload - Skipped',
+          run: 'echo "No APK files found for Firebase upload. Only APK files are supported by Firebase App Distribution."',
+        }];
+      }
+      
+      return [
+        {
+          name: 'Upload to Firebase App Distribution',
+          id: 'firebase-distribution',
+          if: 'success()',
+          uses: 'wzieba/Firebase-Distribution-Github-Action@v1.4.0',
+          with: {
+            appId: '\${{ secrets.FIREBASE_APP_ID_ANDROID }}',
+            serviceCredentialsFileContent: '\${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
+            file: apkPaths[0],
+            releaseNotes: 'Branch: \${{ github.head_ref || github.ref_name }}\nCommit: \${{ github.sha }}\nBuild: \${{ github.run_id }}',
+            groups: '\${{ secrets.FIREBASE_TEST_GROUPS || \'testers\' }}',
+          },
+        },
+      ];
+    } else if (build.storage === 'drive') {
+      return [
+        {
+          name: 'Upload to Google Drive',
+          id: 'drive-upload',
+          if: 'success()',
+          run: `
+            # Install rclone
+            curl https://rclone.org/install.sh | sudo bash
+            
+            # Set up rclone config from secrets
+            echo "\${{ secrets.RCLONE_CONFIG }}" > rclone.conf
+            
+            # Create remote directory with timestamp
+            TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+            REMOTE_DIR="expo-builds/$(echo "\${{ github.repository }}" | cut -d'/' -f2)_${TIMESTAMP}_\${{ github.run_id }}"
+            
+            # Upload all artifacts
+            for artifact in ${artifactPaths.join(' ')}; do
+              if [ -f "$artifact" ]; then
+                echo "Uploading $artifact to Google Drive..."
+                rclone --config=rclone.conf copy "$artifact" "gdrive:$REMOTE_DIR/"
+              else
+                echo "Warning: $artifact not found, skipping upload"
+              fi
+            done
+            
+            # Clean up
+            rm rclone.conf
+          `,
+        },
+      ];
+    } else if (build.storage === 's3') {
+      return [
+        {
+          name: 'Upload to Amazon S3',
+          id: 's3-upload',
+          if: 'success()',
+          run: `
+            # Install rclone
+            curl https://rclone.org/install.sh | sudo bash
+            
+            # Set up rclone config from secrets
+            echo "\${{ secrets.RCLONE_CONFIG }}" > rclone.conf
+            
+            # Create remote directory with timestamp
+            TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+            BUCKET="\${{ secrets.AWS_S3_BUCKET || 'rn-artifacts' }}"
+            REMOTE_DIR="expo-builds/$(echo "\${{ github.repository }}" | cut -d'/' -f2)_${TIMESTAMP}_\${{ github.run_id }}"
+            
+            # Upload all artifacts
+            for artifact in ${artifactPaths.join(' ')}; do
+              if [ -f "$artifact" ]; then
+                echo "Uploading $artifact to S3..."
+                rclone --config=rclone.conf copy "$artifact" "s3:$BUCKET/$REMOTE_DIR/"
+              else
+                echo "Warning: $artifact not found, skipping upload"
+              fi
+            done
+            
+            # Clean up
+            rm rclone.conf
+          `,
+        },
+      ];
+    }
+    
+    // Default to empty array if no storage solution matches
+    return [];
+  },
+  /**
    * Creates storage solution steps for Android build artifacts
    *
    * Generates the appropriate GitHub Actions steps to store Android build artifacts

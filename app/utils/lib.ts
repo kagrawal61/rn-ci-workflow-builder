@@ -82,7 +82,12 @@ export function generateWorkflow(cfg: WorkflowConfig): {
     try {
       // Use the imported generateSecretsSummary function
       if (validatedConfig.options && validatedConfig.options.build) {
-        secretsSummary = generateSecretsSummary(validatedConfig.options.build);
+        // Make sure to include framework from options
+        const buildOptions = {
+          ...validatedConfig.options.build,
+          framework: validatedConfig.options.framework
+        };
+        secretsSummary = generateSecretsSummary(buildOptions);
       }
     } catch (err) {
       console.error('Error generating secrets summary:', err);

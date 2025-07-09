@@ -84,6 +84,7 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
     options: {
       name: '',
       platform: (formValues.platform as CIPlatform) || 'github',
+      framework: (formValues.framework as 'react-native-cli' | 'expo') || 'react-native-cli',
       triggers: {},
       nodeVersions: [],
       packageManager: 'yarn',

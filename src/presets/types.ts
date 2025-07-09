@@ -1,4 +1,9 @@
 /**
+ * Framework options
+ */
+export type Framework = 'react-native-cli' | 'expo';
+
+/**
  * Platform options for build
  */
 export type Platform = 'ios' | 'android' | 'both';

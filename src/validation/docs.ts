@@ -19,6 +19,34 @@ interface StorageSecretDocs {
 /**
  * Documentation for storage types and their required secrets
  */
+/**
+ * Framework-specific secrets
+ */
+export const FRAMEWORK_SECRET_DOCS: Record<string, {
+  name: string;
+  description: string;
+  requiredSecrets: Array<{
+    name: string;
+    description: string;
+  }>;
+}> = {
+  'expo': {
+    name: 'Expo',
+    description: 'Expo framework using EAS CLI for builds',
+    requiredSecrets: [
+      {
+        name: 'EXPO_TOKEN',
+        description: 'Authentication token for Expo services and EAS builds',
+      },
+    ],
+  },
+  'react-native-cli': {
+    name: 'React Native CLI',
+    description: 'Standard React Native CLI builds',
+    requiredSecrets: [],
+  },
+};
+
 export const STORAGE_SECRET_DOCS: Record<string, StorageSecretDocs> = {
   firebase: {
     name: 'Firebase App Distribution',
@@ -181,6 +209,14 @@ export function getRequiredSecretsDocumentation(buildOptions: BuildOptions): {
       description: string;
     }>;
   };
+  framework?: {
+    name: string;
+    description: string;
+    requiredSecrets: Array<{
+      name: string;
+      description: string;
+    }>;
+  };
 } {
   const storage = STORAGE_SECRET_DOCS[buildOptions.storage || 'github'] || {
     name: 'Unknown',
@@ -196,9 +232,16 @@ export function getRequiredSecretsDocumentation(buildOptions: BuildOptions): {
     requiredSecrets: [],
   };
 
+  // Get framework secrets if framework is specified
+  let framework = undefined;
+  if (buildOptions.framework) {
+    framework = FRAMEWORK_SECRET_DOCS[buildOptions.framework] || undefined;
+  }
+
   return {
     storage,
     notification,
+    framework,
   };
 }
 
@@ -212,6 +255,20 @@ export function generateRequiredSecretsHelp(
 ): string {
   const docs = getRequiredSecretsDocumentation(buildOptions);
   let result = 'Required secrets for your configuration:\n\n';
+
+  // Storage secrets
+  // Framework secrets
+  if (docs.framework) {
+    result += `Framework (${docs.framework.name}):\n`;
+    if (docs.framework.requiredSecrets.length === 0) {
+      result += '  No additional secrets required\n';
+    } else {
+      docs.framework.requiredSecrets.forEach(secret => {
+        result += `  - ${secret.name}: ${secret.description}\n`;
+      });
+    }
+    result += '\n';
+  }
 
   // Storage secrets
   result += `Storage (${docs.storage.name}):\n`;
