@@ -10,7 +10,12 @@ import { buildBitriseBuildPipeline } from '../../src/presets/bitriseBuildPreset'
 import { buildBitriseStaticAnalysisPipeline } from '../../src/presets/bitriseStaticAnalysis';
 import { buildBuildPipeline } from '../../src/presets/buildPreset';
 import { buildStaticAnalysisPipeline } from '../../src/presets/staticAnalysis';
-import { WorkflowConfig, WorkflowOptions } from '../../src/types';
+import { 
+  WorkflowConfig, 
+  WorkflowOptions, 
+  BitriseConfig, 
+  GitHubWorkflow 
+} from '../../src/types';
 
 // Map of pipeline builders (copied from generator.ts but without Node.js dependencies)
 // Support both GitHub Actions and Bitrise configurations
@@ -18,7 +23,7 @@ const builders: Record<
   string,
   (
     opts: WorkflowOptions
-  ) => Record<string, any> | import('../../src/types').BitriseConfig
+  ) => GitHubWorkflow | BitriseConfig
 > = {};
 
 /**
@@ -30,7 +35,7 @@ export function registerBuilder(
   kind: string,
   builder: (
     opts: WorkflowOptions
-  ) => Record<string, any> | import('../../src/types').BitriseConfig
+  ) => GitHubWorkflow | BitriseConfig
 ): void {
   builders[kind] = builder;
 }

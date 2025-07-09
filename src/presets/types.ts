@@ -73,6 +73,11 @@ export interface BuildOptions {
   platform?: Platform;
 
   /**
+   * Framework to use (React Native CLI or Expo)
+   */
+  framework?: Framework;
+
+  /**
    * Build variant (debug or release)
    */
   variant?: Variant;
