@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from 'next';
 import { Inter as FontSans } from 'next/font/google';
+import Script from 'next/script';
 
 import { ThemeProvider } from '@/providers/theme-provider';
 import { cn } from '@/utils/cn';
@@ -34,7 +35,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
+      <head>
+        <Script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="dc5f47fa-eb10-466c-908e-64a6bd20e5d4"
+          strategy="afterInteractive"
+        />
+        
+      </head>
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
