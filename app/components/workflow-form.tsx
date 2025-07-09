@@ -39,6 +39,7 @@ import {
 export interface WorkflowFormValues {
   platform?: string;
   preset?: string;
+  framework?: string;
   name?: string;
   nodeVersion?: number;
   packageManager?: string;
@@ -198,6 +199,46 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 {values.platform === 'bitrise'
                   ? 'Generate a Bitrise workflow configuration (bitrise.yml)'
                   : 'Generate a GitHub Actions workflow (.github/workflows/*.yml)'}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="framework">Framework</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 rounded-full p-0"
+                    >
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                      <span className="sr-only">Info</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Select the React Native framework you are using
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Select
+                value={values.framework || 'react-native-cli'}
+                onValueChange={value => handleInputChange('framework', value)}
+              >
+                <SelectTrigger id="framework">
+                  <SelectValue placeholder="Select framework" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="react-native-cli">React Native CLI</SelectItem>
+                  <SelectItem value="expo">
+                    Expo
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {values.framework === 'expo'
+                  ? 'Configure Expo-specific workflows with EAS Build and managed services'
+                  : 'Configure standard React Native CLI workflows for native app builds'}
               </p>
             </div>
 
@@ -581,42 +622,57 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 </p>
               </div>
 
-              {/* Variant */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="build-variant">Build Variant</Label>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 rounded-full p-0"
-                      >
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                        <span className="sr-only">Info</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Release builds are optimized for production, while debug
-                      builds are faster to build
-                    </TooltipContent>
-                  </Tooltip>
+              {/* Variant - Only shown when React Native CLI is selected */}
+              {values.framework !== 'expo' && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="build-variant">Build Variant</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 rounded-full p-0"
+                        >
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                          <span className="sr-only">Info</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Release builds are optimized for production, while debug
+                        builds are faster to build
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Select
+                    value={values.buildVariant || 'release'}
+                    onValueChange={value =>
+                      handleInputChange('buildVariant', value)
+                    }
+                  >
+                    <SelectTrigger id="build-variant">
+                      <SelectValue placeholder="Select build variant" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="debug">Debug</SelectItem>
+                      <SelectItem value="release">Release</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Select
-                  value={values.buildVariant || 'release'}
-                  onValueChange={value =>
-                    handleInputChange('buildVariant', value)
-                  }
-                >
-                  <SelectTrigger id="build-variant">
-                    <SelectValue placeholder="Select build variant" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="debug">Debug</SelectItem>
-                    <SelectItem value="release">Release</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              )}
+              
+              {/* Expo note - Only shown when Expo is selected */}
+              {values.framework === 'expo' && (
+                <div className="rounded-md bg-muted p-3 text-xs">
+                  <p className="mb-1 font-medium">Expo Build Configuration</p>
+                  <p className="mb-1 text-muted-foreground">
+                    For Expo builds, production builds are used by default for optimal performance.
+                  </p>
+                  <p className="text-muted-foreground">
+                    The workflow will generate both APK and AAB formats when selected.
+                  </p>
+                </div>
+              )}
 
               {/* Android Output Type - Only shown for Android builds */}
               {(values.buildPlatform === 'android' ||

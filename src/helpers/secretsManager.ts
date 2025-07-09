@@ -28,6 +28,18 @@ export function getContextualSecrets(
   // Get documentation for the selected configuration
   const docs = getRequiredSecretsDocumentation(buildOptions);
 
+  // Add framework-specific secrets with context
+  if (docs.framework && docs.framework.requiredSecrets.length > 0) {
+    for (const secret of docs.framework.requiredSecrets) {
+      secrets.push({
+        name: secret.name,
+        description: secret.description,
+        required: true,
+        displayGroup: 'platform',
+      });
+    }
+  }
+
   // Add storage secrets with context
   if (buildOptions.storage && buildOptions.storage !== 'github') {
     const storageSecrets = docs.storage.requiredSecrets;
@@ -135,16 +147,47 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
     summary += '\n';
   }
 
-  if (groups.platform.length > 0) {
-    summary += `Platform (${buildOptions.platform})\n\n`;
-    for (const secret of groups.platform) {
-      summary += `- \`${secret.name}\`: ${secret.description}\n`;
+  // Handle framework-specific secrets first (always show if present)
+  if (buildOptions.framework) {
+    const docsResult = getRequiredSecretsDocumentation(buildOptions);
+    const frameworkSpecificSecrets = docsResult.framework?.requiredSecrets || [];
+    
+    if (frameworkSpecificSecrets.length > 0) {
+      const frameworkName = docsResult.framework?.name || buildOptions.framework;
+      summary += `### Framework (${frameworkName})\n\n`;
+      
+      // Get all framework secrets from the context
+      for (const secret of secrets.filter(s => 
+        frameworkSpecificSecrets.some(fs => fs.name === s.name)
+      )) {
+        summary += `- \`${secret.name}\`: ${secret.description}\n`;
+      }
+      summary += '\n';
     }
-    summary += '\n';
+  }
+
+  // Handle platform-specific secrets that aren't framework-related
+  if (groups.platform.length > 0) {
+    const docsResult = getRequiredSecretsDocumentation(buildOptions);
+    const frameworkSpecificSecrets = docsResult.framework?.requiredSecrets || [];
+    
+    // Filter secrets to get only platform-specific (not framework-specific)
+    const platformOnlySecrets = groups.platform.filter(
+      s => !frameworkSpecificSecrets.some(fs => fs.name === s.name)
+    );
+    
+    // Display platform-specific secrets
+    if (platformOnlySecrets.length > 0) {
+      summary += `### Platform (${buildOptions.platform})\n\n`;
+      for (const secret of platformOnlySecrets) {
+        summary += `- \`${secret.name}\`: ${secret.description}\n`;
+      }
+      summary += '\n';
+    }
   }
 
   if (groups.notification.length > 0 && buildOptions.notification) {
-    summary += `Notifications (${NOTIFICATION_SECRET_DOCS[buildOptions.notification].name})\n\n`;
+    summary += `### Notifications (${NOTIFICATION_SECRET_DOCS[buildOptions.notification].name})\n\n`;
     for (const secret of groups.notification) {
       summary += `- \`${secret.name}\`: ${secret.description}\n`;
     }
@@ -193,6 +236,10 @@ export function getSecretRequirementMap() {
         firebase: ['FIREBASE_APP_ID_IOS', 'FIREBASE_APP_ID_ANDROID'],
       },
     },
+    framework: {
+      expo: ['EXPO_TOKEN'],
+      'react-native-cli': [],
+    }
   };
 }
 
@@ -214,6 +261,10 @@ export function getSecretTooltips() {
       'pr-comment': 'No additional secrets required',
       both: 'Requires SLACK_WEBHOOK for the official Slack GitHub Action',
       none: 'No notifications will be sent',
+    },
+    framework: {
+      expo: 'Requires EXPO_TOKEN for authentication with EAS CLI',
+      'react-native-cli': 'No additional secrets required',
     },
   };
 }
