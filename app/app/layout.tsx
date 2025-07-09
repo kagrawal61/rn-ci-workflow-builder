@@ -37,6 +37,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <Script
+          defer
           src="https://cloud.umami.is/script.js"
           data-website-id="dc5f47fa-eb10-466c-908e-64a6bd20e5d4"
           strategy="afterInteractive"
