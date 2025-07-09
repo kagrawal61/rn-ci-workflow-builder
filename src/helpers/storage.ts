@@ -95,9 +95,8 @@ const storageHelpers = {
             # Set up rclone config from secrets
             echo "\${{ secrets.RCLONE_CONFIG }}" > rclone.conf
             
-            # Create remote directory with timestamp
-            TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
-            REMOTE_DIR="expo-builds/$(echo "\${{ github.repository }}" | cut -d'/' -f2)_${TIMESTAMP}_\${{ github.run_id }}"
+            # Create remote directory with run_id
+            REMOTE_DIR="expo-builds/\${{ github.run_id }}"
             
             # Upload all artifacts
             for artifact in ${artifactPaths.join(' ')}; do
@@ -127,10 +126,9 @@ const storageHelpers = {
             # Set up rclone config from secrets
             echo "\${{ secrets.RCLONE_CONFIG }}" > rclone.conf
             
-            # Create remote directory with timestamp
-            TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+            # Create remote directory with run_id
             BUCKET="\${{ secrets.AWS_S3_BUCKET || 'rn-artifacts' }}"
-            REMOTE_DIR="expo-builds/$(echo "\${{ github.repository }}" | cut -d'/' -f2)_${TIMESTAMP}_\${{ github.run_id }}"
+            REMOTE_DIR="expo-builds/\${{ github.run_id }}"
             
             # Upload all artifacts
             for artifact in ${artifactPaths.join(' ')}; do
