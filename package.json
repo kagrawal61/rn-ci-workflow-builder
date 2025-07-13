@@ -57,7 +57,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "validate": "npm run type-check && npm run lint:ci && npm run format:check && npm run test",
-    "prepare": "npm run build"
+    "pre-commit": "npm run lint && npm run type-check",
+    "prepare": "husky"
   },
   "dependencies": {
     "@radix-ui/react-tooltip": "^1.2.7",
@@ -78,6 +79,7 @@
     "@typescript-eslint/parser": "^6.13.2",
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
     "prettier": "^3.1.1",
     "rimraf": "^5.0.5",
