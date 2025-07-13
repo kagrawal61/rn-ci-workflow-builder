@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "SampleExpoApp",
-    "slug": "SampleExpoApp",
+    "slug": "mobilecibuilder",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,6 +24,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f971b97b-8899-4b17-b011-6e01f89f3c0f"
+      }
+    },
+    "owner": "mobilecibuilder"
   }
 }
