@@ -70,6 +70,13 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
       requiredSecrets.push('FIREBASE_TOKEN');
     }
   }
+  
+  // Add Expo-specific secrets when Expo is selected
+  if (opts.framework === 'expo') {
+    if (!requiredSecrets.includes('EXPO_TOKEN')) {
+      requiredSecrets.push('EXPO_TOKEN');
+    }
+  }
 
   // Jobs collection
   const jobs: Record<string, GitHubJob> = {};
@@ -124,30 +131,50 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
       buildJob.needs = ['static_analysis'];
     }
 
-    // Add platform-specific build steps
-    if (platform === 'android') {
-      buildJob.steps = platformHelpers.createAndroidBuildSteps(
+    // First select framework, then platform
+    if (opts.framework === 'expo') {
+      // Use Expo build steps
+      buildJob.steps = platformHelpers.createExpoBuildSteps(
         setupSteps,
         packageManager,
         '',
         build
       );
-    } else if (platform === 'ios') {
-      buildJob.steps = platformHelpers.createIOSBuildSteps(
-        setupSteps,
-        packageManager,
-        '',
-        build
-      );
-    }
-
-    // Add storage steps if configured
-    if (build.storage) {
-      const storageSteps =
-        platform === 'android'
-          ? storageHelpers.createAndroidStorageSteps(build)
-          : storageHelpers.createIOSStorageSteps(build);
-      buildJob.steps.push(...storageSteps);
+      
+      // For Expo, update the job name to remove variant info since we don't use variants
+      buildJob.name = `Build Expo ${platform.charAt(0).toUpperCase()}${platform.slice(1)}`;
+      
+      // Add storage steps if configured
+      if (build.storage) {
+        const storageSteps = storageHelpers.createExpoStorageSteps(build);
+        buildJob.steps.push(...storageSteps);
+      }
+    } else {
+      // Default to React Native CLI
+      if (platform === 'android') {
+        buildJob.steps = platformHelpers.createAndroidBuildSteps(
+          setupSteps,
+          packageManager,
+          '',
+          build
+        );
+      } else if (platform === 'ios') {
+        buildJob.steps = platformHelpers.createIOSBuildSteps(
+          setupSteps,
+          packageManager,
+          '',
+          build
+        );
+      }
+      
+      // Add storage steps if configured
+      if (build.storage) {
+        const storageSteps =
+          platform === 'android'
+            ? storageHelpers.createAndroidStorageSteps(build)
+            : storageHelpers.createIOSStorageSteps(build);
+        buildJob.steps.push(...storageSteps);
+      }
     }
 
     // Add notification steps if configured
@@ -205,11 +232,23 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
         } as const)
       : undefined;
 
-  return {
+  // Create workflow
+  const workflow = {
     name: opts.name ?? 'Build Pipeline',
     on: buildTriggers(triggers),
     env: buildEnv(env, secrets),
     permissions,
     jobs,
   };
+  
+  // Add Expo-specific environment variables to the workflow
+  if (opts.framework === 'expo') {
+    workflow.env = {
+      ...workflow.env,
+      NODE_OPTIONS: '--openssl-legacy-provider',
+      EXPO_TOKEN: '${{ secrets.EXPO_TOKEN }}',
+    };
+  }
+  
+  return workflow;
 }

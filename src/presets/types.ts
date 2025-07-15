@@ -1,4 +1,9 @@
 /**
+ * Framework options
+ */
+export type Framework = 'react-native-cli' | 'expo';
+
+/**
  * Platform options for build
  */
 export type Platform = 'ios' | 'android' | 'both';
@@ -66,6 +71,11 @@ export interface BuildOptions {
    * Platform to build for
    */
   platform?: Platform;
+
+  /**
+   * Framework to use (React Native CLI or Expo)
+   */
+  framework?: Framework;
 
   /**
    * Build variant (debug or release)

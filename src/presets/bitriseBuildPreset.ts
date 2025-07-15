@@ -135,6 +135,114 @@ fi`;
   }
 }
 
+// Helper function to generate Expo build script content
+function generateExpoBuildScript(platform: string, outputType: string): string {
+  const isAndroid = platform === 'android' || platform === 'both';
+  
+  return `#!/usr/bin/env bash
+set -euo pipefail
+
+# Check for required environment
+echo "🔍 Verifying Expo environment..."
+
+# Check for app.json or app.config.js
+if [ ! -f "app.json" ] && [ ! -f "app.config.js" ] && [ ! -f "app.config.ts" ]; then
+  echo "⚠️ Warning: No app.json, app.config.js, or app.config.ts found"
+  echo "Make sure this is an Expo project"
+fi
+
+# Install EAS CLI
+echo "📦 Installing EAS CLI..."
+npm install -g eas-cli
+echo "✅ EAS CLI installed:"
+eas --version
+
+# Set up output directory
+echo "📁 Creating output directories..."
+mkdir -p ./expo-builds
+
+# Running EAS build
+echo "🚀 Starting Expo build for ${platform}..."
+
+# Build based on platform
+${(() => {
+  if (isAndroid) {
+    if (outputType === 'apk' || outputType === 'both') {
+      return `
+# Build Android APK
+echo "Building Android APK using EAS..."
+eas build --platform android --profile production-apk --local --non-interactive --output=./expo-builds/app-production.apk || {
+  echo "❌ Android APK build failed"
+  exit 1
+}
+echo "✅ Android APK build completed"`;
+    } else if (outputType === 'aab') {
+      return `
+# Build Android App Bundle
+echo "Building Android AAB using EAS..."
+eas build --platform android --profile production --local --non-interactive --output=./expo-builds/app-production.aab || {
+  echo "❌ Android AAB build failed"
+  exit 1
+}
+echo "✅ Android AAB build completed"`;
+    } else {
+      return `
+# Build both Android APK and AAB
+echo "Building Android APK using EAS..."
+eas build --platform android --profile production-apk --local --non-interactive --output=./expo-builds/app-production.apk || {
+  echo "❌ Android APK build failed"
+  exit 1
+}
+
+echo "Building Android AAB using EAS..."
+eas build --platform android --profile production --local --non-interactive --output=./expo-builds/app-production.aab || {
+  echo "❌ Android AAB build failed"
+  exit 1
+}
+echo "✅ Android builds completed"`;
+    }
+  } else {
+    return `
+# Build iOS IPA
+echo "Building iOS IPA using EAS..."
+eas build --platform ios --profile production --local --non-interactive --output=./expo-builds/app-production.ipa || {
+  echo "❌ iOS build failed"
+  exit 1
+}
+echo "✅ iOS build completed"`;
+  }
+})()}
+
+# Verify build outputs exist
+${isAndroid ? `
+# Verify Android build outputs
+${outputType === 'apk' || outputType === 'both' ? `
+if [ -f "./expo-builds/app-production.apk" ]; then
+  echo "✅ APK file generated successfully"
+else
+  echo "❌ Expected APK file not found. Build may have failed."
+  exit 1
+fi` : ''}
+
+${outputType === 'aab' || outputType === 'both' ? `
+if [ -f "./expo-builds/app-production.aab" ]; then
+  echo "✅ AAB file generated successfully"
+else
+  echo "❌ Expected AAB file not found. Build may have failed."
+  exit 1
+fi` : ''}
+` : `
+# Verify iOS build output
+if [ -f "./expo-builds/app-production.ipa" ]; then
+  echo "✅ IPA file generated successfully"
+else
+  echo "❌ Expected IPA file not found. Build may have failed."
+  exit 1
+fi`}
+
+echo "✅ All Expo builds completed successfully"`;
+}
+
 // Helper function to generate iOS build script content
 function generateIOSBuildScript(variant: string): string {
   const isDebug = variant === 'debug';
@@ -260,10 +368,11 @@ export function buildBitriseBuildPipeline(
     env,
     packageManager = 'yarn',
     nodeVersions = [20],
+    framework = 'react-native-cli', // Default to React Native CLI if not specified
     build = {
       platform: 'android',
       variant: 'release',
-      androidOutputType: 'apk', // Add support for androidOutputType
+      androidOutputType: 'apk',
       storage: 'bitrise',
       notification: 'pr-comment',
       includeStaticAnalysis: true,
@@ -276,6 +385,11 @@ export function buildBitriseBuildPipeline(
     { NODE_OPTIONS: '--max_old_space_size=4096' },
     { YARN_ENABLE_IMMUTABLE_INSTALLS: '1' },
   ];
+  
+  // Add Expo-specific environment variables if using Expo
+  if (framework === 'expo') {
+    defaultEnvs.push({ NODE_OPTIONS: '--openssl-legacy-provider' });
+  }
 
   // Build app-level environment variables
   const appEnvs: Array<Record<string, string>> = [...defaultEnvs];
@@ -425,19 +539,24 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
   const workflows: Record<string, BitriseWorkflow> = {};
 
   if (build.platform === 'android' || build.platform === 'both') {
+    // Determine if using Expo framework
+    const isExpo = framework === 'expo';
+    
     const androidSteps = [
       ...setupSteps,
       installStep,
       ...staticAnalysisSteps,
       {
         'script@1': {
-          title: 'Build Android App',
+          title: isExpo ? 'Build Expo Android App' : 'Build Android App',
           inputs: [
             {
-              content: generateAndroidBuildScript(
-                build.variant || 'release',
-                (build as BuildOptions).androidOutputType || 'apk'
-              ),
+              content: isExpo 
+                ? generateExpoBuildScript('android', (build as BuildOptions).androidOutputType || 'apk')
+                : generateAndroidBuildScript(
+                    build.variant || 'release',
+                    (build as BuildOptions).androidOutputType || 'apk'
+                  ),
             },
           ],
         },
@@ -476,26 +595,54 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
     // Add cache push step as final step
     androidSteps.push(saveCacheStep);
 
-    workflows['rn-android-build'] = {
-      title: 'Build Android',
-      description: 'Build React Native Android app',
+    const workflowKey = 'rn-android-build';
+    const workflowTitle = isExpo ? 'Build Expo Android' : 'Build Android';
+    const workflowDescription = isExpo 
+      ? 'Build Expo Android app using EAS' 
+      : 'Build React Native Android app';
+    
+    workflows[workflowKey] = {
+      title: workflowTitle,
+      description: workflowDescription,
       steps: androidSteps,
       meta: androidMeta,
     };
   }
 
   if (build.platform === 'ios' || build.platform === 'both') {
+    // Determine if using Expo framework
+    const isExpo = framework === 'expo';
+    
+    // Base steps for iOS build
     const iosSteps = [
       ...setupSteps,
       installStep,
       ...staticAnalysisSteps,
-      {
+    ];
+    
+    // Add platform-specific build steps
+    if (isExpo) {
+      // For Expo, we use the EAS CLI
+      iosSteps.push({
+        'script@1': {
+          title: 'Build Expo iOS App',
+          inputs: [
+            {
+              content: generateExpoBuildScript('ios', ''),
+            },
+          ],
+        },
+      });
+    } else {
+      // For React Native CLI, we use the standard iOS build process
+      iosSteps.push({
         'cocoapods-install@2': {
           title: 'Install CocoaPods',
           inputs: [{ source_root_path: './ios' }],
         },
-      },
-      {
+      });
+      
+      iosSteps.push({
         'script@1': {
           title: 'Build iOS App',
           inputs: [
@@ -504,8 +651,10 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
             },
           ],
         },
-      },
-      {
+      });
+      
+      // Only add xcode-archive step for non-Expo projects
+      iosSteps.push({
         'xcode-archive@4': {
           title: 'Build iOS',
           inputs: [
@@ -517,27 +666,37 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
             },
           ],
         },
+      });
+    }
+    
+    // Common steps for all iOS builds
+    iosSteps.push({
+      'deploy-to-bitrise-io@2': {
+        title: 'Deploy to Bitrise.io',
+        inputs: [
+          { notify_user_groups: 'everyone' },
+          // Enable public install page for builds when notifications are needed
+          { is_enable_public_page: 'true' },
+        ],
       },
-      {
-        'deploy-to-bitrise-io@2': {
-          title: 'Deploy to Bitrise.io',
-          inputs: [
-            { notify_user_groups: 'everyone' },
-            // Enable public install page for builds when notifications are needed
-            { is_enable_public_page: 'true' },
-          ],
-        },
-      },
+    });
+    
+    // Add custom notification steps
+    const notificationSteps = generateBitriseNotificationSteps(build, 'iOS');
+    iosSteps.push(...notificationSteps);
+    
+    // Add cache step
+    iosSteps.push(saveCacheStep);
 
-      // Add custom notification steps based on configuration
-      ...generateBitriseNotificationSteps(build, 'iOS'),
-
-      saveCacheStep,
-    ];
-
-    workflows['rn-ios-build'] = {
-      title: 'Build iOS',
-      description: 'Build React Native iOS app',
+    const workflowKey = 'rn-ios-build';
+    const workflowTitle = isExpo ? 'Build Expo iOS' : 'Build iOS';
+    const workflowDescription = isExpo 
+      ? 'Build Expo iOS app using EAS' 
+      : 'Build React Native iOS app';
+    
+    workflows[workflowKey] = {
+      title: workflowTitle,
+      description: workflowDescription,
       steps: iosSteps,
       meta: iosMeta,
     };
@@ -545,9 +704,15 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
 
   // If building for both platforms, create a combined workflow
   if (build.platform === 'both') {
-    workflows['rn-build-all-platforms'] = {
-      title: 'Build Both Platforms',
-      description: 'Build React Native app for both Android and iOS',
+    const workflowKey = 'rn-build-all-platforms';
+    const workflowTitle = framework === 'expo' ? 'Build Expo for All Platforms' : 'Build Both Platforms';
+    const workflowDescription = framework === 'expo' 
+      ? 'Build Expo app for both Android and iOS using EAS' 
+      : 'Build React Native app for both Android and iOS';
+    
+    workflows[workflowKey] = {
+      title: workflowTitle,
+      description: workflowDescription,
       steps: [],
       before_run: ['rn-android-build', 'rn-ios-build'],
       meta: {
@@ -596,11 +761,14 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
     });
   }
 
+  // Set project type based on framework
+  const projectType = framework === 'expo' ? 'expo' : 'react-native';
+
   return {
     format_version: 13,
     default_step_lib_source:
       'https://github.com/bitrise-io/bitrise-steplib.git',
-    project_type: 'react-native',
+    project_type: projectType,
     meta:
       build.platform === 'both'
         ? {

@@ -260,6 +260,11 @@ export interface WorkflowOptions {
   platform?: CIPlatform;
 
   /**
+   * Framework to use (React Native CLI or Expo)
+   */
+  framework?: 'react-native-cli' | 'expo';
+
+  /**
    * Triggers for the workflow
    */
   triggers?: TriggerOptions;

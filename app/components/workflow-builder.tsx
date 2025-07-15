@@ -32,6 +32,9 @@ export function WorkflowBuilder() {
 
       // Platform selection
       platform: 'github',
+      
+      // Framework selection
+      framework: 'expo',
 
       // Basic settings
       name: defaultConfig.options?.name || 'React Native Static Analysis',
@@ -78,11 +81,11 @@ export function WorkflowBuilder() {
       buildFlavor: 'develop',
       buildVariant: 'release',
       buildStorage: 'github',
-      buildNotification: 'pr-comment',
+      buildNotification: 'none',
       includeStaticAnalysis: true,
 
       // Static analysis settings
-      staticAnalysisNotification: 'pr-comment',
+      staticAnalysisNotification: 'none',
       typescriptCheck: true,
       eslintCheck: true,
       prettierCheck: true,
@@ -158,6 +161,7 @@ export function WorkflowBuilder() {
       trackWorkflowGenerated({
         platform: formValues.platform || 'github',
         preset: formValues.preset || 'build',
+        framework: formValues.framework || 'expo',
         buildPlatform: formValues.buildPlatform,
         buildVariant: formValues.buildVariant
       });

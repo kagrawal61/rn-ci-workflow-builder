@@ -359,9 +359,6 @@ function createPRCommentNotificationSteps(
     })
   );
 
-  // Add conditional CLI installation step
-  steps.push(createConditionalCLIInstallationStep(stepId));
-
   // Add the provided PR comment step
   steps.push(prCommentStep);
 
@@ -479,10 +476,6 @@ const notificationHelpers = {
           context: 'static analysis',
         })
       );
-
-      // Add conditional CLI installation step
-      steps.push(createConditionalCLIInstallationStep(stepId));
-
       // Add static analysis PR comment step
       steps.push(createStaticAnalysisPRCommentStep(stepId));
     }
