@@ -222,7 +222,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 </Tooltip>
               </div>
               <Select
-                value={values.framework || 'react-native-cli'}
+                value={values.framework || 'expo'}
                 onValueChange={value => handleInputChange('framework', value)}
               >
                 <SelectTrigger id="framework">
@@ -413,7 +413,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                     </Tooltip>
                   </div>
                   <Select
-                    value={values.staticAnalysisNotification || 'pr-comment'}
+                    value={values.staticAnalysisNotification || 'none'}
                     onValueChange={value =>
                       handleInputChange('staticAnalysisNotification', value)
                     }
@@ -897,7 +897,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   </Tooltip>
                 </div>
                 <Select
-                  value={values.buildNotification || 'pr-comment'}
+                  value={values.buildNotification || 'none'}
                   onValueChange={value =>
                     handleInputChange('buildNotification', value)
                   }
