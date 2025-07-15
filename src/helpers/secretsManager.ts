@@ -129,7 +129,7 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
 
   // Generate summary by group
   if (groups.storage.length > 0 && buildOptions.storage) {
-    summary += `### Storage (${STORAGE_SECRET_DOCS[buildOptions.storage].name})\n\n`;
+    summary += `Storage (${STORAGE_SECRET_DOCS[buildOptions.storage].name})\n\n`;
     for (const secret of groups.storage) {
       summary += `- \`${secret.name}\`: ${secret.description}\n`;
     }
@@ -138,7 +138,7 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
     const optionalSecrets =
       STORAGE_SECRET_DOCS[buildOptions.storage].optionalSecrets;
     if (optionalSecrets && optionalSecrets.length > 0) {
-      summary += '\n#### Optional Storage Secrets\n\n';
+      summary += '\nOptional Storage Secrets\n\n';
       for (const secret of optionalSecrets) {
         summary += `- \`${secret.name}\`: ${secret.description}\n`;
       }
@@ -154,7 +154,7 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
     
     if (frameworkSpecificSecrets.length > 0) {
       const frameworkName = docsResult.framework?.name || buildOptions.framework;
-      summary += `### Framework (${frameworkName})\n\n`;
+      summary += `Framework (${frameworkName})\n\n`;
       
       // Get all framework secrets from the context
       for (const secret of secrets.filter(s => 
@@ -178,7 +178,7 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
     
     // Display platform-specific secrets
     if (platformOnlySecrets.length > 0) {
-      summary += `### Platform (${buildOptions.platform})\n\n`;
+      summary += `Platform (${buildOptions.platform})\n\n`;
       for (const secret of platformOnlySecrets) {
         summary += `- \`${secret.name}\`: ${secret.description}\n`;
       }
@@ -187,7 +187,7 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
   }
 
   if (groups.notification.length > 0 && buildOptions.notification) {
-    summary += `### Notifications (${NOTIFICATION_SECRET_DOCS[buildOptions.notification].name})\n\n`;
+    summary += `Notifications (${NOTIFICATION_SECRET_DOCS[buildOptions.notification].name})\n\n`;
     for (const secret of groups.notification) {
       summary += `- \`${secret.name}\`: ${secret.description}\n`;
     }
