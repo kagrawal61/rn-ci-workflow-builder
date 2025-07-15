@@ -31,7 +31,7 @@ export function SupportedFrameworks() {
               </span>
               Available Now
             </h3>
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           
           {/* React Native Card */}
           <motion.div
@@ -59,6 +59,49 @@ export function SupportedFrameworks() {
                   <p className="mt-2 text-muted-foreground">
                     Configure and generate optimized CI/CD workflows for React Native iOS and
                     Android apps using our tailored GitHub Actions templates
+                  </p>
+                  <div className="mt-4">
+                    <Button
+                      onClick={() => {
+                        document
+                          .getElementById('workflow-builder')
+                          ?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      size="sm"
+                    >
+                      Get Started
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Expo Card */}
+          <motion.div
+            className="overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-300 hover:shadow-md"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.25 }}
+            whileHover={{ y: -5 }}
+          >
+            <div className="bg-gradient-to-r from-purple-500 to-indigo-500 p-1"></div>
+            <div className="p-6">
+              <div className="flex items-start">
+                <div className="mr-4 flex-shrink-0">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                    <Layers className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center">
+                    <h3 className="text-lg font-semibold">Expo</h3>
+                    <span className="ml-3 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                      Available
+                    </span>
+                  </div>
+                  <p className="mt-2 text-muted-foreground">
+                    Specialized CI/CD workflows for Expo projects with automated builds and deployments for both development and production
                   </p>
                   <div className="mt-4">
                     <Button
@@ -266,47 +309,6 @@ export function SupportedFrameworks() {
               On the Roadmap
             </h3>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-
-          {/* Expo Card */}
-          <motion.div
-            className="overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-300 hover:shadow-md"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.7 }}
-            whileHover={{ y: -5 }}
-          >
-            <div className="bg-gradient-to-r from-purple-500 to-indigo-500 p-1"></div>
-            <div className="p-6">
-              <div className="flex items-start">
-                <div className="mr-4 flex-shrink-0">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                    <Layers className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center">
-                    <h3 className="text-lg font-semibold">Expo</h3>
-                  </div>
-                  <p className="mt-2 text-muted-foreground">
-                    Specialized CI/CD workflows for Expo projects leveraging EAS Build, managed credentials, and QR code preview deployments for easy testing
-                  </p>
-                  <div className="mt-4">
-                    <Button 
-                      className="bg-transparent text-purple-600 dark:text-purple-400 border border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-950/30 shadow-sm relative overflow-hidden cursor-pointer" 
-                      size="sm" 
-                      onClick={() => {}}
-                    >
-                      <span className="absolute inset-x-0 h-px top-0 bg-gradient-to-r from-transparent via-purple-500 to-transparent animate-shimmer"></span>
-                      <span className="absolute inset-x-0 h-px bottom-0 bg-gradient-to-r from-transparent via-purple-500 to-transparent animate-shimmer"></span>
-                      <span className="absolute inset-y-0 w-px left-0 bg-gradient-to-b from-transparent via-purple-500 to-transparent animate-shimmer"></span>
-                      <span className="absolute inset-y-0 w-px right-0 bg-gradient-to-b from-transparent via-purple-500 to-transparent animate-shimmer"></span>
-                      Stay Tuned
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
 
           {/* Native iOS Card */}
           <motion.div

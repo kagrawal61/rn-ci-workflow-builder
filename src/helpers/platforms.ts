@@ -1,10 +1,79 @@
-import { GitHubStep, PackageManager } from '../types';
 import { BuildOptions } from '../presets/types';
+import { GitHubStep, PackageManager } from '../types';
 
 /**
  * Platform-specific workflow step helpers
  */
 const platformHelpers = {
+  /**
+   * Creates Expo-specific build steps for GitHub Actions workflow
+   *
+   * @param setupSteps Common setup steps like checkout and Node setup
+   * @param packageManager Package manager to use for installing dependencies
+   * @param buildParams DEPRECATED: No longer used directly, kept for API compatibility
+   * @param build Build options specifying platform and output type
+   * @returns Array of GitHub Actions workflow steps
+   */
+  createExpoBuildSteps(
+    setupSteps: GitHubStep[],
+    packageManager: PackageManager,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    buildParams: string,
+    build: BuildOptions
+  ): GitHubStep[] {
+    // Platform-aware build steps
+    const platform = build.platform || 'android';
+    const isAndroid = platform === 'android' || platform === 'both';
+    const outputType = build.androidOutputType || 'apk';
+
+    // Base steps (setup only)
+    const steps = [
+      ...setupSteps,
+      // Install EAS CLI
+      {
+        name: 'Install EAS CLI',
+        run: `${packageManager === 'yarn' ? 'yarn global add' : 'npm install -g'} eas-cli@latest`,
+      },
+      // Setup EAS Build Cache
+      {
+        name: 'Setup EAS Build Cache',
+        uses: 'actions/cache@v3',
+        with: {
+          path: '~/.eas-build-local',
+          key: "${{ runner.os }}-eas-build-local-${{ hashFiles('**/package.json') }}",
+          'restore-keys': '${{ runner.os }}-eas-build-local-',
+        },
+      },
+      // Verify EAS CLI installation
+      {
+        name: 'Verify EAS CLI Installation',
+        run: 'eas --version',
+      },
+    ];
+
+    // Android-specific build steps
+    if (isAndroid) {
+      // APK Build step - always use production profile
+      if (outputType === 'apk' || outputType === 'both') {
+        steps.push({
+          name: 'Build Android APK',
+          run: 'eas build --platform android --profile production-apk --local --non-interactive --output=./android-builds/app-production.apk',
+          env: {},
+        });
+      }
+
+      // AAB Build step - always build production
+      if (outputType === 'aab' || outputType === 'both') {
+        steps.push({
+          name: 'Build Android App Bundle (AAB)',
+          run: 'eas build --platform android --profile production --local --non-interactive --output=./android-builds/app-production.aab',
+          env: {},
+        });
+      }
+    }
+
+    return steps;
+  },
   /**
    * Creates Android-specific build steps for GitHub Actions workflow
    *

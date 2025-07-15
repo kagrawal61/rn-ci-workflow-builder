@@ -25,6 +25,7 @@ export const AnalyticsEvents = {
 type WorkflowGeneratedProps = {
   platform: string;
   preset: string;
+  framework?: string;
   buildPlatform?: string;
   buildVariant?: string;
 };
