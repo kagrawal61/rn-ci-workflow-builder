@@ -1,5 +1,5 @@
-import { GitHubStep, PackageManager } from '../types';
 import { BuildOptions } from '../presets/types';
+import { GitHubStep, PackageManager } from '../types';
 
 /**
  * Platform-specific workflow step helpers
@@ -25,7 +25,7 @@ const platformHelpers = {
     const platform = build.platform || 'android';
     const isAndroid = platform === 'android' || platform === 'both';
     const outputType = build.androidOutputType || 'apk';
-    
+
     // Base steps (setup only)
     const steps = [
       ...setupSteps,
@@ -40,7 +40,7 @@ const platformHelpers = {
         uses: 'actions/cache@v3',
         with: {
           path: '~/.eas-build-local',
-          key: '${{ runner.os }}-eas-build-local-${{ hashFiles(\'**/package.json\') }}',
+          key: "${{ runner.os }}-eas-build-local-${{ hashFiles('**/package.json') }}",
           'restore-keys': '${{ runner.os }}-eas-build-local-',
         },
       },
@@ -57,25 +57,21 @@ const platformHelpers = {
       if (outputType === 'apk' || outputType === 'both') {
         steps.push({
           name: 'Build Android APK',
-          run: "export NODE_OPTIONS=\"--openssl-legacy-provider --max_old_space_size=4096\"\neas build --platform android --profile production-apk --local --non-interactive --output=./android-builds/app-production.apk",
-          env: {
-            NODE_ENV: 'production',
-          },
+          run: 'eas build --platform android --profile production-apk --local --non-interactive --output=./android-builds/app-production.apk',
+          env: {},
         });
       }
-      
+
       // AAB Build step - always build production
       if (outputType === 'aab' || outputType === 'both') {
         steps.push({
           name: 'Build Android App Bundle (AAB)',
-          run: "export NODE_OPTIONS=\"--openssl-legacy-provider --max_old_space_size=4096\"\neas build --platform android --profile production --local --non-interactive --output=./android-builds/app-production.aab",
-          env: {
-            NODE_ENV: 'production',
-          },
+          run: 'eas build --platform android --profile production --local --non-interactive --output=./android-builds/app-production.aab',
+          env: {},
         });
       }
     }
-    
+
     return steps;
   },
   /**
