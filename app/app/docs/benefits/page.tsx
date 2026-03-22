@@ -1,6 +1,14 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Book, CheckCircle, Clock, Target, TrendingUp } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Benefits — React Native CI/CD Workflow Builder',
+  description:
+    'Discover how the React Native CI/CD Workflow Builder saves $2K–15K annually by eliminating manual CI setup and reducing build configuration time.',
+  alternates: { canonical: '/docs/benefits' },
+};
 
 export default function BenefitsPage() {
   return (
