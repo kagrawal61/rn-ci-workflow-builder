@@ -1,6 +1,14 @@
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Storage Options — React Native CI/CD Workflow Builder',
+  description:
+    'Configure where to store your React Native build artifacts — APK, AAB, and IPA — including GitHub Actions artifacts and external storage.',
+  alternates: { canonical: '/docs/storage-options' },
+};
 
 export default function StorageOptionsPage() {
   return (

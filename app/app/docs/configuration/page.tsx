@@ -2,6 +2,14 @@ import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Configuration Reference — React Native CI/CD Workflow Builder',
+  description:
+    'Complete reference for all workflow configuration options including package manager, platform targets, Node version, and more.',
+  alternates: { canonical: '/docs/configuration' },
+};
 
 export default function ConfigurationPage() {
   return (

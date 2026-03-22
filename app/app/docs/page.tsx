@@ -1,6 +1,14 @@
 import { Card } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Documentation — React Native CI/CD Workflow Builder',
+  description:
+    'Learn how to generate and configure GitHub Actions and Bitrise CI/CD workflows for your React Native projects.',
+  alternates: { canonical: '/docs' },
+};
 
 export default function DocsPage() {
   return (
