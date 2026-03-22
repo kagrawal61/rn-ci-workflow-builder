@@ -1,6 +1,14 @@
 // import { IconArrowRight } from "@tabler/icons-react";
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Core Concepts — React Native CI/CD Workflow Builder',
+  description:
+    'Understand the fundamental concepts behind the React Native CI workflow generator — pipelines, presets, platforms, and configuration.',
+  alternates: { canonical: '/docs/core-concepts' },
+};
 
 export default function CoreConceptsPage() {
   return (

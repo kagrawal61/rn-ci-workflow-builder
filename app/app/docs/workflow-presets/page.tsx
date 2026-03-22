@@ -1,6 +1,14 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Check, AlertCircle, Box, Smartphone } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Workflow Presets — React Native CI/CD Workflow Builder',
+  description:
+    'Explore the available CI/CD workflow presets — static analysis and build — and choose the right template for your React Native project.',
+  alternates: { canonical: '/docs/workflow-presets' },
+};
 
 export default function WorkflowPresetsPage() {
   return (

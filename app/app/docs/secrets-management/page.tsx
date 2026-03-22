@@ -1,3 +1,12 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Secrets Management — React Native CI/CD Workflow Builder',
+  description:
+    'Securely handle API keys, signing certificates, and deployment credentials in your React Native CI/CD workflow configurations.',
+  alternates: { canonical: '/docs/secrets-management' },
+};
+
 export default function SecretsManagementPage() {
   return (
     <div className="space-y-8">
