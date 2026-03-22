@@ -1,5 +1,13 @@
 import { Check, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Getting Started — React Native CI/CD Workflow Builder',
+  description:
+    'Set up your first CI/CD workflow for your React Native app in minutes using our visual builder.',
+  alternates: { canonical: '/docs/getting-started' },
+};
 
 export default function GettingStartedPage() {
   return (
