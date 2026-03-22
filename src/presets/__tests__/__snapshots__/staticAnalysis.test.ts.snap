@@ -1,0 +1,209 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildStaticAnalysisPipeline output matches snapshot for default options 1`] = `
+{
+  "env": {
+    "GITHUB_TOKEN": "__SECRET_GITHUB_TOKEN__",
+  },
+  "jobs": {
+    "static_analysis": {
+      "name": "Run Static Analysis",
+      "runs-on": "ubuntu-latest",
+      "steps": [
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v4",
+        },
+        {
+          "name": "Setup Node",
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "cache": "yarn",
+            "node-version": 20,
+          },
+        },
+        {
+          "name": "Install",
+          "run": "yarn install --immutable",
+        },
+        {
+          "name": "TypeScript",
+          "run": "yarn tsc --noEmit",
+        },
+        {
+          "name": "ESLint",
+          "run": "yarn lint",
+        },
+        {
+          "name": "Prettier",
+          "run": "yarn format:check",
+        },
+        {
+          "name": "Unit tests",
+          "run": "yarn test --ci",
+        },
+        {
+          "id": "static-analysis-source",
+          "name": "Determine PR Status",
+          "run": "
+# Determine if this is a PR or a direct push
+EVENT_NAME="\${{ github.event_name }}"
+if [[ "$EVENT_NAME" == "pull_request" ]] || [[ "$EVENT_NAME" == "pull_request_target" ]]; then
+  # This is a PR - set output flag
+  echo "is_pr=true" >> $GITHUB_OUTPUT
+  echo "📌 Running static analysis on PR #\${{ github.event.pull_request.number }} from branch \${{ github.head_ref }}"
+else
+  # This is a direct push - set output flag
+  echo "is_pr=false" >> $GITHUB_OUTPUT
+  echo "📌 Running static analysis on branch \${{ github.ref_name }}"
+fi
+",
+        },
+        {
+          "env": {
+            "GH_TOKEN": "\${{ secrets.GITHUB_TOKEN }}",
+          },
+          "if": "steps.static-analysis-source.outputs.is_pr == 'true'",
+          "name": "Add Static Analysis PR Comment",
+          "run": "# Create comment message
+MESSAGE="## 📊 Static Analysis Results
+
+\${{ job.status == 'success' && '✅ All static analysis checks passed!' || '❌ Some static analysis checks failed!' }}
+
+### Build Information
+- **Repository**: \${{ github.repository }}
+- **Branch**: \${{ github.head_ref }}
+- **Commit**: \${{ github.sha }}
+- **Workflow**: \${{ github.workflow }}
+
+> Static analysis completed via React Native CI Workflow Builder"
+
+# Check if comment already exists and update it
+PR_NUM="\${{ github.event.number }}"
+SEARCH_TEXT="Static Analysis Results"
+echo "Creating new comment..."
+gh pr comment $PR_NUM --body "$MESSAGE"
+",
+        },
+      ],
+    },
+  },
+  "name": "Static Analysis",
+  "on": {
+    "pull_request": {
+      "branches": [
+        "main",
+      ],
+    },
+    "push": {
+      "branches": [
+        "main",
+      ],
+    },
+  },
+}
+`;
+
+exports[`buildStaticAnalysisPipeline output matches snapshot for npm with custom name 1`] = `
+{
+  "env": {
+    "GITHUB_TOKEN": "__SECRET_GITHUB_TOKEN__",
+  },
+  "jobs": {
+    "static_analysis": {
+      "name": "Run Static Analysis",
+      "runs-on": "ubuntu-latest",
+      "steps": [
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v4",
+        },
+        {
+          "name": "Setup Node",
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "cache": "npm",
+            "node-version": 18,
+          },
+        },
+        {
+          "name": "Install",
+          "run": "npm ci",
+        },
+        {
+          "name": "TypeScript",
+          "run": "npm run tsc -- --noEmit",
+        },
+        {
+          "name": "ESLint",
+          "run": "npm run lint",
+        },
+        {
+          "name": "Prettier",
+          "run": "npm run format:check",
+        },
+        {
+          "name": "Unit tests",
+          "run": "npm test -- --ci",
+        },
+        {
+          "id": "static-analysis-source",
+          "name": "Determine PR Status",
+          "run": "
+# Determine if this is a PR or a direct push
+EVENT_NAME="\${{ github.event_name }}"
+if [[ "$EVENT_NAME" == "pull_request" ]] || [[ "$EVENT_NAME" == "pull_request_target" ]]; then
+  # This is a PR - set output flag
+  echo "is_pr=true" >> $GITHUB_OUTPUT
+  echo "📌 Running static analysis on PR #\${{ github.event.pull_request.number }} from branch \${{ github.head_ref }}"
+else
+  # This is a direct push - set output flag
+  echo "is_pr=false" >> $GITHUB_OUTPUT
+  echo "📌 Running static analysis on branch \${{ github.ref_name }}"
+fi
+",
+        },
+        {
+          "env": {
+            "GH_TOKEN": "\${{ secrets.GITHUB_TOKEN }}",
+          },
+          "if": "steps.static-analysis-source.outputs.is_pr == 'true'",
+          "name": "Add Static Analysis PR Comment",
+          "run": "# Create comment message
+MESSAGE="## 📊 Static Analysis Results
+
+\${{ job.status == 'success' && '✅ All static analysis checks passed!' || '❌ Some static analysis checks failed!' }}
+
+### Build Information
+- **Repository**: \${{ github.repository }}
+- **Branch**: \${{ github.head_ref }}
+- **Commit**: \${{ github.sha }}
+- **Workflow**: \${{ github.workflow }}
+
+> Static analysis completed via React Native CI Workflow Builder"
+
+# Check if comment already exists and update it
+PR_NUM="\${{ github.event.number }}"
+SEARCH_TEXT="Static Analysis Results"
+echo "Creating new comment..."
+gh pr comment $PR_NUM --body "$MESSAGE"
+",
+        },
+      ],
+    },
+  },
+  "name": "CI Analysis",
+  "on": {
+    "pull_request": {
+      "branches": [
+        "main",
+      ],
+    },
+    "push": {
+      "branches": [
+        "main",
+      ],
+    },
+  },
+}
+`;

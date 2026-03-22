@@ -31,10 +31,10 @@ module.exports = {
   ],
   coverageThreshold: {
     global: {
-      branches: 24,
-      functions: 28,
-      lines: 29,
-      statements: 29,
+      branches: 50,
+      functions: 49,
+      lines: 52,
+      statements: 52,
     },
   },
   
@@ -43,6 +43,7 @@ module.exports = {
     '/node_modules/',
     '/dist/',
     '/SampleRNApp/',
+    '/SampleExpoApp/',
     '/app/',
     '/examples/',
   ],

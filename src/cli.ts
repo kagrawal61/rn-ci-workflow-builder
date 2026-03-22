@@ -55,6 +55,14 @@ program
     '-v, --validate-only',
     'Only validate the configuration without generating files'
   )
+  .option(
+    '--validate-actionlint',
+    'Run actionlint static analysis on the generated GitHub Actions workflow (auto-installs actionlint if needed)'
+  )
+  .option(
+    '--validate-act',
+    'Run act --list on the generated GitHub Actions workflow to verify it is parseable by act (requires act to be installed)'
+  )
   .action(async (preset = 'build', options) => {
     try {
       // Default config
@@ -146,6 +154,34 @@ program
           const result = writeWorkflowFile(config);
           filePath = result.filePath;
           console.log(`✅ Workflow written to ${filePath}`);
+        }
+
+        // Post-generation GitHub Actions validation (GitHub platform only)
+        const isGitHubPlatform =
+          !config.options?.platform || config.options?.platform === 'github';
+
+        if (isGitHubPlatform && (options.validateActionlint || options.validateAct)) {
+          const { validateWithActionlint, validateWithAct } = await import('./validation/yaml');
+
+          if (options.validateActionlint) {
+            console.log('🔍 Running actionlint static analysis...');
+            try {
+              await validateWithActionlint(filePath, true);
+            } catch (e) {
+              console.error(`❌ actionlint: ${(e as Error).message}`);
+              process.exit(1);
+            }
+          }
+
+          if (options.validateAct) {
+            console.log('🔍 Running act --list validation...');
+            try {
+              await validateWithAct(filePath);
+            } catch (e) {
+              console.error(`❌ act: ${(e as Error).message}`);
+              process.exit(1);
+            }
+          }
         }
       } catch (error) {
         console.error(
@@ -240,6 +276,40 @@ program
       }
     } catch (error) {
       console.error(`❌ Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+// GitHub Actions validate command
+program
+  .command('github-validate [file]')
+  .description(
+    'Validate a GitHub Actions workflow YAML file using actionlint (static analysis) and optionally act'
+  )
+  .option(
+    '--act',
+    'Also run act --list to verify the workflow is parseable by act (requires act to be installed)'
+  )
+  .action(async (file = '.github/workflows/build.yaml', options) => {
+    try {
+      const { validateWithActionlint, validateWithAct } = await import('./validation/yaml');
+
+      if (!fs.existsSync(file)) {
+        console.error(`❌ Error: File not found: ${file}`);
+        process.exit(1);
+      }
+
+      console.log('🔍 Running actionlint static analysis...');
+      await validateWithActionlint(file, true);
+      console.log(`✅ ${file} passes actionlint static analysis`);
+
+      if (options.act) {
+        console.log('🔍 Running act --list validation...');
+        await validateWithAct(file);
+        console.log(`✅ ${file} is parseable by act`);
+      }
+    } catch (error) {
+      console.error(`❌ ${(error as Error).message}`);
       process.exit(1);
     }
   });

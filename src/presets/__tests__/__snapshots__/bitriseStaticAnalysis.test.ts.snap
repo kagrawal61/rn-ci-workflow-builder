@@ -1,0 +1,293 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildBitriseStaticAnalysisPipeline output matches snapshot for default options 1`] = `
+{
+  "app": {
+    "envs": [
+      {
+        "CI": "true",
+      },
+      {
+        "NODE_OPTIONS": "--max_old_space_size=4096",
+      },
+      {
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "1",
+      },
+    ],
+  },
+  "default_step_lib_source": "https://github.com/bitrise-io/bitrise-steplib.git",
+  "format_version": 13,
+  "meta": {
+    "bitrise.io": {
+      "machine_type_id": "elite",
+      "stack": "linux-docker-android-22.04",
+    },
+  },
+  "project_type": "react-native",
+  "trigger_map": [
+    {
+      "push_branch": "main",
+      "workflow": "rn-static-analysis",
+    },
+    {
+      "pull_request_target_branch": "main",
+      "workflow": "rn-static-analysis",
+    },
+  ],
+  "workflows": {
+    "rn-static-analysis": {
+      "description": "Run static analysis including TypeScript, ESLint, Prettier, and unit tests",
+      "steps": [
+        {
+          "git-clone@8": {
+            "title": "Git Clone",
+          },
+        },
+        {
+          "nvm@1": {
+            "inputs": [
+              {
+                "node_version": "18",
+              },
+            ],
+            "title": "Setup Node.js 18",
+          },
+        },
+        {
+          "restore-cache@2": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+            ],
+            "title": "Restore yarn cache",
+          },
+        },
+        {
+          "yarn@0": {
+            "inputs": [
+              {
+                "args": "--immutable",
+              },
+            ],
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn tsc --noEmit",
+              },
+            ],
+            "title": "TypeScript Check",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn lint",
+              },
+            ],
+            "title": "ESLint Check",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn format:check",
+              },
+            ],
+            "title": "Prettier Check",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn test --ci",
+              },
+            ],
+            "title": "Unit Tests",
+          },
+        },
+        {
+          "save-cache@1": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+              {
+                "paths": "node_modules",
+              },
+            ],
+            "title": "Save yarn cache",
+          },
+        },
+      ],
+      "title": "React Native Static Analysis",
+    },
+  },
+}
+`;
+
+exports[`buildBitriseStaticAnalysisPipeline output matches snapshot for npm package manager 1`] = `
+{
+  "app": {
+    "envs": [
+      {
+        "CI": "true",
+      },
+      {
+        "NODE_OPTIONS": "--max_old_space_size=4096",
+      },
+      {
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "1",
+      },
+    ],
+  },
+  "default_step_lib_source": "https://github.com/bitrise-io/bitrise-steplib.git",
+  "format_version": 13,
+  "meta": {
+    "bitrise.io": {
+      "machine_type_id": "elite",
+      "stack": "linux-docker-android-22.04",
+    },
+  },
+  "project_type": "react-native",
+  "trigger_map": [
+    {
+      "push_branch": "main",
+      "workflow": "rn-static-analysis",
+    },
+    {
+      "pull_request_target_branch": "main",
+      "workflow": "rn-static-analysis",
+    },
+  ],
+  "workflows": {
+    "rn-static-analysis": {
+      "description": "Run static analysis including TypeScript, ESLint, Prettier, and unit tests",
+      "steps": [
+        {
+          "git-clone@8": {
+            "title": "Git Clone",
+          },
+        },
+        {
+          "nvm@1": {
+            "inputs": [
+              {
+                "node_version": "18",
+              },
+            ],
+            "title": "Setup Node.js 18",
+          },
+        },
+        {
+          "restore-cache@2": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-npm-cache-{{ checksum "package-lock.json" }}",
+              },
+            ],
+            "title": "Restore npm cache",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+npm ci",
+              },
+            ],
+            "title": "Install Dependencies",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+npm run tsc -- --noEmit",
+              },
+            ],
+            "title": "TypeScript Check",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+npm run lint",
+              },
+            ],
+            "title": "ESLint Check",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+npm run format:check",
+              },
+            ],
+            "title": "Prettier Check",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+npm test -- --ci",
+              },
+            ],
+            "title": "Unit Tests",
+          },
+        },
+        {
+          "save-cache@1": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-npm-cache-{{ checksum "package-lock.json" }}",
+              },
+              {
+                "paths": "node_modules",
+              },
+            ],
+            "title": "Save npm cache",
+          },
+        },
+      ],
+      "title": "React Native Static Analysis",
+    },
+  },
+}
+`;
