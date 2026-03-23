@@ -265,17 +265,252 @@ Then run the validation command again.
 }
 
 /**
+ * Checks if act (nektos/act) is installed
+ * @returns Promise<boolean>
+ */
+async function isActInstalled(): Promise<boolean> {
+  try {
+    await execAsync('act --version');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Checks if actionlint is installed
+ * @returns Promise<boolean>
+ */
+async function isActionlintInstalled(): Promise<boolean> {
+  try {
+    await execAsync('actionlint --version');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Prints installation instructions for act (nektos/act).
+ * act requires Docker for execution; we intentionally do not auto-install it.
+ */
+function printActInstallInstructions(): void {
+  console.log(`
+📋 To install act (nektos/act) for local GitHub Actions validation:
+
+Option 1 - Homebrew (macOS/Linux):
+  brew install act
+
+Option 2 - Binary (Linux/macOS):
+  curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+
+Option 3 - GitHub releases:
+  https://github.com/nektos/act/releases
+
+Note: act --list mode (used here) does not require Docker.
+Then run the validation command again.
+`);
+}
+
+/**
+ * Attempts to install actionlint via system package manager or direct download.
+ * @param autoInstall Whether to auto-install or just print instructions
+ */
+async function installActionlint(autoInstall: boolean = false): Promise<void> {
+  console.log('🔧 actionlint is not installed. Setting up actionlint...');
+
+  const osType = detectOS();
+
+  if (autoInstall && osType === 'macos') {
+    try {
+      await execAsync('which brew');
+      console.log('📦 Installing actionlint via Homebrew...');
+      await execAsync('brew install actionlint');
+      console.log('✅ actionlint installed successfully!');
+      return;
+    } catch {
+      // fall through to instructions
+    }
+  }
+
+  if (autoInstall && osType === 'linux') {
+    try {
+      const arch = os.arch();
+      const archMap: Record<string, string> = {
+        x64: 'amd64',
+        arm64: 'arm64',
+      };
+      const mappedArch = archMap[arch] || 'amd64';
+      console.log('📦 Downloading actionlint binary...');
+      await execAsync(
+        `bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) latest /usr/local/bin`
+      );
+      void mappedArch; // used in fallback path
+      await execAsync('actionlint --version');
+      console.log('✅ actionlint installed successfully!');
+      return;
+    } catch {
+      // fall through to instructions
+    }
+  }
+
+  console.log(`
+📋 To install actionlint (GitHub Actions static analysis):
+
+Option 1 - Homebrew (macOS/Linux):
+  brew install actionlint
+
+Option 2 - Script (Linux/macOS):
+  bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+
+Option 3 - GitHub releases:
+  https://github.com/rhysd/actionlint/releases
+
+Then run the validation command again.
+`);
+  throw new Error('Please install actionlint and try again');
+}
+
+/**
+ * Validates a GitHub Actions workflow file using act --list (dry validation, no Docker needed)
+ * @param yamlFilePath Path to the workflow file
+ * @returns Promise that resolves if the file is parseable by act
+ * @throws Error if act is not installed or the file is invalid
+ */
+export async function validateWithAct(yamlFilePath: string): Promise<void> {
+  const isInstalled = await isActInstalled();
+
+  if (!isInstalled) {
+    printActInstallInstructions();
+    throw new Error(
+      'act is not installed. Please install it to run GitHub Actions validation.'
+    );
+  }
+
+  try {
+    // act -l (list) validates workflow structure without running jobs or requiring Docker
+    const { stdout } = await execAsync(
+      `act -l --workflows "${yamlFilePath}" 2>&1`
+    );
+    console.log('✅ act validation passed');
+    if (stdout.trim()) {
+      console.log('act output:\n' + stdout.trim());
+    }
+  } catch (error: unknown) {
+    const execError = error as { stdout?: unknown; stderr?: unknown; message?: unknown };
+    const detail =
+      String(execError.stderr ?? execError.stdout ?? execError.message ?? '').trim();
+    throw new Error(`act validation failed${detail ? `\n\n${detail}` : ''}`);
+  }
+}
+
+/**
+ * Validates GitHub Actions YAML content using act (temp file wrapper)
+ * @param yamlContent The workflow YAML content as string
+ * @param tempFileName Optional temp file name
+ * @returns Promise that resolves if validation passes
+ */
+export async function validateGitHubActionsYamlWithAct(
+  yamlContent: string,
+  tempFileName: string = 'temp-github-workflow.yml'
+): Promise<void> {
+  const tempFilePath = path.join(os.tmpdir(), tempFileName);
+  try {
+    fs.writeFileSync(tempFilePath, yamlContent, 'utf8');
+    await validateWithAct(tempFilePath);
+  } finally {
+    try {
+      fs.unlinkSync(tempFilePath);
+    } catch {
+      // ignore cleanup errors
+    }
+  }
+}
+
+/**
+ * Validates a GitHub Actions workflow file using actionlint (static analysis)
+ * @param yamlFilePath Path to the workflow file
+ * @param autoInstall Whether to auto-install actionlint if missing
+ * @returns Promise that resolves if validation passes
+ * @throws Error if actionlint is not installed or finds issues
+ */
+export async function validateWithActionlint(
+  yamlFilePath: string,
+  autoInstall: boolean = true
+): Promise<void> {
+  const isInstalled = await isActionlintInstalled();
+
+  if (!isInstalled) {
+    await installActionlint(autoInstall);
+    const isNowInstalled = await isActionlintInstalled();
+    if (!isNowInstalled) {
+      throw new Error('actionlint installation verification failed');
+    }
+  }
+
+  try {
+    const { stdout, stderr } = await execAsync(
+      `actionlint "${yamlFilePath}"`
+    );
+    console.log('✅ actionlint validation passed');
+    if (stdout.trim()) console.log('actionlint output:', stdout.trim());
+    if (stderr.trim()) console.log('actionlint warnings:', stderr.trim());
+  } catch (error: unknown) {
+    const execError = error as { stdout?: unknown; stderr?: unknown; message?: unknown };
+    const detail =
+      String(execError.stdout ?? execError.stderr ?? execError.message ?? '').trim();
+
+    if (detail.includes('Please install') || detail.includes('not found')) {
+      throw error;
+    }
+
+    let errorMessage = 'actionlint validation failed';
+    if (detail) errorMessage += `\n\nDetailed output:\n${detail}`;
+    throw new Error(errorMessage);
+  }
+}
+
+/**
+ * Validates GitHub Actions YAML content using actionlint (temp file wrapper)
+ * @param yamlContent The workflow YAML content as string
+ * @param tempFileName Optional temp file name
+ * @param autoInstall Whether to auto-install actionlint if missing
+ * @returns Promise that resolves if validation passes
+ */
+export async function validateGitHubActionsYamlWithActionlint(
+  yamlContent: string,
+  tempFileName: string = 'temp-actionlint.yml',
+  autoInstall: boolean = true
+): Promise<void> {
+  const tempFilePath = path.join(os.tmpdir(), tempFileName);
+  try {
+    fs.writeFileSync(tempFilePath, yamlContent, 'utf8');
+    await validateWithActionlint(tempFilePath, autoInstall);
+  } finally {
+    try {
+      fs.unlinkSync(tempFilePath);
+    } catch {
+      // ignore cleanup errors
+    }
+  }
+}
+
+/**
  * Validates that the generated YAML is correctly structured and has no undefined values
  * @param yamlStr The YAML string to validate
  * @param enableBitriseCliValidation Whether to run Bitrise CLI validation (only works in CLI context, not browser)
  * @param enableYamllintValidation Whether to run yamllint validation for non-Bitrise workflows (only works in CLI context, not browser)
+ * @param enableActionlintValidation Whether to run actionlint static analysis for GitHub Actions workflows
+ * @param enableActValidation Whether to run act --list validation for GitHub Actions workflows
  * @returns The same YAML string if valid (or Promise<string> if async validation is enabled)
  * @throws Error if the YAML is invalid
  */
 export function validateGeneratedYaml(
   yamlStr: string,
   enableBitriseCliValidation: boolean = false,
-  enableYamllintValidation: boolean = false
+  enableYamllintValidation: boolean = false,
+  enableActionlintValidation: boolean = false,
+  enableActValidation: boolean = false,
 ): string | Promise<string> {
   try {
     // Try to parse the YAML to make sure it's valid
@@ -285,29 +520,32 @@ export function validateGeneratedYaml(
     validateNoUndefinedValues(parsedYaml);
     validateWorkflowStructure(parsedYaml);
 
-    // If Bitrise CLI validation is enabled and this is a Bitrise config, validate with Bitrise CLI
-    if (
-      enableBitriseCliValidation &&
+    const isBitriseConfig =
       parsedYaml &&
       typeof parsedYaml === 'object' &&
-      'format_version' in parsedYaml
-    ) {
-      // Return async validation for Bitrise configs when CLI validation is enabled
+      'format_version' in parsedYaml;
+
+    // Bitrise path: Bitrise CLI validation
+    if (isBitriseConfig && enableBitriseCliValidation) {
       return validateBitriseYamlAndReturn(yamlStr);
     }
 
-    // If yamllint validation is enabled and this is NOT a Bitrise config, validate with yamllint
-    if (
-      enableYamllintValidation &&
-      parsedYaml &&
-      typeof parsedYaml === 'object' &&
-      !('format_version' in parsedYaml)
-    ) {
-      // Return async validation for non-Bitrise configs (like GitHub Actions) when yamllint validation is enabled
-      return validateYamllintAndReturn(yamlStr);
+    // GitHub Actions path: yamllint → actionlint → act (each optional, chained)
+    if (!isBitriseConfig) {
+      const anyAsyncEnabled =
+        enableYamllintValidation || enableActionlintValidation || enableActValidation;
+
+      if (anyAsyncEnabled) {
+        return validateGitHubActionsAsync(
+          yamlStr,
+          enableYamllintValidation,
+          enableActionlintValidation,
+          enableActValidation
+        );
+      }
     }
 
-    // If validation passes, return the original string (sync)
+    // If all validation passes (or no async validation requested), return the original string
     return yamlStr;
   } catch (error) {
     throw new Error(`Invalid YAML generated: ${(error as Error).message}`);
@@ -315,22 +553,32 @@ export function validateGeneratedYaml(
 }
 
 /**
- * Helper function to validate Bitrise YAML content and return the original string
- * @param yamlStr The YAML string to validate and return
- * @returns Promise<string> The original YAML string if validation passes
+ * Runs the async GitHub Actions validation chain in order:
+ * yamllint → actionlint → act
  */
-async function validateBitriseYamlAndReturn(yamlStr: string): Promise<string> {
-  await validateBitriseYamlContent(yamlStr);
+async function validateGitHubActionsAsync(
+  yamlStr: string,
+  enableYamllint: boolean,
+  enableActionlint: boolean,
+  enableAct: boolean,
+): Promise<string> {
+  if (enableYamllint) {
+    await validateYamlContentWithYamllint(yamlStr, 'temp-gh-yamllint.yml', true, 'relaxed');
+  }
+  if (enableActionlint) {
+    await validateGitHubActionsYamlWithActionlint(yamlStr, 'temp-gh-actionlint.yml', true);
+  }
+  if (enableAct) {
+    await validateGitHubActionsYamlWithAct(yamlStr, 'temp-gh-act.yml');
+  }
   return yamlStr;
 }
 
 /**
- * Helper function to validate YAML content with yamllint and return the original string
- * @param yamlStr The YAML string to validate and return
- * @returns Promise<string> The original YAML string if validation passes
+ * Helper function to validate Bitrise YAML content and return the original string
  */
-async function validateYamllintAndReturn(yamlStr: string): Promise<string> {
-  await validateYamlContentWithYamllint(yamlStr, 'temp.yml', true, 'relaxed');
+async function validateBitriseYamlAndReturn(yamlStr: string): Promise<string> {
+  await validateBitriseYamlContent(yamlStr);
   return yamlStr;
 }
 

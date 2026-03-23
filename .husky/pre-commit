@@ -1,3 +1,4 @@
 #!/bin/sh
-# Run lint and type check before committing
+# Run lint, type check, and tests before committing
 npm run pre-commit
+npm test

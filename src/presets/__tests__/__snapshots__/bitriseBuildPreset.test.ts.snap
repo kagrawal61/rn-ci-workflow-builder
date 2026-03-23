@@ -1,0 +1,488 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildBitriseBuildPipeline output matches snapshot for android debug with yarn 1`] = `
+{
+  "app": {
+    "envs": [
+      {
+        "CI": "true",
+      },
+      {
+        "NODE_OPTIONS": "--max_old_space_size=4096",
+      },
+      {
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "1",
+      },
+    ],
+  },
+  "default_step_lib_source": "https://github.com/bitrise-io/bitrise-steplib.git",
+  "format_version": 13,
+  "meta": {
+    "bitrise.io": {
+      "machine_type_id": "elite",
+      "stack": "linux-docker-android-22.04",
+    },
+  },
+  "project_type": "react-native",
+  "trigger_map": [
+    {
+      "push_branch": "main",
+      "workflow": "rn-android-build",
+    },
+    {
+      "pull_request_target_branch": "main",
+      "workflow": "rn-android-build",
+    },
+  ],
+  "workflows": {
+    "rn-android-build": {
+      "description": "Build React Native Android app",
+      "meta": {
+        "bitrise.io": {
+          "machine_type_id": "elite",
+          "stack": "linux-docker-android-22.04",
+        },
+      },
+      "steps": [
+        {
+          "git-clone@8": {
+            "title": "Git Clone",
+          },
+        },
+        {
+          "nvm@1": {
+            "inputs": [
+              {
+                "node_version": "20",
+              },
+            ],
+            "title": "Setup Node.js 20",
+          },
+        },
+        {
+          "restore-cache@2": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+            ],
+            "title": "Restore yarn cache",
+          },
+        },
+        {
+          "yarn@0": {
+            "inputs": [
+              {
+                "args": "--immutable",
+              },
+            ],
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+# Check for required directories and files
+echo "🔍 Verifying Android project setup..."
+
+if [ ! -d "android" ]; then
+  echo "❌ Error: Android directory not found"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
+  exit 1
+fi
+
+if [ ! -f "android/gradlew" ]; then
+  echo "⚠️ Warning: Gradle wrapper not found at android/gradlew"
+  echo "Build may fail if Gradle wrapper is not properly set up"
+fi
+
+echo "✅ Android environment looks good"
+
+# Make gradlew executable
+chmod +x android/gradlew
+
+echo "🚀 Starting Android build for debug..."
+
+# Building APK
+echo "Using Gradle task: assembleDebug for debug build with APK output format"
+
+cd android
+./gradlew assembleDebug || {
+  echo "❌ Android build failed"
+  exit 1
+}
+
+cd ..
+
+echo "✅ Android build completed successfully"
+
+# Verify the expected outputs
+if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+  echo "✅ APK files generated successfully"
+else
+  echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
+fi",
+              },
+            ],
+            "title": "Build Android App",
+          },
+        },
+        {
+          "deploy-to-bitrise-io@2": {
+            "inputs": [
+              {
+                "notify_user_groups": "everyone",
+              },
+              {
+                "is_enable_public_page": "true",
+              },
+            ],
+            "title": "Deploy to Bitrise.io",
+          },
+        },
+        {
+          "save-cache@1": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+              {
+                "paths": "node_modules",
+              },
+            ],
+            "title": "Save yarn cache",
+          },
+        },
+      ],
+      "title": "Build Android",
+    },
+  },
+}
+`;
+
+exports[`buildBitriseBuildPipeline output matches snapshot for both platforms 1`] = `
+{
+  "app": {
+    "envs": [
+      {
+        "CI": "true",
+      },
+      {
+        "NODE_OPTIONS": "--max_old_space_size=4096",
+      },
+      {
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "1",
+      },
+    ],
+  },
+  "default_step_lib_source": "https://github.com/bitrise-io/bitrise-steplib.git",
+  "format_version": 13,
+  "meta": {
+    "bitrise.io": {
+      "machine_type_id": "g2-m1.8core",
+      "stack": "osx-xcode-15.3.x-ventura",
+    },
+  },
+  "project_type": "react-native",
+  "trigger_map": [
+    {
+      "push_branch": "main",
+      "workflow": "rn-build-all-platforms",
+    },
+    {
+      "pull_request_target_branch": "main",
+      "workflow": "rn-build-all-platforms",
+    },
+  ],
+  "workflows": {
+    "rn-android-build": {
+      "description": "Build React Native Android app",
+      "meta": {
+        "bitrise.io": {
+          "machine_type_id": "elite",
+          "stack": "linux-docker-android-22.04",
+        },
+      },
+      "steps": [
+        {
+          "git-clone@8": {
+            "title": "Git Clone",
+          },
+        },
+        {
+          "nvm@1": {
+            "inputs": [
+              {
+                "node_version": "20",
+              },
+            ],
+            "title": "Setup Node.js 20",
+          },
+        },
+        {
+          "restore-cache@2": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+            ],
+            "title": "Restore yarn cache",
+          },
+        },
+        {
+          "yarn@0": {
+            "inputs": [
+              {
+                "args": "--immutable",
+              },
+            ],
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+# Check for required directories and files
+echo "🔍 Verifying Android project setup..."
+
+if [ ! -d "android" ]; then
+  echo "❌ Error: Android directory not found"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
+  exit 1
+fi
+
+if [ ! -f "android/gradlew" ]; then
+  echo "⚠️ Warning: Gradle wrapper not found at android/gradlew"
+  echo "Build may fail if Gradle wrapper is not properly set up"
+fi
+
+echo "✅ Android environment looks good"
+
+# Make gradlew executable
+chmod +x android/gradlew
+
+echo "🚀 Starting Android build for debug..."
+
+# Building APK
+echo "Using Gradle task: assembleDebug for debug build with APK output format"
+
+cd android
+./gradlew assembleDebug || {
+  echo "❌ Android build failed"
+  exit 1
+}
+
+cd ..
+
+echo "✅ Android build completed successfully"
+
+# Verify the expected outputs
+if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+  echo "✅ APK files generated successfully"
+else
+  echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
+fi",
+              },
+            ],
+            "title": "Build Android App",
+          },
+        },
+        {
+          "deploy-to-bitrise-io@2": {
+            "inputs": [
+              {
+                "notify_user_groups": "everyone",
+              },
+              {
+                "is_enable_public_page": "true",
+              },
+            ],
+            "title": "Deploy to Bitrise.io",
+          },
+        },
+        {
+          "save-cache@1": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+              {
+                "paths": "node_modules",
+              },
+            ],
+            "title": "Save yarn cache",
+          },
+        },
+      ],
+      "title": "Build Android",
+    },
+    "rn-build-all-platforms": {
+      "before_run": [
+        "rn-android-build",
+        "rn-ios-build",
+      ],
+      "description": "Build React Native app for both Android and iOS",
+      "meta": {
+        "bitrise.io": {
+          "machine_type_id": "g2-m1.8core",
+          "stack": "osx-xcode-15.3.x-ventura",
+        },
+      },
+      "steps": [],
+      "title": "Build Both Platforms",
+    },
+    "rn-ios-build": {
+      "description": "Build React Native iOS app",
+      "meta": {
+        "bitrise.io": {
+          "machine_type_id": "g2-m1.8core",
+          "stack": "osx-xcode-15.3.x-ventura",
+        },
+      },
+      "steps": [
+        {
+          "git-clone@8": {
+            "title": "Git Clone",
+          },
+        },
+        {
+          "nvm@1": {
+            "inputs": [
+              {
+                "node_version": "20",
+              },
+            ],
+            "title": "Setup Node.js 20",
+          },
+        },
+        {
+          "restore-cache@2": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+            ],
+            "title": "Restore yarn cache",
+          },
+        },
+        {
+          "yarn@0": {
+            "inputs": [
+              {
+                "args": "--immutable",
+              },
+            ],
+          },
+        },
+        {
+          "cocoapods-install@2": {
+            "inputs": [
+              {
+                "source_root_path": "./ios",
+              },
+            ],
+            "title": "Install CocoaPods",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+# Check for required directories and files
+echo "🔍 Verifying iOS project setup..."
+
+if [ ! -d "ios" ]; then
+  echo "❌ Error: iOS directory not found"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
+  exit 1
+fi
+
+if [ ! -f "ios/Podfile" ]; then
+  echo "⚠️ Warning: Podfile not found"
+  echo "iOS build might fail without a valid Podfile"
+fi
+
+echo "✅ iOS environment looks good"
+
+# Determine the configuration based on variant
+CONFIGURATION="Debug"
+
+echo "🚀 Starting iOS build with configuration: $CONFIGURATION..."
+
+# Extract project name from xcworkspace directory
+WORKSPACE_PATH=$(find ios -name "*.xcworkspace" -type d | head -n 1)
+if [ -z "$WORKSPACE_PATH" ]; then
+  echo "❌ No .xcworkspace found in ios directory"
+  exit 1
+fi
+
+PROJECT_NAME=$(basename "$WORKSPACE_PATH" .xcworkspace)
+echo "Detected project: $PROJECT_NAME"
+
+# Build the iOS project using xcodebuild
+echo "Building iOS project using native xcodebuild commands..."",
+              },
+            ],
+            "title": "Build iOS App",
+          },
+        },
+        {
+          "xcode-archive@4": {
+            "inputs": [
+              {
+                "project_path": "./ios/*.xcworkspace",
+              },
+              {
+                "scheme": "$BITRISE_SCHEME",
+              },
+              {
+                "export_method": "development",
+              },
+            ],
+            "title": "Build iOS",
+          },
+        },
+        {
+          "deploy-to-bitrise-io@2": {
+            "inputs": [
+              {
+                "notify_user_groups": "everyone",
+              },
+              {
+                "is_enable_public_page": "true",
+              },
+            ],
+            "title": "Deploy to Bitrise.io",
+          },
+        },
+        {
+          "save-cache@1": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+              {
+                "paths": "node_modules",
+              },
+            ],
+            "title": "Save yarn cache",
+          },
+        },
+      ],
+      "title": "Build iOS",
+    },
+  },
+}
+`;

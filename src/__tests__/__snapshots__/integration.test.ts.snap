@@ -1,0 +1,962 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Integration: Full Workflow Generation Pipeline Bitrise — Build output structure matches snapshot 1`] = `
+{
+  "app": {
+    "envs": [
+      {
+        "CI": "true",
+      },
+      {
+        "NODE_OPTIONS": "--max_old_space_size=4096",
+      },
+      {
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "1",
+      },
+    ],
+  },
+  "default_step_lib_source": "https://github.com/bitrise-io/bitrise-steplib.git",
+  "format_version": 13,
+  "meta": {
+    "bitrise.io": {
+      "machine_type_id": "elite",
+      "stack": "linux-docker-android-22.04",
+    },
+  },
+  "project_type": "react-native",
+  "trigger_map": [
+    {
+      "push_branch": "main",
+      "workflow": "rn-android-build",
+    },
+    {
+      "pull_request_target_branch": "main",
+      "workflow": "rn-android-build",
+    },
+  ],
+  "workflows": {
+    "rn-android-build": {
+      "description": "Build React Native Android app",
+      "meta": {
+        "bitrise.io": {
+          "machine_type_id": "elite",
+          "stack": "linux-docker-android-22.04",
+        },
+      },
+      "steps": [
+        {
+          "git-clone@8": {
+            "title": "Git Clone",
+          },
+        },
+        {
+          "nvm@1": {
+            "inputs": [
+              {
+                "node_version": "20",
+              },
+            ],
+            "title": "Setup Node.js 20",
+          },
+        },
+        {
+          "restore-cache@2": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+            ],
+            "title": "Restore yarn cache",
+          },
+        },
+        {
+          "yarn@0": {
+            "inputs": [
+              {
+                "args": "--immutable",
+              },
+            ],
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn tsc --noEmit",
+              },
+            ],
+            "title": "TypeScript Check",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn lint",
+              },
+            ],
+            "title": "ESLint",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn test --ci",
+              },
+            ],
+            "title": "Unit Tests",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+# Check for required directories and files
+echo "🔍 Verifying Android project setup..."
+
+if [ ! -d "android" ]; then
+  echo "❌ Error: Android directory not found"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
+  exit 1
+fi
+
+if [ ! -f "android/gradlew" ]; then
+  echo "⚠️ Warning: Gradle wrapper not found at android/gradlew"
+  echo "Build may fail if Gradle wrapper is not properly set up"
+fi
+
+echo "✅ Android environment looks good"
+
+# Make gradlew executable
+chmod +x android/gradlew
+
+echo "🚀 Starting Android build for debug..."
+
+# Building APK
+echo "Using Gradle task: assembleDebug for debug build with APK output format"
+
+cd android
+./gradlew assembleDebug || {
+  echo "❌ Android build failed"
+  exit 1
+}
+
+cd ..
+
+echo "✅ Android build completed successfully"
+
+# Verify the expected outputs
+if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+  echo "✅ APK files generated successfully"
+else
+  echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
+fi",
+              },
+            ],
+            "title": "Build Android App",
+          },
+        },
+        {
+          "deploy-to-bitrise-io@2": {
+            "inputs": [
+              {
+                "notify_user_groups": "everyone",
+              },
+              {
+                "is_enable_public_page": "true",
+              },
+            ],
+            "title": "Deploy to Bitrise.io",
+          },
+        },
+        {
+          "save-cache@1": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+              {
+                "paths": "node_modules",
+              },
+            ],
+            "title": "Save yarn cache",
+          },
+        },
+      ],
+      "title": "Build Android",
+    },
+  },
+}
+`;
+
+exports[`Integration: Full Workflow Generation Pipeline Bitrise — Static Analysis output structure matches snapshot 1`] = `
+{
+  "app": {
+    "envs": [
+      {
+        "CI": "true",
+      },
+      {
+        "NODE_OPTIONS": "--max_old_space_size=4096",
+      },
+      {
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "1",
+      },
+    ],
+  },
+  "default_step_lib_source": "https://github.com/bitrise-io/bitrise-steplib.git",
+  "format_version": 13,
+  "meta": {
+    "bitrise.io": {
+      "machine_type_id": "elite",
+      "stack": "linux-docker-android-22.04",
+    },
+  },
+  "project_type": "react-native",
+  "trigger_map": [
+    {
+      "push_branch": "main",
+      "workflow": "rn-static-analysis",
+    },
+    {
+      "pull_request_target_branch": "main",
+      "workflow": "rn-static-analysis",
+    },
+  ],
+  "workflows": {
+    "rn-static-analysis": {
+      "description": "Run static analysis including TypeScript, ESLint, Prettier, and unit tests",
+      "steps": [
+        {
+          "git-clone@8": {
+            "title": "Git Clone",
+          },
+        },
+        {
+          "nvm@1": {
+            "inputs": [
+              {
+                "node_version": "18",
+              },
+            ],
+            "title": "Setup Node.js 18",
+          },
+        },
+        {
+          "restore-cache@2": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+            ],
+            "title": "Restore yarn cache",
+          },
+        },
+        {
+          "yarn@0": {
+            "inputs": [
+              {
+                "args": "--immutable",
+              },
+            ],
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn tsc --noEmit",
+              },
+            ],
+            "title": "TypeScript Check",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn lint",
+              },
+            ],
+            "title": "ESLint Check",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn format:check",
+              },
+            ],
+            "title": "Prettier Check",
+          },
+        },
+        {
+          "script@1": {
+            "inputs": [
+              {
+                "content": "#!/usr/bin/env bash
+set -euo pipefail
+
+yarn test --ci",
+              },
+            ],
+            "title": "Unit Tests",
+          },
+        },
+        {
+          "save-cache@1": {
+            "inputs": [
+              {
+                "key": "{{ .OS }}-{{ .Arch }}-yarn-cache-{{ checksum "yarn.lock" }}",
+              },
+              {
+                "paths": "node_modules",
+              },
+            ],
+            "title": "Save yarn cache",
+          },
+        },
+      ],
+      "title": "React Native Static Analysis",
+    },
+  },
+}
+`;
+
+exports[`Integration: Full Workflow Generation Pipeline GitHub Actions — Build (Android) output structure matches snapshot 1`] = `
+{
+  "env": {},
+  "jobs": {
+    "build-android": {
+      "name": "Build Android Debug",
+      "needs": [
+        "static_analysis",
+      ],
+      "runs-on": "ubuntu-latest",
+      "steps": [
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v4",
+        },
+        {
+          "name": "Setup Node",
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "cache": "yarn",
+            "node-version": 20,
+          },
+        },
+        {
+          "name": "Install",
+          "run": "yarn install --immutable",
+        },
+        {
+          "id": "android-env-check",
+          "name": "Verify Android Environment",
+          "run": "
+# Check for required directories and files
+echo "🔍 Verifying Android project setup..."
+
+if [ ! -d "android" ]; then
+  echo "❌ Error: Android directory not found"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
+  exit 1
+fi
+
+if [ ! -f "android/gradlew" ]; then
+  echo "⚠️ Warning: Gradle wrapper not found at android/gradlew"
+  echo "Build may fail if Gradle wrapper is not properly set up"
+fi
+
+echo "✅ Android environment looks good"
+",
+        },
+        {
+          "name": "Setup Java",
+          "uses": "actions/setup-java@v3",
+          "with": {
+            "cache": "gradle",
+            "distribution": "temurin",
+            "java-version": "17",
+          },
+        },
+        {
+          "name": "Make Gradlew Executable",
+          "run": "chmod +x android/gradlew",
+        },
+        {
+          "id": "android-build",
+          "name": "Run Android Build",
+          "run": "
+echo "🚀 Starting Android build for debug..."
+
+# Check for .env file and use it if exists
+if [ -f ".env" ]; then
+  echo "✅ Found .env file, will be used for the build"
+else
+  echo "⚠️ No .env file found in project root"
+fi
+
+# Run the build with error capture
+echo "Building Android app using official React Native CLI..."
+
+# Using direct Gradle commands for more reliable builds
+echo "Using Gradle task: assembleDebug for debug build with apk output format"
+
+# Using direct Gradle command
+cd android
+./gradlew assembleDebug || {
+  echo "❌ Android build failed"
+  echo "::error::Android build failed. Check logs for details."
+  exit 1
+}
+cd ..
+
+
+echo "✅ Android build completed successfully"
+
+# Verify the expected outputs based on output type
+if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+  echo "✅ APK files generated successfully"
+else
+  echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
+fi
+",
+        },
+        {
+          "continue-on-error": true,
+          "id": "artifact-upload-android",
+          "if": "success()",
+          "name": "Upload Android Artifact",
+          "uses": "actions/upload-artifact@v4",
+          "with": {
+            "name": "android-debug-apk",
+            "path": "android/app/build/outputs/apk/**/*.apk",
+            "retention-days": 30,
+          },
+        },
+      ],
+    },
+    "static_analysis": {
+      "name": "Run Static Analysis",
+      "runs-on": "ubuntu-latest",
+      "steps": [
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v4",
+        },
+        {
+          "name": "Setup Node",
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "cache": "yarn",
+            "node-version": 20,
+          },
+        },
+        {
+          "name": "Install",
+          "run": "yarn install --immutable",
+        },
+        {
+          "name": "TypeScript",
+          "run": "yarn tsc --noEmit",
+        },
+        {
+          "name": "ESLint",
+          "run": "yarn lint",
+        },
+        {
+          "name": "Prettier",
+          "run": "yarn format:check",
+        },
+        {
+          "name": "Unit tests",
+          "run": "yarn test --ci",
+        },
+      ],
+    },
+  },
+  "name": "Build Pipeline",
+  "on": {
+    "pull_request": {
+      "branches": [
+        "main",
+      ],
+    },
+    "push": {
+      "branches": [
+        "main",
+      ],
+    },
+  },
+}
+`;
+
+exports[`Integration: Full Workflow Generation Pipeline GitHub Actions — Build (Both platforms) output structure matches snapshot 1`] = `
+{
+  "env": {},
+  "jobs": {
+    "build-android": {
+      "name": "Build Android Debug",
+      "needs": [
+        "static_analysis",
+      ],
+      "runs-on": "ubuntu-latest",
+      "steps": [
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v4",
+        },
+        {
+          "name": "Setup Node",
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "cache": "yarn",
+            "node-version": 20,
+          },
+        },
+        {
+          "name": "Install",
+          "run": "yarn install --immutable",
+        },
+        {
+          "id": "android-env-check",
+          "name": "Verify Android Environment",
+          "run": "
+# Check for required directories and files
+echo "🔍 Verifying Android project setup..."
+
+if [ ! -d "android" ]; then
+  echo "❌ Error: Android directory not found"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
+  exit 1
+fi
+
+if [ ! -f "android/gradlew" ]; then
+  echo "⚠️ Warning: Gradle wrapper not found at android/gradlew"
+  echo "Build may fail if Gradle wrapper is not properly set up"
+fi
+
+echo "✅ Android environment looks good"
+",
+        },
+        {
+          "name": "Setup Java",
+          "uses": "actions/setup-java@v3",
+          "with": {
+            "cache": "gradle",
+            "distribution": "temurin",
+            "java-version": "17",
+          },
+        },
+        {
+          "name": "Make Gradlew Executable",
+          "run": "chmod +x android/gradlew",
+        },
+        {
+          "id": "android-build",
+          "name": "Run Android Build",
+          "run": "
+echo "🚀 Starting Android build for debug..."
+
+# Check for .env file and use it if exists
+if [ -f ".env" ]; then
+  echo "✅ Found .env file, will be used for the build"
+else
+  echo "⚠️ No .env file found in project root"
+fi
+
+# Run the build with error capture
+echo "Building Android app using official React Native CLI..."
+
+# Using direct Gradle commands for more reliable builds
+echo "Using Gradle task: assembleDebug for debug build with apk output format"
+
+# Using direct Gradle command
+cd android
+./gradlew assembleDebug || {
+  echo "❌ Android build failed"
+  echo "::error::Android build failed. Check logs for details."
+  exit 1
+}
+cd ..
+
+
+echo "✅ Android build completed successfully"
+
+# Verify the expected outputs based on output type
+if ls android/app/build/outputs/apk/**/*.apk 1> /dev/null 2>&1; then
+  echo "✅ APK files generated successfully"
+else
+  echo "⚠️ Warning: Expected APK files not found. Storage steps may fail."
+fi
+",
+        },
+        {
+          "continue-on-error": true,
+          "id": "artifact-upload-android",
+          "if": "success()",
+          "name": "Upload Android Artifact",
+          "uses": "actions/upload-artifact@v4",
+          "with": {
+            "name": "android-debug-apk",
+            "path": "android/app/build/outputs/apk/**/*.apk",
+            "retention-days": 30,
+          },
+        },
+      ],
+    },
+    "build-ios": {
+      "name": "Build Ios Debug",
+      "needs": [
+        "static_analysis",
+      ],
+      "runs-on": "macos-latest",
+      "steps": [
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v4",
+        },
+        {
+          "name": "Setup Node",
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "cache": "yarn",
+            "node-version": 20,
+          },
+        },
+        {
+          "name": "Install",
+          "run": "yarn install --immutable",
+        },
+        {
+          "id": "ios-env-check",
+          "name": "Verify iOS Environment",
+          "run": "
+# Check for required directories and files
+echo "🔍 Verifying iOS project setup..."
+
+if [ ! -d "ios" ]; then
+  echo "❌ Error: iOS directory not found"
+  echo "Make sure you're running this workflow from the root"
+  echo "of a React Native project"
+  exit 1
+fi
+
+if [ ! -f "ios/Podfile" ]; then
+  echo "❌ Error: Podfile not found"
+  echo "iOS build will likely fail without a valid Podfile"
+  exit 1
+fi
+
+echo "✅ iOS environment looks good"
+",
+        },
+        {
+          "name": "Setup Ruby/CocoaPods",
+          "uses": "ruby/setup-ruby@v1",
+          "with": {
+            "bundler-cache": "true",
+            "ruby-version": "3.0",
+            "working-directory": "ios",
+          },
+        },
+        {
+          "id": "pod-install",
+          "name": "Install CocoaPods",
+          "run": "
+echo "📦 Installing CocoaPods dependencies..."
+cd ios
+pod install || {
+  echo "❌ CocoaPods installation failed"
+  echo "::error::CocoaPods installation failed."
+  echo "Check for valid Podfile and Pod specs."
+  exit 1
+}
+echo "✅ CocoaPods installation successful"
+",
+        },
+        {
+          "id": "ios-build",
+          "name": "Run iOS Build",
+          "run": "
+echo "🚀 Starting iOS build for debug..."
+
+# Check for .env file and use it if exists
+if [ -f ".env" ]; then
+  echo "✅ Found .env file, will be used for the build"
+else
+  echo "⚠️ No .env file found in project root"
+fi
+
+# Run the build with error capture
+echo "Building iOS app using direct Xcode commands..."
+
+# Determine the configuration based on variant
+CONFIG=$(echo "debug" | tr '[:upper:]' '[:lower:]')
+if [ "$CONFIG" == "debug" ]; then
+  CONFIGURATION="Debug"
+else
+  CONFIGURATION="Release"
+fi
+
+echo "Using Xcode build with configuration: $CONFIGURATION"
+
+# Extract project name from xcworkspace directory
+WORKSPACE_PATH=$(find ios -name "*.xcworkspace" -type d | head -n 1)
+if [ -z "$WORKSPACE_PATH" ]; then
+  echo "❌ No .xcworkspace found in ios directory"
+  exit 1
+fi
+
+PROJECT_NAME=$(basename "$WORKSPACE_PATH" .xcworkspace)
+echo "Detected project: $PROJECT_NAME"
+
+# Using direct Xcode command for more reliable builds
+xcodebuild   -workspace "ios/$PROJECT_NAME.xcworkspace"   -scheme "$PROJECT_NAME"   -configuration "$CONFIGURATION"   -derivedDataPath ios/build   -destination 'generic/platform=iOS'   -archivePath "ios/build/$PROJECT_NAME.xcarchive"   archive || {
+    echo "❌ iOS build failed"
+    echo "::error::Xcode build failed. Check logs for details."
+    exit 1
+  }
+
+# Export IPA for distribution
+xcodebuild   -exportArchive   -archivePath "ios/build/$PROJECT_NAME.xcarchive"   -exportPath "ios/build/output"   -exportOptionsPlist "ios/ExportOptions.plist" || {
+    echo "❌ iOS export failed"
+    echo "::warning::Xcode export failed. This might be due to missing ExportOptions.plist file."
+    
+    # Create a basic ExportOptions.plist if it doesn't exist
+    if [ ! -f "ios/ExportOptions.plist" ]; then
+      echo "Creating default ExportOptions.plist file..."
+      cat > ios/ExportOptions.plist << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>$([ "$CONFIG" == "debug" ] && echo "development" || echo "app-store")</string>
+    <key>teamID</key>
+    <string>TEAM_ID</string>
+</dict>
+</plist>
+EOF
+      
+      # Try export again
+      xcodebuild         -exportArchive         -archivePath "ios/build/$PROJECT_NAME.xcarchive"         -exportPath "ios/build/output"         -exportOptionsPlist "ios/ExportOptions.plist" || {
+          echo "❌ iOS export failed again"
+          echo "::error::Xcode export failed even with default ExportOptions.plist. Check logs for details."
+          exit 1
+        }
+    else
+      echo "ExportOptions.plist exists but export failed. Check the file format and content."
+      exit 1
+    fi
+  }
+
+echo "✅ iOS build completed successfully"
+
+# Verify the expected outputs exist
+if ls ios/build/output/*.ipa 1> /dev/null 2>&1; then
+  echo "✅ IPA files generated successfully"
+else
+  echo "⚠️ Warning: Expected IPA files not found. Storage steps may fail."
+fi
+",
+        },
+        {
+          "continue-on-error": true,
+          "id": "artifact-upload-ios",
+          "if": "success()",
+          "name": "Upload iOS Artifact",
+          "uses": "actions/upload-artifact@v4",
+          "with": {
+            "name": "ios-debug-\${{ github.run_id }}",
+            "path": "ios/build/Build/Products/**/*.ipa",
+            "retention-days": 30,
+          },
+        },
+      ],
+    },
+    "static_analysis": {
+      "name": "Run Static Analysis",
+      "runs-on": "ubuntu-latest",
+      "steps": [
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v4",
+        },
+        {
+          "name": "Setup Node",
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "cache": "yarn",
+            "node-version": 20,
+          },
+        },
+        {
+          "name": "Install",
+          "run": "yarn install --immutable",
+        },
+        {
+          "name": "TypeScript",
+          "run": "yarn tsc --noEmit",
+        },
+        {
+          "name": "ESLint",
+          "run": "yarn lint",
+        },
+        {
+          "name": "Prettier",
+          "run": "yarn format:check",
+        },
+        {
+          "name": "Unit tests",
+          "run": "yarn test --ci",
+        },
+      ],
+    },
+  },
+  "name": "Build Pipeline",
+  "on": {
+    "pull_request": {
+      "branches": [
+        "main",
+      ],
+    },
+    "push": {
+      "branches": [
+        "main",
+      ],
+    },
+  },
+}
+`;
+
+exports[`Integration: Full Workflow Generation Pipeline GitHub Actions — Static Analysis output structure matches snapshot 1`] = `
+{
+  "env": {
+    "GITHUB_TOKEN": "\${{ secrets.GITHUB_TOKEN }}",
+  },
+  "jobs": {
+    "static_analysis": {
+      "name": "Run Static Analysis",
+      "runs-on": "ubuntu-latest",
+      "steps": [
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v4",
+        },
+        {
+          "name": "Setup Node",
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "cache": "yarn",
+            "node-version": 20,
+          },
+        },
+        {
+          "name": "Install",
+          "run": "yarn install --immutable",
+        },
+        {
+          "name": "TypeScript",
+          "run": "yarn tsc --noEmit",
+        },
+        {
+          "name": "ESLint",
+          "run": "yarn lint",
+        },
+        {
+          "name": "Prettier",
+          "run": "yarn format:check",
+        },
+        {
+          "name": "Unit tests",
+          "run": "yarn test --ci",
+        },
+        {
+          "id": "static-analysis-source",
+          "name": "Determine PR Status",
+          "run": "
+# Determine if this is a PR or a direct push
+EVENT_NAME="\${{ github.event_name }}"
+if [[ "$EVENT_NAME" == "pull_request" ]] || [[ "$EVENT_NAME" == "pull_request_target" ]]; then
+  # This is a PR - set output flag
+  echo "is_pr=true" >> $GITHUB_OUTPUT
+  echo "📌 Running static analysis on PR #\${{ github.event.pull_request.number }} from branch \${{ github.head_ref }}"
+else
+  # This is a direct push - set output flag
+  echo "is_pr=false" >> $GITHUB_OUTPUT
+  echo "📌 Running static analysis on branch \${{ github.ref_name }}"
+fi
+",
+        },
+        {
+          "env": {
+            "GH_TOKEN": "\${{ secrets.GITHUB_TOKEN }}",
+          },
+          "if": "steps.static-analysis-source.outputs.is_pr == 'true'",
+          "name": "Add Static Analysis PR Comment",
+          "run": "# Create comment message
+MESSAGE="## 📊 Static Analysis Results
+
+\${{ job.status == 'success' && '✅ All static analysis checks passed!' || '❌ Some static analysis checks failed!' }}
+
+### Build Information
+- **Repository**: \${{ github.repository }}
+- **Branch**: \${{ github.head_ref }}
+- **Commit**: \${{ github.sha }}
+- **Workflow**: \${{ github.workflow }}
+
+> Static analysis completed via React Native CI Workflow Builder"
+
+# Check if comment already exists and update it
+PR_NUM="\${{ github.event.number }}"
+SEARCH_TEXT="Static Analysis Results"
+echo "Creating new comment..."
+gh pr comment $PR_NUM --body "$MESSAGE"
+",
+        },
+      ],
+    },
+  },
+  "name": "Static Analysis",
+  "on": {
+    "pull_request": {
+      "branches": [
+        "main",
+      ],
+    },
+    "push": {
+      "branches": [
+        "main",
+      ],
+    },
+  },
+}
+`;
