@@ -79,15 +79,14 @@ function generateStaticAnalysisSecretsSummary(
 }
 
 /**
- * Generate a workflow YAML from config
- * @param cfg The workflow configuration
- * @returns Workflow YAML as string
+ * Shared core: validate config, run builder, post-process YAML, compute secrets summary.
+ * Returns the raw (unvalidated) YAML string and secrets summary so callers can apply
+ * their own validation strategy (sync for web, async for CLI).
  */
-export function generateWorkflow(cfg: WorkflowConfig): {
-  yaml: string;
-  secretsSummary?: string;
+function buildWorkflowCore(cfg: WorkflowConfig): {
+  yamlStr: string;
+  secretsSummary: string | undefined;
 } {
-  // Validate the config before proceeding
   const validatedConfig = validateConfig(cfg);
 
   const options: WorkflowOptions = validatedConfig.options ?? {};
@@ -101,20 +100,13 @@ export function generateWorkflow(cfg: WorkflowConfig): {
   }
 
   const obj = builder(options);
-  // Disable YAML anchors/references which GitHub Actions doesn't support
   let yamlStr = yaml.dump(obj, {
     lineWidth: 120,
-    noRefs: true, // Prevent the creation of anchors and references
+    noRefs: true,
   });
   yamlStr = injectSecrets(yamlStr);
-
-  // Add spacing after each step for better readability
   yamlStr = addStepSpacing(yamlStr);
 
-  // Validate the generated YAML (sync - for web app compatibility)
-  const validatedYaml = validateGeneratedYaml(yamlStr, false) as string;
-
-  // Generate secrets summary for build preset and static-analysis with notifications
   let secretsSummary: string | undefined;
   if (validatedConfig.kind === 'build' && validatedConfig.options) {
     secretsSummary = generateSecretsSummary(
@@ -129,10 +121,21 @@ export function generateWorkflow(cfg: WorkflowConfig): {
     );
   }
 
-  return {
-    yaml: validatedYaml,
-    secretsSummary,
-  };
+  return { yamlStr, secretsSummary };
+}
+
+/**
+ * Generate a workflow YAML from config
+ * @param cfg The workflow configuration
+ * @returns Workflow YAML as string
+ */
+export function generateWorkflow(cfg: WorkflowConfig): {
+  yaml: string;
+  secretsSummary?: string;
+} {
+  const { yamlStr, secretsSummary } = buildWorkflowCore(cfg);
+  const validatedYaml = validateGeneratedYaml(yamlStr, false) as string;
+  return { yaml: validatedYaml, secretsSummary };
 }
 
 /**
@@ -144,34 +147,11 @@ export function generateWorkflow(cfg: WorkflowConfig): {
 export async function generateWorkflowForCli(
   cfg: WorkflowConfig
 ): Promise<{ yaml: string; secretsSummary?: string }> {
-  // Validate the config before proceeding
-  const validatedConfig = validateConfig(cfg);
-
-  const options: WorkflowOptions = validatedConfig.options ?? {};
-  const builder = builders[validatedConfig.kind];
-
-  if (!builder) {
-    throw new Error(
-      `Unsupported pipeline kind: ${validatedConfig.kind}. ` +
-        `Available presets: ${getAvailablePresets().join(', ')}`
-    );
-  }
-
-  const obj = builder(options);
-  // Disable YAML anchors/references which GitHub Actions doesn't support
-  let yamlStr = yaml.dump(obj, {
-    lineWidth: 120,
-    noRefs: true, // Prevent the creation of anchors and references
-  });
-  yamlStr = injectSecrets(yamlStr);
-
-  // Add spacing after each step for better readability
-  yamlStr = addStepSpacing(yamlStr);
+  const { yamlStr, secretsSummary } = buildWorkflowCore(cfg);
 
   // Validate the generated YAML with CLI-specific enhancements
   // This will automatically run Bitrise CLI validation for Bitrise configs
   // and yamllint validation for other platforms (like GitHub Actions)
-  // Skip validation for tests to avoid yamllint errors
   let validatedYaml = yamlStr;
   try {
     const validationResult = validateGeneratedYaml(yamlStr, true, true);
@@ -183,25 +163,7 @@ export async function generateWorkflowForCli(
     console.warn('Skipping YAML validation:', e);
   }
 
-  // Generate secrets summary for build preset and static-analysis with notifications
-  let secretsSummary: string | undefined;
-  if (validatedConfig.kind === 'build' && validatedConfig.options) {
-    secretsSummary = generateSecretsSummary(
-      (validatedConfig.options as WorkflowOptions & { build?: BuildOptions })
-        .build || ({} as BuildOptions)
-    );
-  } else if (validatedConfig.kind === 'static-analysis') {
-    // Note: the validator currently strips `staticAnalysis` from options (bug H).
-    // Read from the original cfg to ensure notification settings are visible.
-    secretsSummary = generateStaticAnalysisSecretsSummary(
-      cfg.options?.staticAnalysis
-    );
-  }
-
-  return {
-    yaml: validatedYaml,
-    secretsSummary,
-  };
+  return { yaml: validatedYaml, secretsSummary };
 }
 
 /**
