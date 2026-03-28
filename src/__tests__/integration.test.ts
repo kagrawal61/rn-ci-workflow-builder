@@ -424,6 +424,69 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     });
   });
 
+  // ─── Secrets summary: static-analysis (bug 1.5) ──────────────────────────
+
+  describe('Secrets summary — Static Analysis (bug 1.5)', () => {
+    it('returns a non-undefined secretsSummary containing SLACK_WEBHOOK when notification is slack', () => {
+      const { secretsSummary } = generateWorkflow({
+        kind: 'static-analysis',
+        options: {
+          platform: 'github',
+          staticAnalysis: { notification: 'slack' },
+        },
+      });
+
+      expect(secretsSummary).toBeDefined();
+      expect(secretsSummary).toContain('SLACK_WEBHOOK');
+    });
+
+    it('returns a non-undefined secretsSummary containing SLACK_WEBHOOK when notification is both', () => {
+      const { secretsSummary } = generateWorkflow({
+        kind: 'static-analysis',
+        options: {
+          platform: 'github',
+          staticAnalysis: { notification: 'both' },
+        },
+      });
+
+      expect(secretsSummary).toBeDefined();
+      expect(secretsSummary).toContain('SLACK_WEBHOOK');
+    });
+
+    it('returns undefined secretsSummary when notification is none', () => {
+      const { secretsSummary } = generateWorkflow({
+        kind: 'static-analysis',
+        options: {
+          platform: 'github',
+          staticAnalysis: { notification: 'none' },
+        },
+      });
+
+      expect(secretsSummary).toBeUndefined();
+    });
+
+    it('returns undefined secretsSummary when no staticAnalysis options are provided', () => {
+      const { secretsSummary } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'github' },
+      });
+
+      expect(secretsSummary).toBeUndefined();
+    });
+
+    it('returns undefined secretsSummary when notification is pr-comment', () => {
+      const { secretsSummary } = generateWorkflow({
+        kind: 'static-analysis',
+        options: {
+          platform: 'github',
+          staticAnalysis: { notification: 'pr-comment' },
+        },
+      });
+
+      expect(secretsSummary).toBeUndefined();
+    });
+  });
+
   // ─── Error cases ──────────────────────────────────────────────────────────
 
   describe('Error handling', () => {

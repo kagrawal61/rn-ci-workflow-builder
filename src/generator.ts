@@ -4,7 +4,7 @@ import path from 'path';
 
 import { injectSecrets } from './helpers';
 import { generateSecretsSummary } from './helpers/secretsManager';
-import { BuildOptions } from './presets/types';
+import { BuildOptions, StaticAnalysisOptions } from './presets/types';
 import {
   BitriseConfig,
   GitHubWorkflow,
@@ -109,6 +109,26 @@ export function clearBuilders(): void {
 }
 
 /**
+ * Generate a secrets summary for a static-analysis config.
+ * Returns a summary only when Slack notifications are configured
+ * (notification === 'slack' or 'both'), since those require SLACK_WEBHOOK_URL.
+ * Returns undefined when no secrets are needed.
+ */
+function generateStaticAnalysisSecretsSummary(
+  staticAnalysis: StaticAnalysisOptions | undefined
+): string | undefined {
+  const notification = staticAnalysis?.notification;
+  if (notification !== 'slack' && notification !== 'both') {
+    return undefined;
+  }
+  // Build a synthetic BuildOptions so we can reuse generateSecretsSummary.
+  // Only the notification field is relevant — storage and platform secrets
+  // do not apply to the static-analysis preset.
+  const syntheticBuildOptions: BuildOptions = { notification };
+  return generateSecretsSummary(syntheticBuildOptions);
+}
+
+/**
  * Generate a workflow YAML from config
  * @param cfg The workflow configuration
  * @returns Workflow YAML as string
@@ -144,12 +164,18 @@ export function generateWorkflow(cfg: WorkflowConfig): {
   // Validate the generated YAML (sync - for web app compatibility)
   const validatedYaml = validateGeneratedYaml(yamlStr, false) as string;
 
-  // Generate secrets summary for build preset
+  // Generate secrets summary for build preset and static-analysis with notifications
   let secretsSummary: string | undefined;
   if (validatedConfig.kind === 'build' && validatedConfig.options) {
     secretsSummary = generateSecretsSummary(
       (validatedConfig.options as WorkflowOptions & { build?: BuildOptions })
         .build || ({} as BuildOptions)
+    );
+  } else if (validatedConfig.kind === 'static-analysis') {
+    // Note: the validator currently strips `staticAnalysis` from options (bug H).
+    // Read from the original cfg to ensure notification settings are visible.
+    secretsSummary = generateStaticAnalysisSecretsSummary(
+      cfg.options?.staticAnalysis
     );
   }
 
@@ -207,12 +233,18 @@ export async function generateWorkflowForCli(
     console.warn('Skipping YAML validation:', e);
   }
 
-  // Generate secrets summary for build preset
+  // Generate secrets summary for build preset and static-analysis with notifications
   let secretsSummary: string | undefined;
   if (validatedConfig.kind === 'build' && validatedConfig.options) {
     secretsSummary = generateSecretsSummary(
       (validatedConfig.options as WorkflowOptions & { build?: BuildOptions })
         .build || ({} as BuildOptions)
+    );
+  } else if (validatedConfig.kind === 'static-analysis') {
+    // Note: the validator currently strips `staticAnalysis` from options (bug H).
+    // Read from the original cfg to ensure notification settings are visible.
+    secretsSummary = generateStaticAnalysisSecretsSummary(
+      cfg.options?.staticAnalysis
     );
   }
 
