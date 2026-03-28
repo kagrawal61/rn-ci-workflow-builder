@@ -27,15 +27,15 @@ const storageHelpers = {
   createExpoStorageSteps(build: BuildOptions): GitHubStep[] {
     const outputType = build.androidOutputType || 'apk';
     const platform = build.platform || 'android';
-    
+
     // Build artifact paths
     const artifactPaths = [];
-    
+
     // Add APK path
     if (outputType === 'apk' || outputType === 'both') {
       artifactPaths.push(`./android-builds/app-production.apk`);
     }
-    
+
     // Add AAB path
     if (outputType === 'aab' || outputType === 'both') {
       artifactPaths.push(`./android-builds/app-production.aab`);
@@ -59,14 +59,16 @@ const storageHelpers = {
     } else if (build.storage === 'firebase') {
       // Filter only APK paths for Firebase (doesn't support AAB)
       const apkPaths = artifactPaths.filter(path => path.endsWith('.apk'));
-      
+
       if (apkPaths.length === 0) {
-        return [{
-          name: 'Firebase Upload - Skipped',
-          run: 'echo "No APK files found for Firebase upload. Only APK files are supported by Firebase App Distribution."',
-        }];
+        return [
+          {
+            name: 'Firebase Upload - Skipped',
+            run: 'echo "No APK files found for Firebase upload. Only APK files are supported by Firebase App Distribution."',
+          },
+        ];
       }
-      
+
       return [
         {
           name: 'Upload to Firebase App Distribution',
@@ -75,9 +77,11 @@ const storageHelpers = {
           uses: 'wzieba/Firebase-Distribution-Github-Action@v1.4.0',
           with: {
             appId: '${{ secrets.FIREBASE_APP_ID_ANDROID }}',
-            serviceCredentialsFileContent: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
+            serviceCredentialsFileContent:
+              '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
             file: apkPaths[0],
-            releaseNotes: 'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}\nBuild: ${{ github.run_id }}',
+            releaseNotes:
+              'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}\nBuild: ${{ github.run_id }}',
             groups: "${{ secrets.FIREBASE_TEST_GROUPS || 'testers' }}",
           },
         },
@@ -146,7 +150,7 @@ const storageHelpers = {
         },
       ];
     }
-    
+
     // Default to empty array if no storage solution matches
     return [];
   },

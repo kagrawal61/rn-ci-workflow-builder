@@ -11,7 +11,10 @@ import {
 import { useTheme } from 'next-themes';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
-import { trackWorkflowCopied, trackWorkflowDownloaded } from '@/utils/analytics';
+import {
+  trackWorkflowCopied,
+  trackWorkflowDownloaded,
+} from '@/utils/analytics';
 
 interface YamlPreviewProps {
   yamlContent: string;
@@ -33,22 +36,23 @@ export function YamlPreview({
     setMounted(true);
   }, []);
 
-
   const copyToClipboard = () => {
     navigator.clipboard.writeText(yamlContent).then(
       () => {
         setCopied(true);
         toast.success('YAML copied to clipboard!');
-        
+
         // Track copy event
         const platform = fileName.includes('bitrise') ? 'bitrise' : 'github';
-        const preset = fileName.toLowerCase().includes('build') ? 'build' : 'static-analysis';
+        const preset = fileName.toLowerCase().includes('build')
+          ? 'build'
+          : 'static-analysis';
         trackWorkflowCopied({
           platform,
           preset,
-          fileName
+          fileName,
         });
-        
+
         setTimeout(() => setCopied(false), 2000);
       },
       err => {
@@ -70,14 +74,16 @@ export function YamlPreview({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast.success(`Downloaded ${fileName}`);
-    
+
     // Track download event
     const platform = fileName.includes('bitrise') ? 'bitrise' : 'github';
-    const preset = fileName.toLowerCase().includes('build') ? 'build' : 'static-analysis';
+    const preset = fileName.toLowerCase().includes('build')
+      ? 'build'
+      : 'static-analysis';
     trackWorkflowDownloaded({
       platform,
       preset,
-      fileName
+      fileName,
     });
   };
 

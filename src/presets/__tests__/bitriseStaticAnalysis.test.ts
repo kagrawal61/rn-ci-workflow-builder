@@ -372,8 +372,8 @@ describe('buildBitriseStaticAnalysisPipeline', () => {
         ...defaultOptions,
         triggers: { push: { branches: ['develop', 'main'] } },
       });
-      const branches = result.trigger_map!
-        .filter((t: any) => 'push_branch' in t)
+      const branches = result
+        .trigger_map!.filter((t: any) => 'push_branch' in t)
         .map((t: any) => t.push_branch);
 
       expect(branches).toContain('develop');

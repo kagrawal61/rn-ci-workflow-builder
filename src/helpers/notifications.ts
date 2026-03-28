@@ -264,51 +264,55 @@ function createSlackNotificationStep(
 function createStaticAnalysisSlackNotificationStep(): GitHubStep {
   const withConfig: Record<string, string> = {
     webhook: '${{ secrets.SLACK_WEBHOOK_URL }}',
-    payload: JSON.stringify({
-      text: '*Static Analysis Results*: ${{ job.status }}',
-      blocks: [
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: '📊 Static Analysis Results',
-            emoji: true,
-          },
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: "${{ job.status == 'success' && ':white_check_mark: All checks passed!' || ':x: Some checks failed!' }}\\n*Repository:* ${{ github.repository }}\\n*Branch:* ${{ github.head_ref || github.ref_name }}\\n*Commit:* ${{ github.sha }}",
-          },
-        },
-        {
-          type: 'actions',
-          elements: [
-            {
-              type: 'button',
-              text: {
-                type: 'plain_text',
-                text: 'View Workflow',
-                emoji: true,
-              },
-              url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
-              action_id: 'view_workflow',
+    payload: JSON.stringify(
+      {
+        text: '*Static Analysis Results*: ${{ job.status }}',
+        blocks: [
+          {
+            type: 'header',
+            text: {
+              type: 'plain_text',
+              text: '📊 Static Analysis Results',
+              emoji: true,
             },
-            {
-              type: 'button',
-              text: {
-                type: 'plain_text',
-                text: 'View Commit',
-                emoji: true,
-              },
-              url: '${{ github.event.pull_request.html_url || github.event.head_commit.url }}',
-              action_id: 'view_commit',
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: "${{ job.status == 'success' && ':white_check_mark: All checks passed!' || ':x: Some checks failed!' }}\\n*Repository:* ${{ github.repository }}\\n*Branch:* ${{ github.head_ref || github.ref_name }}\\n*Commit:* ${{ github.sha }}",
             },
-          ],
-        },
-      ],
-    }, null, 2),
+          },
+          {
+            type: 'actions',
+            elements: [
+              {
+                type: 'button',
+                text: {
+                  type: 'plain_text',
+                  text: 'View Workflow',
+                  emoji: true,
+                },
+                url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
+                action_id: 'view_workflow',
+              },
+              {
+                type: 'button',
+                text: {
+                  type: 'plain_text',
+                  text: 'View Commit',
+                  emoji: true,
+                },
+                url: '${{ github.event.pull_request.html_url || github.event.head_commit.url }}',
+                action_id: 'view_commit',
+              },
+            ],
+          },
+        ],
+      },
+      null,
+      2
+    ),
   };
 
   // Add webhook-type property using bracket notation to avoid TypeScript issues

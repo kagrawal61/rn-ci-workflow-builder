@@ -32,7 +32,7 @@ export function WorkflowBuilder() {
 
       // Platform selection
       platform: 'github',
-      
+
       // Framework selection
       framework: 'expo',
 
@@ -89,7 +89,7 @@ export function WorkflowBuilder() {
       typescriptCheck: true,
       eslintCheck: true,
       prettierCheck: true,
-      unitTestsCheck: true
+      unitTestsCheck: true,
     };
   });
 
@@ -156,18 +156,19 @@ export function WorkflowBuilder() {
       setYamlContent(result.yaml);
       setSecretsSummary(result.secretsSummary);
       setActiveTab('preview');
-      
+
       // Track workflow generation event
       trackWorkflowGenerated({
         platform: formValues.platform || 'github',
         preset: formValues.preset || 'build',
         framework: formValues.framework || 'expo',
         buildPlatform: formValues.buildPlatform,
-        buildVariant: formValues.buildVariant
+        buildVariant: formValues.buildVariant,
       });
-      
+
       // Scroll to the top of the workflow builder section when switching tabs
-      const workflowBuilderSection = document.getElementById('workflow-builder');
+      const workflowBuilderSection =
+        document.getElementById('workflow-builder');
       if (workflowBuilderSection) {
         workflowBuilderSection.scrollIntoView({ behavior: 'smooth' });
       }
@@ -197,7 +198,7 @@ export function WorkflowBuilder() {
 
         <Tabs
           value={activeTab}
-          onValueChange={(tab) => {
+          onValueChange={tab => {
             setActiveTab(tab);
             // Track tab change
             trackTabChanged({ tab });
@@ -254,9 +255,12 @@ export function WorkflowBuilder() {
                 onClick={() => {
                   setActiveTab('configure');
                   // Scroll to the top of the workflow builder section when switching tabs
-                  const workflowBuilderSection = document.getElementById('workflow-builder');
+                  const workflowBuilderSection =
+                    document.getElementById('workflow-builder');
                   if (workflowBuilderSection) {
-                    workflowBuilderSection.scrollIntoView({ behavior: 'smooth' });
+                    workflowBuilderSection.scrollIntoView({
+                      behavior: 'smooth',
+                    });
                   }
                 }}
                 className="flex items-center gap-2"

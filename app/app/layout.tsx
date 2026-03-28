@@ -26,9 +26,7 @@ export const metadata: Metadata = {
       { url: '/logo.svg', sizes: '192x192', type: 'image/svg' },
       { url: '/logo.svg', sizes: '512x512', type: 'image/svg' },
     ],
-    apple: [
-      { url: '/logo.svg' },
-    ],
+    apple: [{ url: '/logo.svg' }],
   },
 };
 
@@ -46,7 +44,6 @@ export default function RootLayout({
           data-website-id="dc5f47fa-eb10-466c-908e-64a6bd20e5d4"
           strategy="afterInteractive"
         />
-        
       </head>
       <body
         className={cn(

@@ -22,15 +22,18 @@ interface StorageSecretDocs {
 /**
  * Framework-specific secrets
  */
-export const FRAMEWORK_SECRET_DOCS: Record<string, {
-  name: string;
-  description: string;
-  requiredSecrets: Array<{
+export const FRAMEWORK_SECRET_DOCS: Record<
+  string,
+  {
     name: string;
     description: string;
-  }>;
-}> = {
-  'expo': {
+    requiredSecrets: Array<{
+      name: string;
+      description: string;
+    }>;
+  }
+> = {
+  expo: {
     name: 'Expo',
     description: 'Expo framework using EAS CLI for builds',
     requiredSecrets: [

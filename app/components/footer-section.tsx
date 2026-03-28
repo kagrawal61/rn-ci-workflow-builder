@@ -1,7 +1,7 @@
 'use client';
 
-import { PROJECT_NAME } from "@/config/constants";
-import { Github, HeartHandshake, TwitterIcon } from "lucide-react";
+import { PROJECT_NAME } from '@/config/constants';
+import { Github, HeartHandshake, TwitterIcon } from 'lucide-react';
 
 export function FooterSection() {
   return (
@@ -11,29 +11,29 @@ export function FooterSection() {
           &copy; {new Date().getFullYear()} {PROJECT_NAME}. All rights reserved.
         </p>
         <div className="flex items-center gap-4">
-          <a 
+          <a
             href="https://github.com/kagrawal61/rn-ci-workflow-builder"
             target="_blank"
-            rel="noopener noreferrer" 
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
           >
             <Github className="h-4 w-4" />
             <span>GitHub</span>
           </a>
-          <a 
+          <a
             href="https://twitter.com/KushalAgrawal14"
             target="_blank"
-            rel="noopener noreferrer" 
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
           >
             <TwitterIcon className="h-4 w-4" />
             <span>@KushalAgrawal14</span>
           </a>
-          <a 
+          <a
             href="https://twitter.com/NikhilVDev"
             target="_blank"
-            rel="noopener noreferrer" 
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
           >
             <TwitterIcon className="h-4 w-4" />
             <span>@NikhilVDev</span>

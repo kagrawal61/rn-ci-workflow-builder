@@ -4,7 +4,11 @@
  */
 import * as yaml from 'js-yaml';
 
-import { addStepSpacing, injectSecrets, validateWorkflowConfig } from '../../src/helpers';
+import {
+  addStepSpacing,
+  injectSecrets,
+  validateWorkflowConfig,
+} from '../../src/helpers';
 import { generateSecretsSummary } from '../../src/helpers/secretsManager';
 import { buildBitriseBuildPipeline } from '../../src/presets/bitriseBuildPreset';
 import { buildBitriseStaticAnalysisPipeline } from '../../src/presets/bitriseStaticAnalysis';
@@ -15,16 +19,14 @@ import {
   WorkflowConfig,
   WorkflowOptions,
   BitriseConfig,
-  GitHubWorkflow
+  GitHubWorkflow,
 } from '../../src/types';
 
 // Map of pipeline builders (copied from generator.ts but without Node.js dependencies)
 // Support both GitHub Actions and Bitrise configurations
 const builders: Record<
   string,
-  (
-    opts: WorkflowOptions
-  ) => GitHubWorkflow | BitriseConfig
+  (opts: WorkflowOptions) => GitHubWorkflow | BitriseConfig
 > = {};
 
 /**
@@ -34,9 +36,7 @@ const builders: Record<
  */
 export function registerBuilder(
   kind: string,
-  builder: (
-    opts: WorkflowOptions
-  ) => GitHubWorkflow | BitriseConfig
+  builder: (opts: WorkflowOptions) => GitHubWorkflow | BitriseConfig
 ): void {
   builders[kind] = builder;
 }
@@ -93,10 +93,14 @@ export function generateWorkflow(cfg: WorkflowConfig): {
     }
   } else if (validatedConfig.kind === 'static-analysis') {
     // Validator strips staticAnalysis from options (bug H) — read from original cfg
-    const notification = (cfg.options?.staticAnalysis as StaticAnalysisOptions | undefined)?.notification;
+    const notification = (
+      cfg.options?.staticAnalysis as StaticAnalysisOptions | undefined
+    )?.notification;
     if (notification === 'slack' || notification === 'both') {
       try {
-        secretsSummary = generateSecretsSummary({ notification } as BuildOptions);
+        secretsSummary = generateSecretsSummary({
+          notification,
+        } as BuildOptions);
       } catch (err) {
         console.error('Error generating secrets summary:', err);
       }

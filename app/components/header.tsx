@@ -1,12 +1,12 @@
 'use client';
 
-import { PROJECT_NAME } from "@/config/constants";
-import { BookText, Star } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { IssueReportDialog } from "./issue-report-dialog";
-import { ThemeToggle } from "./theme-toggle";
-import { Button } from "./ui/button";
+import { PROJECT_NAME } from '@/config/constants';
+import { BookText, Star } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { IssueReportDialog } from './issue-report-dialog';
+import { ThemeToggle } from './theme-toggle';
+import { Button } from './ui/button';
 
 export function Header() {
   return (
@@ -54,11 +54,11 @@ export function Header() {
               href="https://www.producthunt.com/products/react-native-ci-cd-workflow-builder?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-react&#0045;native&#0045;ci&#0045;cd&#0045;workflow&#0045;builder"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:flex items-center"
+              className="hidden items-center md:flex"
             >
-              <Image 
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=992216&theme=light&t=1752416047378" 
-                alt="React Native CI/CD Workflow Builder - Transform weeks of CI/CD setup into minutes | Product Hunt" 
+              <Image
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=992216&theme=light&t=1752416047378"
+                alt="React Native CI/CD Workflow Builder - Transform weeks of CI/CD setup into minutes | Product Hunt"
                 width={156}
                 height={16}
                 priority

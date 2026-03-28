@@ -150,14 +150,16 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
   // Handle framework-specific secrets first (always show if present)
   if (buildOptions.framework) {
     const docsResult = getRequiredSecretsDocumentation(buildOptions);
-    const frameworkSpecificSecrets = docsResult.framework?.requiredSecrets || [];
-    
+    const frameworkSpecificSecrets =
+      docsResult.framework?.requiredSecrets || [];
+
     if (frameworkSpecificSecrets.length > 0) {
-      const frameworkName = docsResult.framework?.name || buildOptions.framework;
+      const frameworkName =
+        docsResult.framework?.name || buildOptions.framework;
       summary += `Framework (${frameworkName})\n\n`;
-      
+
       // Get all framework secrets from the context
-      for (const secret of secrets.filter(s => 
+      for (const secret of secrets.filter(s =>
         frameworkSpecificSecrets.some(fs => fs.name === s.name)
       )) {
         summary += `- \`${secret.name}\`: ${secret.description}\n`;
@@ -169,13 +171,14 @@ export function generateSecretsSummary(buildOptions: BuildOptions): string {
   // Handle platform-specific secrets that aren't framework-related
   if (groups.platform.length > 0) {
     const docsResult = getRequiredSecretsDocumentation(buildOptions);
-    const frameworkSpecificSecrets = docsResult.framework?.requiredSecrets || [];
-    
+    const frameworkSpecificSecrets =
+      docsResult.framework?.requiredSecrets || [];
+
     // Filter secrets to get only platform-specific (not framework-specific)
     const platformOnlySecrets = groups.platform.filter(
       s => !frameworkSpecificSecrets.some(fs => fs.name === s.name)
     );
-    
+
     // Display platform-specific secrets
     if (platformOnlySecrets.length > 0) {
       summary += `Platform (${buildOptions.platform})\n\n`;
@@ -239,7 +242,7 @@ export function getSecretRequirementMap() {
     framework: {
       expo: ['EXPO_TOKEN'],
       'react-native-cli': [],
-    }
+    },
   };
 }
 

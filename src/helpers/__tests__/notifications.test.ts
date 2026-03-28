@@ -349,18 +349,21 @@ describe('Notification Helpers', () => {
 
   describe('createStaticAnalysisNotificationSteps', () => {
     it('should return empty array when notification is none', () => {
-      const steps = notificationHelpers.createStaticAnalysisNotificationSteps('none');
+      const steps =
+        notificationHelpers.createStaticAnalysisNotificationSteps('none');
       expect(steps).toHaveLength(0);
     });
 
     it('should return empty array when notification is pr-comment (no slack step)', () => {
-      const steps = notificationHelpers.createStaticAnalysisNotificationSteps('pr-comment');
+      const steps =
+        notificationHelpers.createStaticAnalysisNotificationSteps('pr-comment');
       const slackStep = steps.find(s => s.name === 'Send Slack Notification');
       expect(slackStep).toBeUndefined();
     });
 
     it('should include a Slack step when notification is slack', () => {
-      const steps = notificationHelpers.createStaticAnalysisNotificationSteps('slack');
+      const steps =
+        notificationHelpers.createStaticAnalysisNotificationSteps('slack');
       const slackStep = steps.find(s => s.name === 'Send Slack Notification');
       expect(slackStep).toBeDefined();
       expect(slackStep?.uses).toBe('slackapi/slack-github-action@v2.1.0');
@@ -369,7 +372,8 @@ describe('Notification Helpers', () => {
     });
 
     it('should emit a pretty-printed (multi-line) JSON payload for Slack', () => {
-      const steps = notificationHelpers.createStaticAnalysisNotificationSteps('slack');
+      const steps =
+        notificationHelpers.createStaticAnalysisNotificationSteps('slack');
       const slackStep = steps.find(s => s.name === 'Send Slack Notification');
       const payload = slackStep?.with?.payload as string;
       expect(payload).toBeDefined();
@@ -380,11 +384,16 @@ describe('Notification Helpers', () => {
     });
 
     it('should include both Slack and PR comment steps when notification is both', () => {
-      const steps = notificationHelpers.createStaticAnalysisNotificationSteps('both');
+      const steps =
+        notificationHelpers.createStaticAnalysisNotificationSteps('both');
       const slackStep = steps.find(s => s.name === 'Send Slack Notification');
       expect(slackStep).toBeDefined();
       // PR comment step should also be present
-      const prCommentStep = steps.find(s => s.name?.toLowerCase().includes('pr') || s.name?.toLowerCase().includes('comment'));
+      const prCommentStep = steps.find(
+        s =>
+          s.name?.toLowerCase().includes('pr') ||
+          s.name?.toLowerCase().includes('comment')
+      );
       expect(prCommentStep).toBeDefined();
     });
   });

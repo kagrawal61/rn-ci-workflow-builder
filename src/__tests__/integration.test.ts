@@ -14,7 +14,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('generates valid parseable YAML with yarn', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'github', packageManager: 'yarn', nodeVersions: [20] },
+        options: {
+          platform: 'github',
+          packageManager: 'yarn',
+          nodeVersions: [20],
+        },
       });
 
       expect(typeof yamlStr).toBe('string');
@@ -32,7 +36,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('generates valid parseable YAML with npm', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'github', packageManager: 'npm', nodeVersions: [18] },
+        options: {
+          platform: 'github',
+          packageManager: 'npm',
+          nodeVersions: [18],
+        },
       });
 
       const parsed = yaml.load(yamlStr) as Record<string, any>;
@@ -62,7 +70,12 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
         kind: 'static-analysis',
         options: {
           platform: 'github',
-          staticAnalysis: { typescript: false, eslint: true, prettier: true, unitTests: true },
+          staticAnalysis: {
+            typescript: false,
+            eslint: true,
+            prettier: true,
+            unitTests: true,
+          },
         },
       });
 
@@ -80,7 +93,9 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
       });
 
       const parsed = yaml.load(yamlStr) as Record<string, any>;
-      const stepNames = parsed.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = parsed.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).toContain('TypeScript');
       expect(stepNames).toContain('ESLint');
@@ -91,7 +106,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('output structure matches snapshot', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'github', packageManager: 'yarn', nodeVersions: [20] },
+        options: {
+          platform: 'github',
+          packageManager: 'yarn',
+          nodeVersions: [20],
+        },
       });
 
       expect(yaml.load(yamlStr)).toMatchSnapshot();
@@ -229,8 +248,12 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
       expect(parsed.format_version).toBe(13);
       expect(parsed.workflows).toBeDefined();
       expect(parsed.workflows['rn-static-analysis']).toBeDefined();
-      expect(Array.isArray(parsed.workflows['rn-static-analysis'].steps)).toBe(true);
-      expect(parsed.workflows['rn-static-analysis'].steps.length).toBeGreaterThan(0);
+      expect(Array.isArray(parsed.workflows['rn-static-analysis'].steps)).toBe(
+        true
+      );
+      expect(
+        parsed.workflows['rn-static-analysis'].steps.length
+      ).toBeGreaterThan(0);
     });
 
     it('output structure matches snapshot', () => {
@@ -334,7 +357,9 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
       const setupNode = job.steps.find((s: any) => s.name === 'Setup Node');
 
       expect(job.strategy?.matrix?.['node-version']).toEqual([18, 20, 22]);
-      expect(setupNode?.with?.['node-version']).toBe('${{ matrix.node-version }}');
+      expect(setupNode?.with?.['node-version']).toBe(
+        '${{ matrix.node-version }}'
+      );
     });
 
     it('uses a direct version value (no matrix) when a single nodeVersion is provided', () => {
@@ -502,9 +527,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
 
   describe('Error handling', () => {
     it('throws for an unknown preset kind', () => {
-      expect(() =>
-        generateWorkflow({ kind: 'nonexistent-preset' })
-      ).toThrow();
+      expect(() => generateWorkflow({ kind: 'nonexistent-preset' })).toThrow();
     });
 
     it('throws when build options are missing for build preset', () => {

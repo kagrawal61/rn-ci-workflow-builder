@@ -98,7 +98,9 @@ describe('buildStaticAnalysisPipeline', () => {
       const steps = result.jobs.static_analysis.steps;
       const nodeStep = steps.find((s: any) => s.name === 'Setup Node') as any;
 
-      expect(nodeStep?.with?.['node-version']).toBe('${{ matrix.node-version }}');
+      expect(nodeStep?.with?.['node-version']).toBe(
+        '${{ matrix.node-version }}'
+      );
     });
 
     it('adds strategy.matrix when multiple versions provided', () => {
@@ -177,7 +179,9 @@ describe('buildStaticAnalysisPipeline', () => {
   describe('analysis checks', () => {
     it('includes all four checks by default', () => {
       const result = buildStaticAnalysisPipeline(defaultOptions);
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).toContain('TypeScript');
       expect(stepNames).toContain('ESLint');
@@ -190,7 +194,9 @@ describe('buildStaticAnalysisPipeline', () => {
         ...defaultOptions,
         staticAnalysis: { typescript: false },
       });
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).not.toContain('TypeScript');
     });
@@ -200,7 +206,9 @@ describe('buildStaticAnalysisPipeline', () => {
         ...defaultOptions,
         staticAnalysis: { eslint: false },
       });
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).not.toContain('ESLint');
     });
@@ -210,7 +218,9 @@ describe('buildStaticAnalysisPipeline', () => {
         ...defaultOptions,
         staticAnalysis: { prettier: false },
       });
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).not.toContain('Prettier');
     });
@@ -220,7 +230,9 @@ describe('buildStaticAnalysisPipeline', () => {
         ...defaultOptions,
         staticAnalysis: { unitTests: false },
       });
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).not.toContain('Unit tests');
     });
@@ -235,7 +247,9 @@ describe('buildStaticAnalysisPipeline', () => {
           unitTests: false,
         },
       });
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).not.toContain('TypeScript');
       expect(stepNames).not.toContain('ESLint');
@@ -253,7 +267,12 @@ describe('buildStaticAnalysisPipeline', () => {
 
       // Verify no slack-related steps
       expect(
-        steps.every((s: any) => !String(s.name ?? '').toLowerCase().includes('slack'))
+        steps.every(
+          (s: any) =>
+            !String(s.name ?? '')
+              .toLowerCase()
+              .includes('slack')
+        )
       ).toBe(true);
     });
 
@@ -265,7 +284,12 @@ describe('buildStaticAnalysisPipeline', () => {
       const steps = result.jobs.static_analysis.steps;
 
       expect(
-        steps.every((s: any) => !String(s.name ?? '').toLowerCase().includes('slack'))
+        steps.every(
+          (s: any) =>
+            !String(s.name ?? '')
+              .toLowerCase()
+              .includes('slack')
+        )
       ).toBe(true);
     });
   });

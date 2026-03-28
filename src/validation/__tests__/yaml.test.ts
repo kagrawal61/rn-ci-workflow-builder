@@ -265,13 +265,24 @@ jobs:
     });
 
     it('returns a Promise when enableActionlintValidation is true for GitHub Actions', () => {
-      const result = validateGeneratedYaml(VALID_GITHUB_WORKFLOW, false, false, true);
+      const result = validateGeneratedYaml(
+        VALID_GITHUB_WORKFLOW,
+        false,
+        false,
+        true
+      );
       expect(result).toBeInstanceOf(Promise);
       if (result instanceof Promise) result.catch(() => {});
     });
 
     it('returns a Promise when enableActValidation is true for GitHub Actions', () => {
-      const result = validateGeneratedYaml(VALID_GITHUB_WORKFLOW, false, false, false, true);
+      const result = validateGeneratedYaml(
+        VALID_GITHUB_WORKFLOW,
+        false,
+        false,
+        false,
+        true
+      );
       expect(result).toBeInstanceOf(Promise);
       // Suppress unhandled rejection — act may not be installed in test env
       if (result instanceof Promise) result.catch(() => {});
@@ -279,7 +290,13 @@ jobs:
 
     it('does NOT return a Promise for Bitrise config when only GitHub flags are set', () => {
       // actionlint and act only apply to GitHub Actions workflows, not Bitrise
-      const result = validateGeneratedYaml(VALID_BITRISE_CONFIG, false, false, true, true);
+      const result = validateGeneratedYaml(
+        VALID_BITRISE_CONFIG,
+        false,
+        false,
+        true,
+        true
+      );
       // Bitrise config with enableBitriseCliValidation=false → sync return
       expect(typeof result).toBe('string');
     });
@@ -299,7 +316,9 @@ on:
     branches: [main]
 `.trim(); // missing jobs → sync check fires before any Promise is created
 
-      expect(() => validateGeneratedYaml(invalid, false, false, true)).toThrow();
+      expect(() =>
+        validateGeneratedYaml(invalid, false, false, true)
+      ).toThrow();
     });
   });
 });
@@ -335,9 +354,9 @@ describe('validateWithAct', () => {
       // Error should mention act or validation failure
       expect(
         msg.toLowerCase().includes('act') ||
-        msg.toLowerCase().includes('install') ||
-        msg.toLowerCase().includes('failed') ||
-        msg.toLowerCase().includes('no such file')
+          msg.toLowerCase().includes('install') ||
+          msg.toLowerCase().includes('failed') ||
+          msg.toLowerCase().includes('no such file')
       ).toBe(true);
     }
   });
