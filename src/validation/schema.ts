@@ -90,7 +90,7 @@ function validateWorkflowOptionsSchema(
   if (options.platform !== undefined) {
     validatedOptions.platform = validateEnum(
       options.platform,
-      ['github', 'bitrise', 'gitlab'],
+      ['github', 'bitrise', 'gitlab', 'circleci'],
       'platform'
     ) as WorkflowOptions['platform'];
   }

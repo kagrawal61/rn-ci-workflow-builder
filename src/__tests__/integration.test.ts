@@ -577,6 +577,68 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     });
   });
 
+  // ─── CircleCI ────────────────────────────────────────────────────────────
+
+  describe('CircleCI — Static Analysis', () => {
+    it('generates valid parseable YAML with yarn', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'circleci', packageManager: 'yarn', nodeVersions: [20] },
+      });
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      expect(parsed.version).toBeCloseTo(2.1);
+      expect(parsed.jobs['static-analysis']).toBeDefined();
+    });
+
+    it('includes TypeScript run step', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'circleci', packageManager: 'yarn', nodeVersions: [18] },
+      });
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      const steps: Array<string | Record<string, unknown>> = parsed.jobs['static-analysis'].steps;
+      const hasTs = steps.some(s =>
+        typeof s === 'object' && s !== null && 'run' in s &&
+        typeof (s as any).run === 'object' && ((s as any).run.command ?? '').includes('tsc')
+      );
+      expect(hasTs).toBe(true);
+    });
+
+    it('output structure matches snapshot', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'circleci', packageManager: 'yarn', nodeVersions: [20] },
+      });
+      expect(yamlStr).toMatchSnapshot();
+    });
+  });
+
+  describe('CircleCI — Build (Android)', () => {
+    it('generates valid parseable YAML', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'build',
+        options: {
+          platform: 'circleci',
+          build: { platform: 'android', variant: 'release', storage: 'github', notification: 'none' },
+        },
+      });
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      expect(parsed.version).toBeCloseTo(2.1);
+      expect(parsed.jobs.build).toBeDefined();
+    });
+
+    it('output structure matches snapshot', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'build',
+        options: {
+          platform: 'circleci',
+          build: { platform: 'android', variant: 'release', storage: 'github', notification: 'none' },
+        },
+      });
+      expect(yamlStr).toMatchSnapshot();
+    });
+  });
+
   // ─── GitLab CI ───────────────────────────────────────────────────────────
 
   describe('GitLab CI — Static Analysis', () => {

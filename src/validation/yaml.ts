@@ -924,6 +924,11 @@ function validateWorkflowStructure(parsedYaml: unknown): void {
     if (!Array.isArray(obj.stages) || obj.stages.length === 0) {
       throw new Error('GitLab CI configuration must have at least one stage');
     }
+  } else if ('version' in obj && typeof obj.version === 'number' && obj.version >= 2) {
+    // CircleCI config (version: 2 or 2.1)
+    if (!obj.jobs || typeof obj.jobs !== 'object') {
+      throw new Error('CircleCI configuration must have at least one job');
+    }
   } else {
     // GitHub Actions workflow
     validateGitHubActionsStructure(obj);

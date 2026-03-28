@@ -226,6 +226,8 @@ export function writeWorkflowFile(
   if (!outputDir) {
     if (platform === 'bitrise' || platform === 'gitlab') {
       outputDir = '.';
+    } else if (platform === 'circleci') {
+      outputDir = '.circleci';
     } else {
       outputDir = '.github/workflows';
     }
@@ -236,6 +238,8 @@ export function writeWorkflowFile(
       outputFileName = 'bitrise.yml';
     } else if (platform === 'gitlab') {
       outputFileName = '.gitlab-ci.yml';
+    } else if (platform === 'circleci') {
+      outputFileName = 'config.yml';
     } else {
       outputFileName = `${cfg.kind}.yaml`;
     }
