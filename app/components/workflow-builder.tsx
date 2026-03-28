@@ -100,17 +100,20 @@ export function WorkflowBuilder() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState('configure');
 
-  // Generate YAML when form values change or on initial load
+  // Generate YAML when form values change, debounced to avoid regenerating on every keystroke
   useEffect(() => {
-    try {
-      const config = createConfigFromFormValues(formValues);
-      const result = generateWorkflowYaml(config);
-      setYamlContent(result.yaml);
-      setSecretsSummary(result.secretsSummary);
-    } catch (error) {
-      console.error('Error generating YAML:', error);
-      // Keep the previous valid YAML
-    }
+    const timer = setTimeout(() => {
+      try {
+        const config = createConfigFromFormValues(formValues);
+        const result = generateWorkflowYaml(config);
+        setYamlContent(result.yaml);
+        setSecretsSummary(result.secretsSummary);
+      } catch (error) {
+        console.error('Error generating YAML:', error);
+        // Keep the previous valid YAML
+      }
+    }, 300);
+    return () => clearTimeout(timer);
   }, [formValues]);
 
   const handleFormChange = (newValues: Record<string, unknown>) => {
