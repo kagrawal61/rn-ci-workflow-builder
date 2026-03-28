@@ -47,10 +47,10 @@ exports[`buildBitriseStaticAnalysisPipeline output matches snapshot for default 
           "nvm@1": {
             "inputs": [
               {
-                "node_version": "18",
+                "node_version": "20",
               },
             ],
-            "title": "Setup Node.js 18",
+            "title": "Setup Node.js 20",
           },
         },
         {
@@ -191,10 +191,10 @@ exports[`buildBitriseStaticAnalysisPipeline output matches snapshot for npm pack
           "nvm@1": {
             "inputs": [
               {
-                "node_version": "18",
+                "node_version": "20",
               },
             ],
-            "title": "Setup Node.js 18",
+            "title": "Setup Node.js 20",
           },
         },
         {

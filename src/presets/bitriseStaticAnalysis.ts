@@ -7,6 +7,7 @@ export function buildBitriseStaticAnalysisPipeline(
     triggers,
     env,
     packageManager = 'yarn',
+    nodeVersions,
     framework = 'react-native-cli', // Default to React Native CLI if not specified
     staticAnalysis = {
       typescript: true,
@@ -75,10 +76,10 @@ export function buildBitriseStaticAnalysisPipeline(
     },
     {
       'nvm@1': {
-        title: 'Setup Node.js 18',
+        title: `Setup Node.js ${String(nodeVersions?.[0] ?? 20)}`,
         inputs: [
           {
-            node_version: '18',
+            node_version: String(nodeVersions?.[0] ?? 20),
           },
         ],
       },

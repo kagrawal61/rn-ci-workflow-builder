@@ -317,10 +317,10 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     });
   });
 
-  // ─── nodeVersions: currently ignores all but first (bug 1.2 documented) ──
+  // ─── nodeVersions: matrix emitted for multiple versions (bug 1.2 fixed) ──
 
-  describe('nodeVersions handling (bug 1.2 — matrix not emitted)', () => {
-    it('uses only the first nodeVersion in the setup step (current broken behavior)', () => {
+  describe('nodeVersions handling', () => {
+    it('emits matrix strategy and uses matrix expression when multiple nodeVersions provided', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
         options: {
@@ -330,14 +330,25 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
       });
 
       const parsed = yaml.load(yamlStr) as Record<string, any>;
-      const setupNode = parsed.jobs.static_analysis.steps.find(
-        (s: any) => s.name === 'Setup Node'
-      );
+      const job = parsed.jobs.static_analysis;
+      const setupNode = job.steps.find((s: any) => s.name === 'Setup Node');
 
-      // Bug 1.2: only first node version used, no matrix strategy emitted
-      // After fix: should have strategy.matrix.node: [18, 20, 22]
-      expect(setupNode?.with?.['node-version']).toBe(18);
-      expect(parsed.jobs.static_analysis.strategy).toBeUndefined();
+      expect(job.strategy?.matrix?.['node-version']).toEqual([18, 20, 22]);
+      expect(setupNode?.with?.['node-version']).toBe('${{ matrix.node-version }}');
+    });
+
+    it('uses a direct version value (no matrix) when a single nodeVersion is provided', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'github', nodeVersions: [20] },
+      });
+
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      const job = parsed.jobs.static_analysis;
+      const setupNode = job.steps.find((s: any) => s.name === 'Setup Node');
+
+      expect(job.strategy).toBeUndefined();
+      expect(setupNode?.with?.['node-version']).toBe(20);
     });
   });
 
