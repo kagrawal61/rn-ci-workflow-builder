@@ -188,12 +188,15 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 <SelectContent>
                   <SelectItem value="github">GitHub Actions</SelectItem>
                   <SelectItem value="bitrise">Bitrise</SelectItem>
+                  <SelectItem value="gitlab">GitLab CI</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
                 {values.platform === 'bitrise'
                   ? 'Generate a Bitrise workflow configuration (bitrise.yml)'
-                  : 'Generate a GitHub Actions workflow (.github/workflows/*.yml)'}
+                  : values.platform === 'gitlab'
+                    ? 'Generate a GitLab CI configuration (.gitlab-ci.yml)'
+                    : 'Generate a GitHub Actions workflow (.github/workflows/*.yml)'}
               </p>
             </div>
 

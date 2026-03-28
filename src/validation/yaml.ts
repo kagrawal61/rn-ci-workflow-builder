@@ -913,17 +913,20 @@ function validateWorkflowStructure(parsedYaml: unknown): void {
     throw new Error('Generated workflow is not a valid object');
   }
 
-  // Detect if this is a Bitrise configuration or GitHub Actions workflow
-  if (
-    typeof parsedYaml === 'object' &&
-    parsedYaml &&
-    'format_version' in parsedYaml
-  ) {
-    // This is a Bitrise configuration
-    validateBitriseStructure(parsedYaml as Record<string, unknown>);
-  } else if (typeof parsedYaml === 'object' && parsedYaml) {
-    // This is a GitHub Actions workflow
-    validateGitHubActionsStructure(parsedYaml as Record<string, unknown>);
+  const obj = parsedYaml as Record<string, unknown>;
+
+  // Detect platform by distinctive top-level keys
+  if ('format_version' in obj) {
+    // Bitrise configuration
+    validateBitriseStructure(obj);
+  } else if ('stages' in obj && !('jobs' in obj)) {
+    // GitLab CI — must have at least one stage
+    if (!Array.isArray(obj.stages) || obj.stages.length === 0) {
+      throw new Error('GitLab CI configuration must have at least one stage');
+    }
+  } else {
+    // GitHub Actions workflow
+    validateGitHubActionsStructure(obj);
   }
 }
 

@@ -224,12 +224,18 @@ export function writeWorkflowFile(
   let outputFileName = fileName;
 
   if (!outputDir) {
-    outputDir = platform === 'bitrise' ? '.' : '.github/workflows';
+    if (platform === 'bitrise' || platform === 'gitlab') {
+      outputDir = '.';
+    } else {
+      outputDir = '.github/workflows';
+    }
   }
 
   if (!outputFileName) {
     if (platform === 'bitrise') {
       outputFileName = 'bitrise.yml';
+    } else if (platform === 'gitlab') {
+      outputFileName = '.gitlab-ci.yml';
     } else {
       outputFileName = `${cfg.kind}.yaml`;
     }
