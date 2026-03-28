@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://mobilecibuilder.com/sitemap.xml
+Sitemap: https://www.mobilecibuilder.com/sitemap.xml

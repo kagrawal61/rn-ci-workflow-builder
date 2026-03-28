@@ -74,11 +74,11 @@ const storageHelpers = {
           if: 'success()',
           uses: 'wzieba/Firebase-Distribution-Github-Action@v1.4.0',
           with: {
-            appId: '\${{ secrets.FIREBASE_APP_ID_ANDROID }}',
-            serviceCredentialsFileContent: '\${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
+            appId: '${{ secrets.FIREBASE_APP_ID_ANDROID }}',
+            serviceCredentialsFileContent: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}',
             file: apkPaths[0],
-            releaseNotes: 'Branch: \${{ github.head_ref || github.ref_name }}\nCommit: \${{ github.sha }}\nBuild: \${{ github.run_id }}',
-            groups: '\${{ secrets.FIREBASE_TEST_GROUPS || \'testers\' }}',
+            releaseNotes: 'Branch: ${{ github.head_ref || github.ref_name }}\nCommit: ${{ github.sha }}\nBuild: ${{ github.run_id }}',
+            groups: "${{ secrets.FIREBASE_TEST_GROUPS || 'testers' }}",
           },
         },
       ];

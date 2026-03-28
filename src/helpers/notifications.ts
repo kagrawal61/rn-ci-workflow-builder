@@ -9,12 +9,13 @@ interface NotificationStepConfig {
 }
 
 /**
- * Creates a GitHub CLI authorization step
- * GitHub CLI is pre-installed on GitHub Actions runners, so we only need to authorize it.
+ * Creates a GitHub CLI authorization step.
+ * GitHub CLI is pre-installed on GitHub Actions runners.
  */
-function createGitHubCLIInstallationStep(): GitHubStep {
+function createGitHubCLIInstallationStep(stepId: string): GitHubStep {
   return {
     name: 'Setup GitHub CLI',
+    if: `steps.${stepId}.outputs.is_pr == 'true'`,
     run:
       '# GitHub CLI is pre-installed on GitHub Actions runners\n' +
       'echo "Using pre-installed GitHub CLI"\n' +
@@ -71,15 +72,6 @@ else
 fi
 `,
   };
-}
-
-/**
- * Creates a conditional CLI installation step
- */
-function createConditionalCLIInstallationStep(stepId: string): GitHubStep {
-  const cliInstallStep = createGitHubCLIInstallationStep();
-  cliInstallStep.if = `steps.${stepId}.outputs.is_pr == 'true'`;
-  return cliInstallStep;
 }
 
 /**
@@ -358,6 +350,9 @@ function createPRCommentNotificationSteps(
       context: 'build',
     })
   );
+
+  // Add GitHub CLI setup step (only runs when it's a PR)
+  steps.push(createGitHubCLIInstallationStep(stepId));
 
   // Add the provided PR comment step
   steps.push(prCommentStep);
