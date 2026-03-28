@@ -5,7 +5,7 @@
 /**
  * Available workflow preset kinds
  */
-export type PipelineKind = 'static-analysis' | string;
+export type PipelineKind = 'static-analysis' | 'build';
 
 /**
  * Available CI platforms

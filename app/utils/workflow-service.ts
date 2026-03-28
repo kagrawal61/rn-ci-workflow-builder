@@ -7,7 +7,7 @@ import {
   StorageSolution,
   Variant,
 } from '../../src/presets/types';
-import { CIPlatform, PackageManager } from '../../src/types';
+import { CIPlatform, PackageManager, PipelineKind } from '../../src/types';
 import { generateWorkflow, getAvailablePresets, WorkflowConfig } from './lib';
 
 // Helper to create a default static analysis configuration
@@ -92,7 +92,7 @@ export const createConfigFromFormValues = (
 ): WorkflowConfig => {
   // Create a properly typed configuration object to avoid type errors
   const config: Required<WorkflowConfig> = {
-    kind: (formValues.preset as string) || 'static-analysis',
+    kind: ((formValues.preset as string) || 'static-analysis') as PipelineKind,
     options: {
       name: '',
       platform: (formValues.platform as CIPlatform) || 'github',

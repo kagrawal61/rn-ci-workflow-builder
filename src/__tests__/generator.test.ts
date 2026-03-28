@@ -7,7 +7,7 @@ import {
   registerBuilder,
   writeWorkflowFile,
 } from '../generator';
-import { WorkflowConfig } from '../types';
+import { WorkflowConfig, PipelineKind } from '../types';
 
 // Mock fs module
 jest.mock('fs');
@@ -80,7 +80,7 @@ describe('Generator', () => {
 
   describe('generateWorkflow', () => {
     const mockConfig: WorkflowConfig = {
-      kind: 'test-preset',
+      kind: 'test-preset' as PipelineKind,
       options: {
         platform: 'github',
         name: 'test-workflow',
@@ -144,7 +144,7 @@ describe('Generator', () => {
 
     it('should handle empty options', () => {
       const configWithoutOptions: WorkflowConfig = {
-        kind: 'test-preset',
+        kind: 'test-preset' as PipelineKind,
       };
 
       const mockBuilder = jest.fn().mockReturnValue({ name: 'test' });
@@ -159,7 +159,7 @@ describe('Generator', () => {
 
   describe('generateWorkflowForCli', () => {
     const mockConfig: WorkflowConfig = {
-      kind: 'test-preset',
+      kind: 'test-preset' as PipelineKind,
       options: { platform: 'github' },
     };
 
@@ -197,7 +197,7 @@ describe('Generator', () => {
 
   describe('writeWorkflowFile', () => {
     const mockConfig: WorkflowConfig = {
-      kind: 'test-preset',
+      kind: 'test-preset' as PipelineKind,
       options: { platform: 'github' },
     };
 
