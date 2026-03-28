@@ -14,7 +14,7 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://mobilecibuilder.com'),
+  metadataBase: new URL('https://www.mobilecibuilder.com'),
   title: 'React Native CI/CD Workflow Builder',
   description:
     'Generate GitHub Actions workflows for your React Native projects',
