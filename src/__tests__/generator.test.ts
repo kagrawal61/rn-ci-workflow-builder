@@ -26,6 +26,7 @@ jest.mock('../validation/yaml', () => ({
 
 jest.mock('../helpers', () => ({
   injectSecrets: jest.fn(yaml => yaml),
+  addStepSpacing: jest.fn(yaml => yaml),
 }));
 
 jest.mock('../helpers/secretsManager', () => ({

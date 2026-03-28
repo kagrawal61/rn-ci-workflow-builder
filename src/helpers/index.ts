@@ -4,6 +4,7 @@
 
 // Re-export from workflow.ts
 export {
+  addStepSpacing,
   buildConcurrency,
   buildEnv,
   buildTriggers,

@@ -4,7 +4,7 @@
  */
 import * as yaml from 'js-yaml';
 
-import { injectSecrets, validateWorkflowConfig } from '../../src/helpers';
+import { addStepSpacing, injectSecrets, validateWorkflowConfig } from '../../src/helpers';
 import { generateSecretsSummary } from '../../src/helpers/secretsManager';
 import { buildBitriseBuildPipeline } from '../../src/presets/bitriseBuildPreset';
 import { buildBitriseStaticAnalysisPipeline } from '../../src/presets/bitriseStaticAnalysis';
@@ -77,6 +77,7 @@ export function generateWorkflow(cfg: WorkflowConfig): {
     noRefs: true, // Prevent the creation of anchors and references
   });
   yamlStr = injectSecrets(yamlStr);
+  yamlStr = addStepSpacing(yamlStr);
 
   // Generate secrets summary
   let secretsSummary: string | undefined;
