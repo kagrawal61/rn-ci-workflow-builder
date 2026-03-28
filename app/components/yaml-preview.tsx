@@ -33,19 +33,9 @@ export function YamlPreview({
     setMounted(true);
   }, []);
 
-  // Validate and format YAML
-  const formattedYaml = (() => {
-    try {
-      // Parse and stringify to ensure proper formatting
-      return yamlContent;
-    } catch (error) {
-      console.error('Invalid YAML:', error);
-      return yamlContent; // Return original if there's a parsing error
-    }
-  })();
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(formattedYaml).then(
+    navigator.clipboard.writeText(yamlContent).then(
       () => {
         setCopied(true);
         toast.success('YAML copied to clipboard!');
@@ -70,7 +60,7 @@ export function YamlPreview({
 
   // Download YAML file
   const downloadYaml = () => {
-    const blob = new Blob([formattedYaml], { type: 'text/yaml' });
+    const blob = new Blob([yamlContent], { type: 'text/yaml' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -160,7 +150,7 @@ export function YamlPreview({
             },
           }}
         >
-          {formattedYaml}
+          {yamlContent}
         </SyntaxHighlighter>
       </div>
 

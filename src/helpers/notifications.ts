@@ -308,7 +308,7 @@ function createStaticAnalysisSlackNotificationStep(): GitHubStep {
           ],
         },
       ],
-    }),
+    }, null, 2),
   };
 
   // Add webhook-type property using bracket notation to avoid TypeScript issues

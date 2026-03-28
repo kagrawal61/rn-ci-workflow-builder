@@ -46,6 +46,7 @@ module.exports = {
     '/SampleExpoApp/',
     '/app/',
     '/examples/',
+    '/.claude/worktrees/',
   ],
   
   // Setup

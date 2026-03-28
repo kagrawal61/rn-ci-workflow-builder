@@ -2,7 +2,7 @@ import fs from 'fs';
 import * as yaml from 'js-yaml';
 import path from 'path';
 
-import { injectSecrets } from './helpers';
+import { addStepSpacing, injectSecrets } from './helpers';
 import { generateSecretsSummary } from './helpers/secretsManager';
 import { BuildOptions, StaticAnalysisOptions } from './presets/types';
 import {
@@ -27,56 +27,6 @@ const builders: Record<
  * @param yamlStr The YAML string to format
  * @returns Formatted YAML string with spacing after steps
  */
-function addStepSpacing(yamlStr: string): string {
-  // Split the YAML into lines
-  const lines = yamlStr.split('\n');
-  const formattedLines: string[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const currentLine = lines[i];
-    const nextLine = lines[i + 1];
-
-    formattedLines.push(currentLine);
-
-    // Check if we're at the end of a step and the next line starts a new step
-    // A step ends when we have a step property and the next line is either:
-    // 1. Another step (starts with "      - name:" or "      - uses:" etc.)
-    // 2. A different section entirely
-    if (currentLine.trim() && nextLine) {
-      const currentIndent = currentLine.match(/^(\s*)/)?.[1]?.length || 0;
-      const nextIndent = nextLine.match(/^(\s*)/)?.[1]?.length || 0;
-
-      // Check if current line is a step property (name, uses, run, with, id, if, env, etc.)
-      const isStepProperty =
-        currentLine.match(/^\s+(name|uses|run|with|id|if|env|shell):\s*/) ||
-        currentLine.match(/^\s+(run):\s*\|/) ||
-        currentLine.match(/^\s+- name:/) ||
-        currentLine.match(/^\s+- uses:/) ||
-        currentLine.match(/^\s+- run:/);
-
-      // Check if next line starts a new step
-      const isNextLineNewStep = nextLine.match(/^\s+- (name|uses|run):/);
-
-      // Check if we're ending a multi-line value (like run: |)
-      const isEndOfMultiLineValue =
-        currentLine.trim() &&
-        currentIndent >= 8 && // Inside a step property
-        nextIndent <= 6 && // Next line is at step level or higher
-        !nextLine.match(/^\s*$/) && // Next line is not empty
-        (isNextLineNewStep || nextIndent < currentIndent);
-
-      // Add spacing when:
-      // 1. We're at a step property and next line is a new step
-      // 2. We're ending a multi-line value block
-      if ((isStepProperty && isNextLineNewStep) || isEndOfMultiLineValue) {
-        formattedLines.push('');
-      }
-    }
-  }
-
-  return formattedLines.join('\n');
-}
-
 /**
  * Register a new workflow builder
  * @param kind The workflow kind/preset name

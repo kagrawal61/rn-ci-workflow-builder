@@ -250,10 +250,10 @@ exports[`Integration: Full Workflow Generation Pipeline Bitrise — Static Analy
           "nvm@1": {
             "inputs": [
               {
-                "node_version": "18",
+                "node_version": "20",
               },
             ],
-            "title": "Setup Node.js 18",
+            "title": "Setup Node.js 20",
           },
         },
         {

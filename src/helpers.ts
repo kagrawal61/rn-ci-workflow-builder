@@ -190,3 +190,45 @@ export function validateWorkflowConfig(config: WorkflowConfig): WorkflowConfig {
 
   return config;
 }
+
+/**
+ * Adds a blank line between adjacent steps in generated YAML for readability.
+ */
+export function addStepSpacing(yamlStr: string): string {
+  const lines = yamlStr.split('\n');
+  const formattedLines: string[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const currentLine = lines[i];
+    const nextLine = lines[i + 1];
+
+    formattedLines.push(currentLine);
+
+    if (currentLine.trim() && nextLine) {
+      const currentIndent = currentLine.match(/^(\s*)/)?.[1]?.length || 0;
+      const nextIndent = nextLine.match(/^(\s*)/)?.[1]?.length || 0;
+
+      const isStepProperty =
+        currentLine.match(/^\s+(name|uses|run|with|id|if|env|shell):\s*/) ||
+        currentLine.match(/^\s+(run):\s*\|/) ||
+        currentLine.match(/^\s+- name:/) ||
+        currentLine.match(/^\s+- uses:/) ||
+        currentLine.match(/^\s+- run:/);
+
+      const isNextLineNewStep = nextLine.match(/^\s+- (name|uses|run):/);
+
+      const isEndOfMultiLineValue =
+        currentLine.trim() &&
+        currentIndent >= 8 &&
+        nextIndent <= 6 &&
+        !nextLine.match(/^\s*$/) &&
+        (isNextLineNewStep || nextIndent < currentIndent);
+
+      if ((isStepProperty && isNextLineNewStep) || isEndOfMultiLineValue) {
+        formattedLines.push('');
+      }
+    }
+  }
+
+  return formattedLines.join('\n');
+}
