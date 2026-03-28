@@ -282,20 +282,34 @@ export function WorkflowBuilder() {
                 <Database className="h-5 w-5 text-primary" />
                 Next Steps
               </h3>
-              <ol className="list-inside list-decimal space-y-2 text-muted-foreground">
-                <li>
-                  Copy the generated workflow to a <code>.yml</code> file in
-                  your repository
-                </li>
-                <li>
-                  Place it in the <code>.github/workflows/</code> directory
-                </li>
-                <li>Commit and push to your GitHub repository</li>
-                <li>
-                  GitHub Actions will automatically run your workflow based on
-                  the triggers
-                </li>
-              </ol>
+              {formValues.platform === 'bitrise' ? (
+                <ol className="list-inside list-decimal space-y-2 text-muted-foreground">
+                  <li>
+                    Copy the generated YAML to a <code>bitrise.yml</code> file
+                    in your repository root
+                  </li>
+                  <li>Commit and push to your repository</li>
+                  <li>
+                    Bitrise will detect the <code>bitrise.yml</code> and run
+                    your workflow based on the configured triggers
+                  </li>
+                </ol>
+              ) : (
+                <ol className="list-inside list-decimal space-y-2 text-muted-foreground">
+                  <li>
+                    Copy the generated workflow to a <code>.yml</code> file in
+                    your repository
+                  </li>
+                  <li>
+                    Place it in the <code>.github/workflows/</code> directory
+                  </li>
+                  <li>Commit and push to your GitHub repository</li>
+                  <li>
+                    GitHub Actions will automatically run your workflow based on
+                    the triggers
+                  </li>
+                </ol>
+              )}
             </div>
           </TabsContent>
         </Tabs>
