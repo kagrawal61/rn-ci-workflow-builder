@@ -11,18 +11,7 @@
   "bugs": {
     "url": "https://github.com/kagrawal61/rn-ci-workflow-builder/issues"
   },
-  "keywords": [
-    "react-native",
-    "github-actions",
-    "bitrise",
-    "ci-cd",
-    "mobile-ci",
-    "workflow-generator",
-    "cli",
-    "devops",
-    "mobile-build",
-    "automation"
-  ],
+  "keywords": [ "react-native", "github-actions", "bitrise", "ci-cd", "mobile-ci", "workflow-generator", "cli", "devops", "mobile-build", "automation" ],
   "engines": {
     "node": ">=18.0.0"
   },
@@ -67,7 +56,8 @@
     "js-yaml": "^4.1.0",
     "lucide-react": "^0.523.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "vexo-analytics": "1.5.4"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
