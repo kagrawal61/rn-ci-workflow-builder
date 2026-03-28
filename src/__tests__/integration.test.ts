@@ -6,6 +6,7 @@
  */
 import * as yaml from 'js-yaml';
 import { generateWorkflow } from '../index';
+import { PipelineKind } from '../types';
 
 describe('Integration: Full Workflow Generation Pipeline', () => {
   // ─── GitHub Actions: Static Analysis ─────────────────────────────────────
@@ -121,7 +122,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
 
   describe('GitHub Actions — Build (Android)', () => {
     const androidConfig = {
-      kind: 'build',
+      kind: 'build' as PipelineKind,
       options: {
         platform: 'github' as const,
         packageManager: 'yarn' as const,
@@ -173,7 +174,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
   describe('GitHub Actions — Build (Both platforms)', () => {
     it('generates both build-android and build-ios jobs', () => {
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           build: {
@@ -195,7 +196,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
 
     it('output structure matches snapshot', () => {
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           build: {
@@ -216,7 +217,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
   describe('GitHub Actions — Build (Release)', () => {
     it('generates a build workflow for release variant', () => {
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           build: {
@@ -270,7 +271,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
 
   describe('Bitrise — Build', () => {
     const bitriseAndroidConfig = {
-      kind: 'build',
+      kind: 'build' as PipelineKind,
       options: {
         platform: 'bitrise' as const,
         build: {
@@ -305,7 +306,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
   describe('GitHub Actions — Expo Build', () => {
     it('generates a workflow for expo android build', () => {
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           framework: 'expo',
@@ -416,7 +417,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
   describe('npm package manager in build preset', () => {
     it('generates a valid build workflow using npm', () => {
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           packageManager: 'npm',
@@ -441,7 +442,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
       // Bug C: validateBuildSchema drops androidOutputType.
       // After PR 2 fix, the AAB gradle task should appear in the generated steps.
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           build: {
@@ -527,13 +528,15 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
 
   describe('Error handling', () => {
     it('throws for an unknown preset kind', () => {
-      expect(() => generateWorkflow({ kind: 'nonexistent-preset' })).toThrow();
+      expect(() =>
+        generateWorkflow({ kind: 'nonexistent-preset' as PipelineKind })
+      ).toThrow();
     });
 
     it('throws when build options are missing for build preset', () => {
       expect(() =>
         generateWorkflow({
-          kind: 'build',
+          kind: 'build' as PipelineKind,
           options: { platform: 'github' },
         })
       ).toThrow();
@@ -542,7 +545,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('throws for invalid platform in build options', () => {
       expect(() =>
         generateWorkflow({
-          kind: 'build',
+          kind: 'build' as PipelineKind,
           options: {
             platform: 'github',
             build: {
@@ -559,7 +562,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('throws for invalid storage value', () => {
       expect(() =>
         generateWorkflow({
-          kind: 'build',
+          kind: 'build' as PipelineKind,
           options: {
             platform: 'github',
             build: {
