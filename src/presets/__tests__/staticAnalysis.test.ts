@@ -79,7 +79,18 @@ describe('buildStaticAnalysisPipeline', () => {
       expect(steps.some((s: any) => s.name === 'Setup Node')).toBe(true);
     });
 
-    it('uses the first nodeVersion for setup-node', () => {
+    it('uses the single nodeVersion directly for setup-node when only one version provided', () => {
+      const result = buildStaticAnalysisPipeline({
+        ...defaultOptions,
+        nodeVersions: [18],
+      });
+      const steps = result.jobs.static_analysis.steps;
+      const nodeStep = steps.find((s: any) => s.name === 'Setup Node') as any;
+
+      expect(nodeStep?.with?.['node-version']).toBe(18);
+    });
+
+    it('uses matrix expression for setup-node when multiple versions provided', () => {
       const result = buildStaticAnalysisPipeline({
         ...defaultOptions,
         nodeVersions: [18, 20],
@@ -87,7 +98,27 @@ describe('buildStaticAnalysisPipeline', () => {
       const steps = result.jobs.static_analysis.steps;
       const nodeStep = steps.find((s: any) => s.name === 'Setup Node') as any;
 
-      expect(nodeStep?.with?.['node-version']).toBe(18);
+      expect(nodeStep?.with?.['node-version']).toBe('${{ matrix.node-version }}');
+    });
+
+    it('adds strategy.matrix when multiple versions provided', () => {
+      const result = buildStaticAnalysisPipeline({
+        ...defaultOptions,
+        nodeVersions: [18, 20],
+      });
+      const job = result.jobs.static_analysis as any;
+
+      expect(job.strategy?.matrix?.['node-version']).toEqual([18, 20]);
+    });
+
+    it('does not add strategy when only one version provided', () => {
+      const result = buildStaticAnalysisPipeline({
+        ...defaultOptions,
+        nodeVersions: [20],
+      });
+      const job = result.jobs.static_analysis as any;
+
+      expect(job.strategy).toBeUndefined();
     });
   });
 
