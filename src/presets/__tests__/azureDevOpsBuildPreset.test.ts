@@ -35,9 +35,7 @@ describe('buildAzureDevOpsBuildPipeline', () => {
       const stages = result.stages as Array<Record<string, unknown>>;
       const jobs = stages[0].jobs as Array<Record<string, unknown>>;
       const steps = jobs[0].steps as Array<Record<string, unknown>>;
-      const publishStep = steps.find(
-        s => s.task === 'PublishBuildArtifacts@1'
-      );
+      const publishStep = steps.find(s => s.task === 'PublishBuildArtifacts@1');
 
       expect(publishStep).toBeDefined();
     });

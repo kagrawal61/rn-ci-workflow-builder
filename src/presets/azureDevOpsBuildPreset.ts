@@ -47,13 +47,11 @@ export function buildAzureDevOpsBuildPipeline(
       displayName: 'TypeScript check',
     });
     steps.push({
-      script:
-        packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
+      script: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
       displayName: 'ESLint',
     });
     steps.push({
-      script:
-        packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
+      script: packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
       displayName: 'Unit tests',
     });
   }
@@ -81,15 +79,13 @@ export function buildAzureDevOpsBuildPipeline(
     let gradleTask: string;
 
     if (outputType === 'both') {
-      const apkTask =
-        variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
+      const apkTask = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
       const aabTask = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
       gradleTask = `${apkTask} ${aabTask}`;
     } else if (outputType === 'aab') {
       gradleTask = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
     } else {
-      gradleTask =
-        variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
+      gradleTask = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
     }
 
     steps.push({
@@ -100,9 +96,7 @@ export function buildAzureDevOpsBuildPipeline(
 
   // Publish artifacts
   const artifactPath =
-    framework === 'expo'
-      ? 'expo-builds'
-      : 'android/app/build/outputs';
+    framework === 'expo' ? 'expo-builds' : 'android/app/build/outputs';
 
   steps.push({
     task: 'PublishBuildArtifacts@1',
@@ -114,10 +108,7 @@ export function buildAzureDevOpsBuildPipeline(
   });
 
   // Slack notification
-  if (
-    buildOpts.notification === 'slack' ||
-    buildOpts.notification === 'both'
-  ) {
+  if (buildOpts.notification === 'slack' || buildOpts.notification === 'both') {
     steps.push({
       script: `curl -s -X POST -H 'Content-type: application/json' --data '{"text":"Android build completed on branch: $(Build.SourceBranchName)"}' "$(SLACK_WEBHOOK_URL)" || true`,
       displayName: 'Notify Slack',
@@ -126,10 +117,8 @@ export function buildAzureDevOpsBuildPipeline(
   }
 
   // Trigger sections
-  const triggerBranches: string[] =
-    triggers?.push?.branches ?? ['main'];
-  const prBranches: string[] =
-    triggers?.pullRequest?.branches ?? ['main'];
+  const triggerBranches: string[] = triggers?.push?.branches ?? ['main'];
+  const prBranches: string[] = triggers?.pullRequest?.branches ?? ['main'];
 
   const result: Record<string, unknown> = {
     trigger: {

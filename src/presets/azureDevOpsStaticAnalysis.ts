@@ -44,8 +44,7 @@ export function buildAzureDevOpsStaticAnalysisPipeline(
 
   if (staticAnalysis.eslint !== false) {
     steps.push({
-      script:
-        packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
+      script: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
       displayName: 'ESLint',
     });
   }
@@ -62,8 +61,7 @@ export function buildAzureDevOpsStaticAnalysisPipeline(
 
   if (staticAnalysis.unitTests !== false) {
     steps.push({
-      script:
-        packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
+      script: packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
       displayName: 'Unit tests',
     });
   }
@@ -81,10 +79,8 @@ export function buildAzureDevOpsStaticAnalysisPipeline(
   }
 
   // Trigger sections
-  const triggerBranches: string[] =
-    triggers?.push?.branches ?? ['main'];
-  const prBranches: string[] =
-    triggers?.pullRequest?.branches ?? ['main'];
+  const triggerBranches: string[] = triggers?.push?.branches ?? ['main'];
+  const prBranches: string[] = triggers?.pullRequest?.branches ?? ['main'];
 
   const result: Record<string, unknown> = {
     trigger: {

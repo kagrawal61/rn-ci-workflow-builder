@@ -54,7 +54,10 @@ describe('buildAzureDevOpsStaticAnalysisPipeline', () => {
       const stages = result.stages as Array<Record<string, unknown>>;
       const jobs = stages[0].jobs as Array<Record<string, unknown>>;
       const steps = jobs[0].steps as Array<Record<string, unknown>>;
-      const nodeStep = steps.find(s => s.task === 'NodeTool@0') as Record<string, unknown>;
+      const nodeStep = steps.find(s => s.task === 'NodeTool@0') as Record<
+        string,
+        unknown
+      >;
       const inputs = nodeStep.inputs as Record<string, string>;
 
       expect(inputs.versionSpec).toBe('20.x');
