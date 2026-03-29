@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildAzureDevOpsBuildPipeline output matches snapshot for default options 1`] = `
+{
+  "pool": {
+    "vmImage": "ubuntu-latest",
+  },
+  "pr": {
+    "branches": {
+      "include": [
+        "main",
+      ],
+    },
+  },
+  "stages": [
+    {
+      "displayName": "Build Android",
+      "jobs": [
+        {
+          "displayName": "Build React Native Android",
+          "job": "AndroidBuild",
+          "steps": [
+            {
+              "displayName": "Install Node.js",
+              "inputs": {
+                "versionSpec": "20.x",
+              },
+              "task": "NodeTool@0",
+            },
+            {
+              "displayName": "Install dependencies",
+              "script": "yarn install --immutable",
+            },
+            {
+              "displayName": "Make gradlew executable",
+              "script": "chmod +x android/gradlew",
+            },
+            {
+              "displayName": "Build Android",
+              "script": "cd android && ./gradlew assembleRelease && cd ..",
+            },
+            {
+              "displayName": "Publish build artifacts",
+              "inputs": {
+                "artifactName": "android-build",
+                "pathToPublish": "android/app/build/outputs",
+              },
+              "task": "PublishBuildArtifacts@1",
+            },
+          ],
+        },
+      ],
+      "stage": "Build",
+    },
+  ],
+  "trigger": {
+    "branches": {
+      "include": [
+        "main",
+      ],
+    },
+  },
+}
+`;

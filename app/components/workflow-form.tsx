@@ -187,18 +187,25 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="github">GitHub Actions</SelectItem>
-                  <SelectItem value="bitrise" disabled={true}>
-                    Bitrise
-                    <span className="ml-2 rounded-full bg-amber-200 px-2 py-0.5 text-xs font-medium text-amber-800">
-                      Coming Soon
-                    </span>
-                  </SelectItem>
+                  <SelectItem value="bitrise">Bitrise</SelectItem>
+                  <SelectItem value="gitlab">GitLab CI</SelectItem>
+                  <SelectItem value="circleci">CircleCI</SelectItem>
+                  <SelectItem value="codemagic">Codemagic</SelectItem>
+                  <SelectItem value="azure-devops">Azure DevOps</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
                 {values.platform === 'bitrise'
                   ? 'Generate a Bitrise workflow configuration (bitrise.yml)'
-                  : 'Generate a GitHub Actions workflow (.github/workflows/*.yml)'}
+                  : values.platform === 'gitlab'
+                    ? 'Generate a GitLab CI configuration (.gitlab-ci.yml)'
+                    : values.platform === 'circleci'
+                      ? 'Generate a CircleCI configuration (.circleci/config.yml)'
+                      : values.platform === 'codemagic'
+                        ? 'Generate a Codemagic configuration (codemagic.yaml)'
+                        : values.platform === 'azure-devops'
+                          ? 'Generate an Azure Pipelines configuration (azure-pipelines.yml)'
+                          : 'Generate a GitHub Actions workflow (.github/workflows/*.yml)'}
               </p>
             </div>
 

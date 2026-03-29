@@ -186,12 +186,31 @@ export function writeWorkflowFile(
   let outputFileName = fileName;
 
   if (!outputDir) {
-    outputDir = platform === 'bitrise' ? '.' : '.github/workflows';
+    if (
+      platform === 'bitrise' ||
+      platform === 'gitlab' ||
+      platform === 'codemagic' ||
+      platform === 'azure-devops'
+    ) {
+      outputDir = '.';
+    } else if (platform === 'circleci') {
+      outputDir = '.circleci';
+    } else {
+      outputDir = '.github/workflows';
+    }
   }
 
   if (!outputFileName) {
     if (platform === 'bitrise') {
       outputFileName = 'bitrise.yml';
+    } else if (platform === 'gitlab') {
+      outputFileName = '.gitlab-ci.yml';
+    } else if (platform === 'circleci') {
+      outputFileName = 'config.yml';
+    } else if (platform === 'codemagic') {
+      outputFileName = 'codemagic.yaml';
+    } else if (platform === 'azure-devops') {
+      outputFileName = 'azure-pipelines.yml';
     } else {
       outputFileName = `${cfg.kind}.yaml`;
     }

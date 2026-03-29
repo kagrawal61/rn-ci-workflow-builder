@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildAzureDevOpsStaticAnalysisPipeline output matches snapshot for default options 1`] = `
+{
+  "pool": {
+    "vmImage": "ubuntu-latest",
+  },
+  "pr": {
+    "branches": {
+      "include": [
+        "main",
+      ],
+    },
+  },
+  "stages": [
+    {
+      "displayName": "Static Analysis",
+      "jobs": [
+        {
+          "displayName": "Lint and Type Check",
+          "job": "Lint",
+          "steps": [
+            {
+              "displayName": "Install Node.js",
+              "inputs": {
+                "versionSpec": "20.x",
+              },
+              "task": "NodeTool@0",
+            },
+            {
+              "displayName": "Install dependencies",
+              "script": "yarn install --immutable",
+            },
+            {
+              "displayName": "TypeScript check",
+              "script": "yarn tsc --noEmit",
+            },
+            {
+              "displayName": "ESLint",
+              "script": "yarn lint",
+            },
+            {
+              "displayName": "Prettier check",
+              "script": "yarn format:check",
+            },
+            {
+              "displayName": "Unit tests",
+              "script": "yarn test --ci",
+            },
+          ],
+        },
+      ],
+      "stage": "StaticAnalysis",
+    },
+  ],
+  "trigger": {
+    "branches": {
+      "include": [
+        "main",
+      ],
+    },
+  },
+}
+`;
+
+exports[`buildAzureDevOpsStaticAnalysisPipeline output matches snapshot for npm package manager 1`] = `
+{
+  "pool": {
+    "vmImage": "ubuntu-latest",
+  },
+  "pr": {
+    "branches": {
+      "include": [
+        "main",
+      ],
+    },
+  },
+  "stages": [
+    {
+      "displayName": "Static Analysis",
+      "jobs": [
+        {
+          "displayName": "Lint and Type Check",
+          "job": "Lint",
+          "steps": [
+            {
+              "displayName": "Install Node.js",
+              "inputs": {
+                "versionSpec": "20.x",
+              },
+              "task": "NodeTool@0",
+            },
+            {
+              "displayName": "Install dependencies",
+              "script": "npm ci",
+            },
+            {
+              "displayName": "TypeScript check",
+              "script": "npm run tsc -- --noEmit",
+            },
+            {
+              "displayName": "ESLint",
+              "script": "npm run lint",
+            },
+            {
+              "displayName": "Prettier check",
+              "script": "npm run format:check",
+            },
+            {
+              "displayName": "Unit tests",
+              "script": "npm test -- --ci",
+            },
+          ],
+        },
+      ],
+      "stage": "StaticAnalysis",
+    },
+  ],
+  "trigger": {
+    "branches": {
+      "include": [
+        "main",
+      ],
+    },
+  },
+}
+`;
