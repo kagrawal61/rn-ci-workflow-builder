@@ -46,8 +46,7 @@ export function buildCircleCIBuildPipeline(
     steps.push({
       run: {
         name: 'ESLint',
-        command:
-          packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
+        command: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
       },
     });
     steps.push({
@@ -88,8 +87,7 @@ export function buildCircleCIBuildPipeline(
     let gradleTask: string;
 
     if (outputType === 'both') {
-      const apkTask =
-        variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
+      const apkTask = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
       const aabTask = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
       gradleTask = `${apkTask} ${aabTask}`;
     } else if (outputType === 'aab') {
@@ -102,7 +100,7 @@ export function buildCircleCIBuildPipeline(
       run: {
         name: 'Build Android',
         command: `cd android && ./gradlew ${gradleTask} && cd ..`,
-        'no_output_timeout': '30m',
+        no_output_timeout: '30m',
       },
     });
   }
@@ -129,10 +127,7 @@ export function buildCircleCIBuildPipeline(
 
   // Slack notification
   const orbs: Record<string, string> = { node: 'circleci/node@5' };
-  if (
-    buildOpts.notification === 'slack' ||
-    buildOpts.notification === 'both'
-  ) {
+  if (buildOpts.notification === 'slack' || buildOpts.notification === 'both') {
     orbs.slack = 'circleci/slack@4';
     steps.push({
       'slack/notify': {

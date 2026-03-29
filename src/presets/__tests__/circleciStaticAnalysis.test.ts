@@ -68,7 +68,10 @@ describe('buildCircleCIStaticAnalysisPipeline', () => {
       ) as Record<string, unknown> | undefined;
 
       expect(installStep).toBeDefined();
-      const installConfig = installStep!['node/install-packages'] as Record<string, string>;
+      const installConfig = installStep!['node/install-packages'] as Record<
+        string,
+        string
+      >;
       expect(installConfig['pkg-manager']).toBe('yarn');
     });
 
@@ -83,7 +86,10 @@ describe('buildCircleCIStaticAnalysisPipeline', () => {
       const installStep = steps.find(
         s => typeof s === 'object' && 'node/install-packages' in s
       ) as Record<string, unknown> | undefined;
-      const installConfig = installStep!['node/install-packages'] as Record<string, string>;
+      const installConfig = installStep!['node/install-packages'] as Record<
+        string,
+        string
+      >;
 
       expect(installConfig['pkg-manager']).toBe('npm');
     });

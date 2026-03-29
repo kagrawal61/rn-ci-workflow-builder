@@ -43,8 +43,7 @@ export function buildCircleCIStaticAnalysisPipeline(
     steps.push({
       run: {
         name: 'ESLint',
-        command:
-          packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
+        command: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
       },
     });
   }

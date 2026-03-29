@@ -583,7 +583,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('generates valid parseable YAML with yarn', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'circleci', packageManager: 'yarn', nodeVersions: [20] },
+        options: {
+          platform: 'circleci',
+          packageManager: 'yarn',
+          nodeVersions: [20],
+        },
       });
       const parsed = yaml.load(yamlStr) as Record<string, any>;
       expect(parsed.version).toBeCloseTo(2.1);
@@ -593,13 +597,22 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('includes TypeScript run step', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'circleci', packageManager: 'yarn', nodeVersions: [18] },
+        options: {
+          platform: 'circleci',
+          packageManager: 'yarn',
+          nodeVersions: [18],
+        },
       });
       const parsed = yaml.load(yamlStr) as Record<string, any>;
-      const steps: Array<string | Record<string, unknown>> = parsed.jobs['static-analysis'].steps;
-      const hasTs = steps.some(s =>
-        typeof s === 'object' && s !== null && 'run' in s &&
-        typeof (s as any).run === 'object' && ((s as any).run.command ?? '').includes('tsc')
+      const steps: Array<string | Record<string, unknown>> =
+        parsed.jobs['static-analysis'].steps;
+      const hasTs = steps.some(
+        s =>
+          typeof s === 'object' &&
+          s !== null &&
+          'run' in s &&
+          typeof (s as any).run === 'object' &&
+          ((s as any).run.command ?? '').includes('tsc')
       );
       expect(hasTs).toBe(true);
     });
@@ -607,7 +620,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('output structure matches snapshot', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'circleci', packageManager: 'yarn', nodeVersions: [20] },
+        options: {
+          platform: 'circleci',
+          packageManager: 'yarn',
+          nodeVersions: [20],
+        },
       });
       expect(yamlStr).toMatchSnapshot();
     });
@@ -619,7 +636,12 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
         kind: 'build',
         options: {
           platform: 'circleci',
-          build: { platform: 'android', variant: 'release', storage: 'github', notification: 'none' },
+          build: {
+            platform: 'android',
+            variant: 'release',
+            storage: 'github',
+            notification: 'none',
+          },
         },
       });
       const parsed = yaml.load(yamlStr) as Record<string, any>;
@@ -632,7 +654,12 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
         kind: 'build',
         options: {
           platform: 'circleci',
-          build: { platform: 'android', variant: 'release', storage: 'github', notification: 'none' },
+          build: {
+            platform: 'android',
+            variant: 'release',
+            storage: 'github',
+            notification: 'none',
+          },
         },
       });
       expect(yamlStr).toMatchSnapshot();
@@ -645,7 +672,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('generates valid parseable YAML with yarn', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'gitlab', packageManager: 'yarn', nodeVersions: [20] },
+        options: {
+          platform: 'gitlab',
+          packageManager: 'yarn',
+          nodeVersions: [20],
+        },
       });
       const parsed = yaml.load(yamlStr) as Record<string, any>;
       expect(parsed.stages).toContain('static-analysis');
@@ -655,7 +686,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('includes TypeScript check in script', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'gitlab', packageManager: 'yarn', nodeVersions: [18] },
+        options: {
+          platform: 'gitlab',
+          packageManager: 'yarn',
+          nodeVersions: [18],
+        },
       });
       const parsed = yaml.load(yamlStr) as Record<string, any>;
       const script: string[] = parsed['static-analysis'].script;
@@ -665,7 +700,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('output structure matches snapshot', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'gitlab', packageManager: 'yarn', nodeVersions: [20] },
+        options: {
+          platform: 'gitlab',
+          packageManager: 'yarn',
+          nodeVersions: [20],
+        },
       });
       expect(yamlStr).toMatchSnapshot();
     });
@@ -677,7 +716,12 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
         kind: 'build',
         options: {
           platform: 'gitlab',
-          build: { platform: 'android', variant: 'release', storage: 'github', notification: 'none' },
+          build: {
+            platform: 'android',
+            variant: 'release',
+            storage: 'github',
+            notification: 'none',
+          },
         },
       });
       const parsed = yaml.load(yamlStr) as Record<string, any>;
@@ -690,7 +734,12 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
         kind: 'build',
         options: {
           platform: 'gitlab',
-          build: { platform: 'android', variant: 'release', storage: 'github', notification: 'none' },
+          build: {
+            platform: 'android',
+            variant: 'release',
+            storage: 'github',
+            notification: 'none',
+          },
         },
       });
       expect(yamlStr).toMatchSnapshot();
