@@ -10,7 +10,7 @@ export type PipelineKind = 'static-analysis' | 'build';
 /**
  * Available CI platforms
  */
-export type CIPlatform = 'github' | 'bitrise';
+export type CIPlatform = 'github' | 'bitrise' | 'gitlab' | 'circleci';
 
 /**
  * GitHub Actions workflow trigger configuration
