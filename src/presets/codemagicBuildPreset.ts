@@ -40,13 +40,11 @@ export function buildCodemagicBuildPipeline(
     });
     scripts.push({
       name: 'ESLint',
-      script:
-        packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
+      script: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
     });
     scripts.push({
       name: 'Unit tests',
-      script:
-        packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
+      script: packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
     });
   }
 
@@ -69,8 +67,7 @@ export function buildCodemagicBuildPipeline(
     const outputType = buildOpts.androidOutputType ?? 'apk';
 
     if (outputType === 'both') {
-      const apkTask =
-        variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
+      const apkTask = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
       const aabTask = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
       scripts.push({
         name: 'Build Android',
@@ -83,8 +80,7 @@ export function buildCodemagicBuildPipeline(
         script: `cd android && ./gradlew ${task} && cd ..`,
       });
     } else {
-      const task =
-        variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
+      const task = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
       scripts.push({
         name: 'Build Android',
         script: `cd android && ./gradlew ${task} && cd ..`,
@@ -135,10 +131,7 @@ export function buildCodemagicBuildPipeline(
 
   // Publishing
   const publishing: Record<string, unknown> = {};
-  if (
-    buildOpts.notification === 'slack' ||
-    buildOpts.notification === 'both'
-  ) {
+  if (buildOpts.notification === 'slack' || buildOpts.notification === 'both') {
     publishing.slack = {
       channel: '#builds',
       notify_on_build_start: true,

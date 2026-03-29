@@ -37,8 +37,7 @@ export function buildCodemagicStaticAnalysisPipeline(
   if (staticAnalysis.eslint !== false) {
     scripts.push({
       name: 'ESLint',
-      script:
-        packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
+      script: packageManager === 'yarn' ? 'yarn lint' : 'npm run lint',
     });
   }
 
@@ -55,8 +54,7 @@ export function buildCodemagicStaticAnalysisPipeline(
   if (staticAnalysis.unitTests !== false) {
     scripts.push({
       name: 'Unit tests',
-      script:
-        packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
+      script: packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci',
     });
   }
 
