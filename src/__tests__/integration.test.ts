@@ -577,6 +577,65 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     });
   });
 
+  // ─── Codemagic ───────────────────────────────────────────────────────────
+
+  describe('Codemagic — Static Analysis', () => {
+    it('generates valid parseable YAML with yarn', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'codemagic', packageManager: 'yarn', nodeVersions: [20] },
+      });
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      expect(parsed.workflows['static-analysis']).toBeDefined();
+      expect(parsed.workflows['static-analysis'].instance_type).toBe('linux_x2');
+    });
+
+    it('includes TypeScript check script', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'codemagic', packageManager: 'yarn', nodeVersions: [18] },
+      });
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      const scripts: Array<Record<string, unknown>> = parsed.workflows['static-analysis'].scripts;
+      const hasTs = scripts.some(s => typeof s.script === 'string' && s.script.includes('tsc'));
+      expect(hasTs).toBe(true);
+    });
+
+    it('output structure matches snapshot', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'codemagic', packageManager: 'yarn', nodeVersions: [20] },
+      });
+      expect(yamlStr).toMatchSnapshot();
+    });
+  });
+
+  describe('Codemagic — Build (Android)', () => {
+    it('generates valid parseable YAML', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'build',
+        options: {
+          platform: 'codemagic',
+          build: { platform: 'android', variant: 'release', storage: 'github', notification: 'none' },
+        },
+      });
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      expect(parsed.workflows['build-android']).toBeDefined();
+      expect(parsed.workflows['build-android'].artifacts).toBeDefined();
+    });
+
+    it('output structure matches snapshot', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'build',
+        options: {
+          platform: 'codemagic',
+          build: { platform: 'android', variant: 'release', storage: 'github', notification: 'none' },
+        },
+      });
+      expect(yamlStr).toMatchSnapshot();
+    });
+  });
+
   // ─── CircleCI ────────────────────────────────────────────────────────────
 
   describe('CircleCI — Static Analysis', () => {

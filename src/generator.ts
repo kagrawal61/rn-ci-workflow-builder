@@ -224,7 +224,7 @@ export function writeWorkflowFile(
   let outputFileName = fileName;
 
   if (!outputDir) {
-    if (platform === 'bitrise' || platform === 'gitlab') {
+    if (platform === 'bitrise' || platform === 'gitlab' || platform === 'codemagic') {
       outputDir = '.';
     } else if (platform === 'circleci') {
       outputDir = '.circleci';
@@ -240,6 +240,8 @@ export function writeWorkflowFile(
       outputFileName = '.gitlab-ci.yml';
     } else if (platform === 'circleci') {
       outputFileName = 'config.yml';
+    } else if (platform === 'codemagic') {
+      outputFileName = 'codemagic.yaml';
     } else {
       outputFileName = `${cfg.kind}.yaml`;
     }

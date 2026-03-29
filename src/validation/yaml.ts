@@ -900,6 +900,21 @@ export async function validateYamlContentWithYamllint(
 }
 
 /**
+ * Returns true if the object looks like a Codemagic config
+ * (workflows whose values contain 'instance_type' or 'scripts', not Bitrise 'steps')
+ */
+function isCodemagicConfig(obj: Record<string, unknown>): boolean {
+  const workflows = obj.workflows;
+  if (!workflows || typeof workflows !== 'object') return false;
+  return Object.values(workflows as Record<string, unknown>).some(
+    wf =>
+      typeof wf === 'object' &&
+      wf !== null &&
+      ('instance_type' in wf || 'scripts' in wf)
+  );
+}
+
+/**
  * Validates that the YAML object structure follows GitHub Actions schema
  * @param parsedYaml Parsed YAML object
  */
@@ -928,6 +943,11 @@ function validateWorkflowStructure(parsedYaml: unknown): void {
     // CircleCI config (version: 2 or 2.1)
     if (!obj.jobs || typeof obj.jobs !== 'object') {
       throw new Error('CircleCI configuration must have at least one job');
+    }
+  } else if ('workflows' in obj && !('format_version' in obj) && isCodemagicConfig(obj)) {
+    // Codemagic configuration (workflows with instance_type or scripts — not Bitrise step format)
+    if (!obj.workflows || typeof obj.workflows !== 'object' || Object.keys(obj.workflows).length === 0) {
+      throw new Error('Codemagic configuration must have at least one workflow');
     }
   } else {
     // GitHub Actions workflow

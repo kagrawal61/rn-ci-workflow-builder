@@ -8,6 +8,8 @@ import { buildBitriseStaticAnalysisPipeline } from './bitriseStaticAnalysis';
 import { buildBuildPipeline } from './buildPreset';
 import { buildCircleCIBuildPipeline } from './circleciBuilPreset';
 import { buildCircleCIStaticAnalysisPipeline } from './circleciStaticAnalysis';
+import { buildCodemagicBuildPipeline } from './codemagicBuildPreset';
+import { buildCodemagicStaticAnalysisPipeline } from './codemagicStaticAnalysis';
 import { buildGitlabBuildPipeline } from './gitlabBuildPreset';
 import { buildGitlabStaticAnalysisPipeline } from './gitlabStaticAnalysis';
 import { buildStaticAnalysisPipeline } from './staticAnalysis';
@@ -23,6 +25,8 @@ export function registerBuiltInPresets(): void {
       return buildGitlabStaticAnalysisPipeline(opts);
     } else if (opts.platform === 'circleci') {
       return buildCircleCIStaticAnalysisPipeline(opts);
+    } else if (opts.platform === 'codemagic') {
+      return buildCodemagicStaticAnalysisPipeline(opts);
     }
     throw new Error(`Unsupported platform: ${opts.platform}`);
   });
@@ -36,6 +40,8 @@ export function registerBuiltInPresets(): void {
       return buildGitlabBuildPipeline(opts);
     } else if (opts.platform === 'circleci') {
       return buildCircleCIBuildPipeline(opts);
+    } else if (opts.platform === 'codemagic') {
+      return buildCodemagicBuildPipeline(opts);
     }
     throw new Error(`Unsupported platform: ${opts.platform}`);
   });
@@ -47,6 +53,8 @@ export * from './bitriseStaticAnalysis';
 export * from './buildPreset';
 export * from './circleciBuilPreset';
 export * from './circleciStaticAnalysis';
+export * from './codemagicBuildPreset';
+export * from './codemagicStaticAnalysis';
 export * from './gitlabBuildPreset';
 export * from './gitlabStaticAnalysis';
 export * from './staticAnalysis';
