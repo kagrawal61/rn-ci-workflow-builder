@@ -25,7 +25,7 @@ const steps = [
     icon: Download,
     title: 'Download & Deploy',
     description:
-      'Download the ready-to-use YAML file, drop it into your repository\'s `.github/workflows` directory, and you\'re done.',
+      "Download the ready-to-use YAML file, drop it into your repository's `.github/workflows` directory, and you're done.",
     color: 'purple',
   },
 ];
@@ -44,8 +44,15 @@ export function HowItWorks() {
         </div>
 
         <div className="relative grid grid-cols-1 gap-8 md:grid-cols-3">
-          {/* Connector line (desktop) */}
-          <div className="absolute left-0 right-0 top-12 hidden h-px bg-border md:block" />
+          {/* Connector line between circle centres (desktop only) */}
+          <div
+            className="absolute hidden h-px bg-border md:block"
+            style={{
+              top: '48px',
+              left: 'calc(100% / 6)',
+              right: 'calc(100% / 6)',
+            }}
+          />
 
           {steps.map((step, i) => (
             <motion.div
