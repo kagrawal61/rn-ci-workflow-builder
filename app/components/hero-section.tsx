@@ -2,15 +2,7 @@
 
 import { PROJECT_DESCRIPTION, PROJECT_NAME } from '@/config/constants';
 import { motion } from 'framer-motion';
-import {
-  Clock,
-  Code,
-  FileJson,
-  Github,
-  LayoutGrid,
-  Rocket,
-  Zap,
-} from 'lucide-react';
+import { Clock, Code, FileJson, LayoutGrid, Rocket, Zap } from 'lucide-react';
 import { Button } from './ui/button';
 
 export function HeroSection() {
@@ -97,21 +89,6 @@ export function HeroSection() {
             asChild
           >
             <a href="/docs">Read Documentation</a>
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="flex h-12 items-center gap-2 px-8 transition-all hover:scale-105"
-            asChild
-          >
-            <a
-              href="https://github.com/kagrawal61/rn-ci-workflow-builder"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Github className="h-4 w-4" />
-              <span>View on GitHub</span>
-            </a>
           </Button>
         </motion.div>
 
