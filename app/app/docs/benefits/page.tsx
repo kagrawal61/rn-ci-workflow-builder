@@ -4,10 +4,24 @@ import { Book, CheckCircle, Clock, Target, TrendingUp } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Benefits — React Native CI/CD Workflow Builder',
+  title: 'Benefits & ROI',
   description:
-    'Discover how the React Native CI/CD Workflow Builder saves $2K–15K annually by eliminating manual CI setup and reducing build configuration time.',
+    'See how Mobile CI Builder saves React Native teams $2K–15K annually: 85–95% faster CI setup, zero manual YAML writing, and consistent pipelines across every project.',
   alternates: { canonical: '/docs/benefits' },
+  openGraph: {
+    title: 'Benefits & ROI | Mobile CI Builder',
+    description:
+      'Save $2K–15K annually. 85–95% faster CI setup for React Native teams. Zero manual YAML writing.',
+    url: 'https://www.mobilecibuilder.com/docs/benefits',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Benefits & ROI | Mobile CI Builder',
+    description:
+      'Save $2K–15K annually. 85–95% faster CI setup for React Native teams. Zero manual YAML writing.',
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function BenefitsPage() {
