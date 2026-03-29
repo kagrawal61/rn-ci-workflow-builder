@@ -2,6 +2,7 @@ import { BenefitsSection } from '@/components/benefits-section';
 import { FooterSection } from '@/components/footer-section';
 import { Header } from '@/components/header';
 import { HeroSection } from '@/components/hero-section';
+import { HowItWorks } from '@/components/how-it-works';
 import { SupportedFrameworks } from '@/components/supported-frameworks';
 import { WorkflowBuilder } from '@/components/workflow-builder';
 
@@ -40,19 +41,18 @@ const jsonLd = {
 
 export default function HomePage() {
   return (
-    <>
+    <main className="flex min-h-screen flex-col items-center">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="flex min-h-screen flex-col items-center">
-        <Header />
-        <HeroSection />
-        <BenefitsSection />
-        <WorkflowBuilder />
-        <SupportedFrameworks />
-        <FooterSection />
-      </main>
-    </>
+      <Header />
+      <HeroSection />
+      <WorkflowBuilder />
+      <HowItWorks />
+      <BenefitsSection />
+      <SupportedFrameworks />
+      <FooterSection />
+    </main>
   );
 }
