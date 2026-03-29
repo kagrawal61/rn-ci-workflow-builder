@@ -347,6 +347,88 @@ yarn test --ci",
 }
 `;
 
+exports[`Integration: Full Workflow Generation Pipeline CircleCI — Build (Android) output structure matches snapshot 1`] = `
+"version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  build:
+    docker:
+      - image: cimg/android:2024.01
+    environment:
+      NODE_VERSION: '20'
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+
+      - run:
+          name: TypeScript
+          command: yarn tsc --noEmit
+
+      - run:
+          name: ESLint
+          command: yarn lint
+
+      - run:
+          name: Unit Tests
+          command: yarn test --ci
+
+      - run:
+          name: Make gradlew executable
+          command: chmod +x android/gradlew
+
+      - run:
+          name: Build Android
+          command: cd android && ./gradlew assembleRelease && cd ..
+          no_output_timeout: 30m
+
+      - store_artifacts:
+          path: android/app/build/outputs/apk
+
+workflows:
+  build:
+    jobs:
+      - build: {}
+"
+`;
+
+exports[`Integration: Full Workflow Generation Pipeline CircleCI — Static Analysis output structure matches snapshot 1`] = `
+"version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  static-analysis:
+    docker:
+      - image: cimg/node:20.0
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+
+      - run:
+          name: TypeScript
+          command: yarn tsc --noEmit
+
+      - run:
+          name: ESLint
+          command: yarn lint
+
+      - run:
+          name: Prettier
+          command: yarn format:check
+
+      - run:
+          name: Unit Tests
+          command: yarn test --ci
+
+workflows:
+  static-analysis:
+    jobs:
+      - static-analysis: {}
+"
+`;
+
 exports[`Integration: Full Workflow Generation Pipeline GitHub Actions — Build (Android) output structure matches snapshot 1`] = `
 {
   "env": {},
@@ -959,4 +1041,53 @@ gh pr comment $PR_NUM --body "$MESSAGE"
     },
   },
 }
+`;
+
+exports[`Integration: Full Workflow Generation Pipeline GitLab CI — Build (Android) output structure matches snapshot 1`] = `
+"stages:
+  - build
+build:
+  image: node:20
+  stage: build
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - node_modules/
+  script:
+    - yarn install --immutable
+    - yarn tsc --noEmit
+    - yarn lint
+    - yarn test --ci
+    - chmod +x android/gradlew
+    - cd android && ./gradlew assembleRelease && cd ..
+  artifacts:
+    paths:
+      - android/app/build/outputs/apk/**/*.apk
+    expire_in: 30 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+"
+`;
+
+exports[`Integration: Full Workflow Generation Pipeline GitLab CI — Static Analysis output structure matches snapshot 1`] = `
+"stages:
+  - static-analysis
+static-analysis:
+  image: node:20
+  stage: static-analysis
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - node_modules/
+  script:
+    - yarn install --immutable
+    - yarn tsc --noEmit
+    - yarn lint
+    - yarn format:check
+    - yarn test --ci
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+"
 `;

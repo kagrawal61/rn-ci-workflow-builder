@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildCircleCIStaticAnalysisPipeline output matches snapshot for default options 1`] = `
+{
+  "jobs": {
+    "static-analysis": {
+      "docker": [
+        {
+          "image": "cimg/node:20.0",
+        },
+      ],
+      "steps": [
+        "checkout",
+        {
+          "node/install-packages": {
+            "pkg-manager": "yarn",
+          },
+        },
+        {
+          "run": {
+            "command": "yarn tsc --noEmit",
+            "name": "TypeScript",
+          },
+        },
+        {
+          "run": {
+            "command": "yarn lint",
+            "name": "ESLint",
+          },
+        },
+        {
+          "run": {
+            "command": "yarn format:check",
+            "name": "Prettier",
+          },
+        },
+        {
+          "run": {
+            "command": "yarn test --ci",
+            "name": "Unit Tests",
+          },
+        },
+      ],
+    },
+  },
+  "orbs": {
+    "node": "circleci/node@5",
+  },
+  "version": 2.1,
+  "workflows": {
+    "static-analysis": {
+      "jobs": [
+        {
+          "static-analysis": {},
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`buildCircleCIStaticAnalysisPipeline output matches snapshot for npm package manager 1`] = `
+{
+  "jobs": {
+    "static-analysis": {
+      "docker": [
+        {
+          "image": "cimg/node:20.0",
+        },
+      ],
+      "steps": [
+        "checkout",
+        {
+          "node/install-packages": {
+            "pkg-manager": "npm",
+          },
+        },
+        {
+          "run": {
+            "command": "npm run tsc -- --noEmit",
+            "name": "TypeScript",
+          },
+        },
+        {
+          "run": {
+            "command": "npm run lint",
+            "name": "ESLint",
+          },
+        },
+        {
+          "run": {
+            "command": "npm run format:check",
+            "name": "Prettier",
+          },
+        },
+        {
+          "run": {
+            "command": "npm test -- --ci",
+            "name": "Unit Tests",
+          },
+        },
+      ],
+    },
+  },
+  "orbs": {
+    "node": "circleci/node@5",
+  },
+  "version": 2.1,
+  "workflows": {
+    "static-analysis": {
+      "jobs": [
+        {
+          "static-analysis": {},
+        },
+      ],
+    },
+  },
+}
+`;

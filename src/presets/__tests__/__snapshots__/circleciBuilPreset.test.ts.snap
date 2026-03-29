@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildCircleCIBuildPipeline output matches snapshot for default options 1`] = `
+{
+  "jobs": {
+    "build": {
+      "docker": [
+        {
+          "image": "cimg/android:2024.01",
+        },
+      ],
+      "environment": {
+        "NODE_VERSION": "20",
+      },
+      "steps": [
+        "checkout",
+        {
+          "node/install-packages": {
+            "pkg-manager": "yarn",
+          },
+        },
+        {
+          "run": {
+            "command": "chmod +x android/gradlew",
+            "name": "Make gradlew executable",
+          },
+        },
+        {
+          "run": {
+            "command": "cd android && ./gradlew assembleRelease && cd ..",
+            "name": "Build Android",
+            "no_output_timeout": "30m",
+          },
+        },
+        {
+          "store_artifacts": {
+            "path": "android/app/build/outputs/apk",
+          },
+        },
+      ],
+    },
+  },
+  "orbs": {
+    "node": "circleci/node@5",
+  },
+  "version": 2.1,
+  "workflows": {
+    "build": {
+      "jobs": [
+        {
+          "build": {},
+        },
+      ],
+    },
+  },
+}
+`;
