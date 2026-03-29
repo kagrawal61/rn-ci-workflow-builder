@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildGitlabStaticAnalysisPipeline output matches snapshot for default options 1`] = `
+{
+  "stages": [
+    "static-analysis",
+  ],
+  "static-analysis": {
+    "cache": {
+      "key": "$CI_COMMIT_REF_SLUG",
+      "paths": [
+        "node_modules/",
+      ],
+    },
+    "image": "node:20",
+    "rules": [
+      {
+        "if": "$CI_PIPELINE_SOURCE == "push"",
+      },
+      {
+        "if": "$CI_PIPELINE_SOURCE == "merge_request_event"",
+      },
+    ],
+    "script": [
+      "yarn install --immutable",
+      "yarn tsc --noEmit",
+      "yarn lint",
+      "yarn format:check",
+      "yarn test --ci",
+    ],
+    "stage": "static-analysis",
+  },
+}
+`;
+
+exports[`buildGitlabStaticAnalysisPipeline output matches snapshot for npm package manager 1`] = `
+{
+  "stages": [
+    "static-analysis",
+  ],
+  "static-analysis": {
+    "cache": {
+      "key": "$CI_COMMIT_REF_SLUG",
+      "paths": [
+        "node_modules/",
+      ],
+    },
+    "image": "node:20",
+    "rules": [
+      {
+        "if": "$CI_PIPELINE_SOURCE == "push"",
+      },
+      {
+        "if": "$CI_PIPELINE_SOURCE == "merge_request_event"",
+      },
+    ],
+    "script": [
+      "npm ci",
+      "npm run tsc -- --noEmit",
+      "npm run lint",
+      "npm run format:check",
+      "npm test -- --ci",
+    ],
+    "stage": "static-analysis",
+  },
+}
+`;

@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildGitlabBuildPipeline output matches snapshot for default options 1`] = `
+{
+  "build": {
+    "artifacts": {
+      "expire_in": "30 days",
+      "paths": [
+        "android/app/build/outputs/apk/**/*.apk",
+      ],
+    },
+    "cache": {
+      "key": "$CI_COMMIT_REF_SLUG",
+      "paths": [
+        "node_modules/",
+      ],
+    },
+    "image": "node:20",
+    "rules": [
+      {
+        "if": "$CI_PIPELINE_SOURCE == "push"",
+      },
+      {
+        "if": "$CI_PIPELINE_SOURCE == "merge_request_event"",
+      },
+    ],
+    "script": [
+      "yarn install --immutable",
+      "chmod +x android/gradlew",
+      "cd android && ./gradlew assembleRelease && cd ..",
+    ],
+    "stage": "build",
+  },
+  "stages": [
+    "build",
+  ],
+}
+`;
