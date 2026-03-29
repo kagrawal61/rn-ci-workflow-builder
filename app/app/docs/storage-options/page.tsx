@@ -4,10 +4,24 @@ import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Storage Options — React Native CI/CD Workflow Builder',
+  title: 'Storage Options',
   description:
-    'Configure where to store your React Native build artifacts — APK, AAB, and IPA — including GitHub Actions artifacts and external storage.',
+    'Configure where to store React Native build artifacts (APK, AAB, IPA) — GitHub Actions artifacts, Firebase App Distribution, Google Drive, or Amazon S3.',
   alternates: { canonical: '/docs/storage-options' },
+  openGraph: {
+    title: 'Storage Options | Mobile CI Builder',
+    description:
+      'Store React Native build artifacts on GitHub Actions, Firebase App Distribution, Google Drive, or Amazon S3.',
+    url: 'https://www.mobilecibuilder.com/docs/storage-options',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Storage Options | Mobile CI Builder',
+    description:
+      'Store React Native build artifacts on GitHub Actions, Firebase App Distribution, Google Drive, or Amazon S3.',
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function StorageOptionsPage() {
