@@ -87,7 +87,10 @@ describe('buildGitlabBuildPipeline', () => {
       });
       const job = result['build'] as Record<string, unknown>;
       const script = job.script as string[];
-      const buildCmd = script.find(s => s.includes('assembleRelease') || s.includes('assembleDebug')) ?? '';
+      const buildCmd =
+        script.find(
+          s => s.includes('assembleRelease') || s.includes('assembleDebug')
+        ) ?? '';
 
       expect(buildCmd).toContain('assembleRelease');
       expect(buildCmd).toContain('bundleRelease');

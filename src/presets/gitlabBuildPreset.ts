@@ -34,9 +34,7 @@ export function buildGitlabBuildPipeline(
         ? 'yarn tsc --noEmit'
         : 'npm run tsc -- --noEmit'
     );
-    script.push(
-      packageManager === 'yarn' ? 'yarn lint' : 'npm run lint'
-    );
+    script.push(packageManager === 'yarn' ? 'yarn lint' : 'npm run lint');
     script.push(
       packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'
     );
@@ -56,16 +54,14 @@ export function buildGitlabBuildPipeline(
     const outputType = buildOpts.androidOutputType ?? 'apk';
 
     if (outputType === 'both') {
-      const apkTask =
-        variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
+      const apkTask = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
       const aabTask = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
       script.push(`cd android && ./gradlew ${apkTask} ${aabTask} && cd ..`);
     } else if (outputType === 'aab') {
       const task = variant === 'debug' ? 'bundleDebug' : 'bundleRelease';
       script.push(`cd android && ./gradlew ${task} && cd ..`);
     } else {
-      const task =
-        variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
+      const task = variant === 'debug' ? 'assembleDebug' : 'assembleRelease';
       script.push(`cd android && ./gradlew ${task} && cd ..`);
     }
   }
@@ -115,10 +111,7 @@ export function buildGitlabBuildPipeline(
 
   // Slack notification
   const afterScript: string[] = [];
-  if (
-    buildOpts.notification === 'slack' ||
-    buildOpts.notification === 'both'
-  ) {
+  if (buildOpts.notification === 'slack' || buildOpts.notification === 'both') {
     afterScript.push(
       `curl -s -X POST -H 'Content-type: application/json' ` +
         `--data '{"text":"Android build completed on branch: $CI_COMMIT_BRANCH"}' ` +

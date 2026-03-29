@@ -29,15 +29,11 @@ export function buildGitlabStaticAnalysisPipeline(
     );
   }
   if (staticAnalysis.eslint !== false) {
-    script.push(
-      packageManager === 'yarn' ? 'yarn lint' : 'npm run lint'
-    );
+    script.push(packageManager === 'yarn' ? 'yarn lint' : 'npm run lint');
   }
   if (staticAnalysis.prettier !== false) {
     script.push(
-      packageManager === 'yarn'
-        ? 'yarn format:check'
-        : 'npm run format:check'
+      packageManager === 'yarn' ? 'yarn format:check' : 'npm run format:check'
     );
   }
   if (staticAnalysis.unitTests !== false) {
