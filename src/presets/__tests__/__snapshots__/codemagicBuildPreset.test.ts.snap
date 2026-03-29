@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildCodemagicBuildPipeline output matches snapshot for default options 1`] = `
+{
+  "workflows": {
+    "build-android": {
+      "artifacts": [
+        "android/app/build/outputs/apk/**/*.apk",
+      ],
+      "cache": {
+        "cache_paths": [
+          "$CM_BUILD_DIR/node_modules",
+        ],
+      },
+      "environment": {
+        "node": 20,
+      },
+      "instance_type": "linux_x2",
+      "name": "Build Android",
+      "scripts": [
+        {
+          "name": "Install dependencies",
+          "script": "yarn install --immutable",
+        },
+        {
+          "name": "Make gradlew executable",
+          "script": "chmod +x android/gradlew",
+        },
+        {
+          "name": "Build Android",
+          "script": "cd android && ./gradlew assembleRelease && cd ..",
+        },
+      ],
+      "triggering": {
+        "branch_patterns": [
+          {
+            "include": true,
+            "pattern": "main",
+          },
+        ],
+        "events": [
+          "push",
+        ],
+      },
+    },
+  },
+}
+`;
