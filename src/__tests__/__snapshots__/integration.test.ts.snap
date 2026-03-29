@@ -958,3 +958,52 @@ gh pr comment $PR_NUM --body "$MESSAGE"
   },
 }
 `;
+
+exports[`Integration: Full Workflow Generation Pipeline GitLab CI — Build (Android) output structure matches snapshot 1`] = `
+"stages:
+  - build
+build:
+  image: node:20
+  stage: build
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - node_modules/
+  script:
+    - yarn install --immutable
+    - yarn tsc --noEmit
+    - yarn lint
+    - yarn test --ci
+    - chmod +x android/gradlew
+    - cd android && ./gradlew assembleRelease && cd ..
+  artifacts:
+    paths:
+      - android/app/build/outputs/apk/**/*.apk
+    expire_in: 30 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+"
+`;
+
+exports[`Integration: Full Workflow Generation Pipeline GitLab CI — Static Analysis output structure matches snapshot 1`] = `
+"stages:
+  - static-analysis
+static-analysis:
+  image: node:20
+  stage: static-analysis
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - node_modules/
+  script:
+    - yarn install --immutable
+    - yarn tsc --noEmit
+    - yarn lint
+    - yarn format:check
+    - yarn test --ci
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+"
+`;
