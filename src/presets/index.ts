@@ -6,6 +6,8 @@ import { WorkflowOptions } from '../types';
 import { buildBitriseBuildPipeline } from './bitriseBuildPreset';
 import { buildBitriseStaticAnalysisPipeline } from './bitriseStaticAnalysis';
 import { buildBuildPipeline } from './buildPreset';
+import { buildAzureDevOpsBuildPipeline } from './azureDevOpsBuildPreset';
+import { buildAzureDevOpsStaticAnalysisPipeline } from './azureDevOpsStaticAnalysis';
 import { buildCircleCIBuildPipeline } from './circleciBuilPreset';
 import { buildCircleCIStaticAnalysisPipeline } from './circleciStaticAnalysis';
 import { buildCodemagicBuildPipeline } from './codemagicBuildPreset';
@@ -27,6 +29,8 @@ export function registerBuiltInPresets(): void {
       return buildCircleCIStaticAnalysisPipeline(opts);
     } else if (opts.platform === 'codemagic') {
       return buildCodemagicStaticAnalysisPipeline(opts);
+    } else if (opts.platform === 'azure-devops') {
+      return buildAzureDevOpsStaticAnalysisPipeline(opts);
     }
     throw new Error(`Unsupported platform: ${opts.platform}`);
   });
@@ -42,12 +46,16 @@ export function registerBuiltInPresets(): void {
       return buildCircleCIBuildPipeline(opts);
     } else if (opts.platform === 'codemagic') {
       return buildCodemagicBuildPipeline(opts);
+    } else if (opts.platform === 'azure-devops') {
+      return buildAzureDevOpsBuildPipeline(opts);
     }
     throw new Error(`Unsupported platform: ${opts.platform}`);
   });
 }
 
 // Export built-in presets
+export * from './azureDevOpsBuildPreset';
+export * from './azureDevOpsStaticAnalysis';
 export * from './bitriseBuildPreset';
 export * from './bitriseStaticAnalysis';
 export * from './buildPreset';

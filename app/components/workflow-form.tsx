@@ -191,6 +191,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   <SelectItem value="gitlab">GitLab CI</SelectItem>
                   <SelectItem value="circleci">CircleCI</SelectItem>
                   <SelectItem value="codemagic">Codemagic</SelectItem>
+                  <SelectItem value="azure-devops">Azure DevOps</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
@@ -202,7 +203,9 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                       ? 'Generate a CircleCI configuration (.circleci/config.yml)'
                       : values.platform === 'codemagic'
                         ? 'Generate a Codemagic configuration (codemagic.yaml)'
-                        : 'Generate a GitHub Actions workflow (.github/workflows/*.yml)'}
+                        : values.platform === 'azure-devops'
+                          ? 'Generate an Azure Pipelines configuration (azure-pipelines.yml)'
+                          : 'Generate a GitHub Actions workflow (.github/workflows/*.yml)'}
               </p>
             </div>
 

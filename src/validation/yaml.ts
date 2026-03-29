@@ -935,9 +935,9 @@ function validateWorkflowStructure(parsedYaml: unknown): void {
     // Bitrise configuration
     validateBitriseStructure(obj);
   } else if ('stages' in obj && !('jobs' in obj)) {
-    // GitLab CI — must have at least one stage
+    // GitLab CI or Azure DevOps — must have at least one stage
     if (!Array.isArray(obj.stages) || obj.stages.length === 0) {
-      throw new Error('GitLab CI configuration must have at least one stage');
+      throw new Error('GitLab CI / Azure DevOps configuration must have at least one stage');
     }
   } else if ('version' in obj && typeof obj.version === 'number' && obj.version >= 2) {
     // CircleCI config (version: 2 or 2.1)

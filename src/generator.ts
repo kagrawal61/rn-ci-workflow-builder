@@ -224,7 +224,12 @@ export function writeWorkflowFile(
   let outputFileName = fileName;
 
   if (!outputDir) {
-    if (platform === 'bitrise' || platform === 'gitlab' || platform === 'codemagic') {
+    if (
+      platform === 'bitrise' ||
+      platform === 'gitlab' ||
+      platform === 'codemagic' ||
+      platform === 'azure-devops'
+    ) {
       outputDir = '.';
     } else if (platform === 'circleci') {
       outputDir = '.circleci';
@@ -242,6 +247,8 @@ export function writeWorkflowFile(
       outputFileName = 'config.yml';
     } else if (platform === 'codemagic') {
       outputFileName = 'codemagic.yaml';
+    } else if (platform === 'azure-devops') {
+      outputFileName = 'azure-pipelines.yml';
     } else {
       outputFileName = `${cfg.kind}.yaml`;
     }

@@ -698,6 +698,67 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     });
   });
 
+  // ─── Azure DevOps ────────────────────────────────────────────────────────
+
+  describe('Azure DevOps — Static Analysis', () => {
+    it('generates valid parseable YAML with yarn', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'azure-devops', packageManager: 'yarn', nodeVersions: [20] },
+      });
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      expect(Array.isArray(parsed.stages)).toBe(true);
+      expect(parsed.stages[0].stage).toBe('StaticAnalysis');
+    });
+
+    it('includes TypeScript check step', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'azure-devops', packageManager: 'yarn', nodeVersions: [18] },
+      });
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      const steps: Array<Record<string, unknown>> = parsed.stages[0].jobs[0].steps;
+      const hasTs = steps.some(
+        s => typeof s.script === 'string' && s.script.includes('tsc')
+      );
+      expect(hasTs).toBe(true);
+    });
+
+    it('output structure matches snapshot', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'azure-devops', packageManager: 'yarn', nodeVersions: [20] },
+      });
+      expect(yamlStr).toMatchSnapshot();
+    });
+  });
+
+  describe('Azure DevOps — Build (Android)', () => {
+    it('generates valid parseable YAML', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'build',
+        options: {
+          platform: 'azure-devops',
+          build: { platform: 'android', variant: 'release', storage: 'github', notification: 'none' },
+        },
+      });
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      expect(parsed.stages[0].stage).toBe('Build');
+      expect(parsed.pool.vmImage).toBe('ubuntu-latest');
+    });
+
+    it('output structure matches snapshot', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'build',
+        options: {
+          platform: 'azure-devops',
+          build: { platform: 'android', variant: 'release', storage: 'github', notification: 'none' },
+        },
+      });
+      expect(yamlStr).toMatchSnapshot();
+    });
+  });
+
   // ─── GitLab CI ───────────────────────────────────────────────────────────
 
   describe('GitLab CI — Static Analysis', () => {
