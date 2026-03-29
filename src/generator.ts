@@ -2,9 +2,9 @@ import fs from 'fs';
 import * as yaml from 'js-yaml';
 import path from 'path';
 
-import { injectSecrets } from './helpers';
+import { addStepSpacing, injectSecrets } from './helpers';
 import { generateSecretsSummary } from './helpers/secretsManager';
-import { BuildOptions } from './presets/types';
+import { BuildOptions, StaticAnalysisOptions } from './presets/types';
 import {
   BitriseConfig,
   GitHubWorkflow,
@@ -27,56 +27,6 @@ const builders: Record<
  * @param yamlStr The YAML string to format
  * @returns Formatted YAML string with spacing after steps
  */
-function addStepSpacing(yamlStr: string): string {
-  // Split the YAML into lines
-  const lines = yamlStr.split('\n');
-  const formattedLines: string[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const currentLine = lines[i];
-    const nextLine = lines[i + 1];
-
-    formattedLines.push(currentLine);
-
-    // Check if we're at the end of a step and the next line starts a new step
-    // A step ends when we have a step property and the next line is either:
-    // 1. Another step (starts with "      - name:" or "      - uses:" etc.)
-    // 2. A different section entirely
-    if (currentLine.trim() && nextLine) {
-      const currentIndent = currentLine.match(/^(\s*)/)?.[1]?.length || 0;
-      const nextIndent = nextLine.match(/^(\s*)/)?.[1]?.length || 0;
-
-      // Check if current line is a step property (name, uses, run, with, id, if, env, etc.)
-      const isStepProperty =
-        currentLine.match(/^\s+(name|uses|run|with|id|if|env|shell):\s*/) ||
-        currentLine.match(/^\s+(run):\s*\|/) ||
-        currentLine.match(/^\s+- name:/) ||
-        currentLine.match(/^\s+- uses:/) ||
-        currentLine.match(/^\s+- run:/);
-
-      // Check if next line starts a new step
-      const isNextLineNewStep = nextLine.match(/^\s+- (name|uses|run):/);
-
-      // Check if we're ending a multi-line value (like run: |)
-      const isEndOfMultiLineValue =
-        currentLine.trim() &&
-        currentIndent >= 8 && // Inside a step property
-        nextIndent <= 6 && // Next line is at step level or higher
-        !nextLine.match(/^\s*$/) && // Next line is not empty
-        (isNextLineNewStep || nextIndent < currentIndent);
-
-      // Add spacing when:
-      // 1. We're at a step property and next line is a new step
-      // 2. We're ending a multi-line value block
-      if ((isStepProperty && isNextLineNewStep) || isEndOfMultiLineValue) {
-        formattedLines.push('');
-      }
-    }
-  }
-
-  return formattedLines.join('\n');
-}
-
 /**
  * Register a new workflow builder
  * @param kind The workflow kind/preset name
@@ -109,15 +59,34 @@ export function clearBuilders(): void {
 }
 
 /**
- * Generate a workflow YAML from config
- * @param cfg The workflow configuration
- * @returns Workflow YAML as string
+ * Generate a secrets summary for a static-analysis config.
+ * Returns a summary only when Slack notifications are configured
+ * (notification === 'slack' or 'both'), since those require SLACK_WEBHOOK_URL.
+ * Returns undefined when no secrets are needed.
  */
-export function generateWorkflow(cfg: WorkflowConfig): {
-  yaml: string;
-  secretsSummary?: string;
+function generateStaticAnalysisSecretsSummary(
+  staticAnalysis: StaticAnalysisOptions | undefined
+): string | undefined {
+  const notification = staticAnalysis?.notification;
+  if (notification !== 'slack' && notification !== 'both') {
+    return undefined;
+  }
+  // Build a synthetic BuildOptions so we can reuse generateSecretsSummary.
+  // Only the notification field is relevant — storage and platform secrets
+  // do not apply to the static-analysis preset.
+  const syntheticBuildOptions: BuildOptions = { notification };
+  return generateSecretsSummary(syntheticBuildOptions);
+}
+
+/**
+ * Shared core: validate config, run builder, post-process YAML, compute secrets summary.
+ * Returns the raw (unvalidated) YAML string and secrets summary so callers can apply
+ * their own validation strategy (sync for web, async for CLI).
+ */
+function buildWorkflowCore(cfg: WorkflowConfig): {
+  yamlStr: string;
+  secretsSummary: string | undefined;
 } {
-  // Validate the config before proceeding
   const validatedConfig = validateConfig(cfg);
 
   const options: WorkflowOptions = validatedConfig.options ?? {};
@@ -131,32 +100,42 @@ export function generateWorkflow(cfg: WorkflowConfig): {
   }
 
   const obj = builder(options);
-  // Disable YAML anchors/references which GitHub Actions doesn't support
   let yamlStr = yaml.dump(obj, {
     lineWidth: 120,
-    noRefs: true, // Prevent the creation of anchors and references
+    noRefs: true,
   });
   yamlStr = injectSecrets(yamlStr);
-
-  // Add spacing after each step for better readability
   yamlStr = addStepSpacing(yamlStr);
 
-  // Validate the generated YAML (sync - for web app compatibility)
-  const validatedYaml = validateGeneratedYaml(yamlStr, false) as string;
-
-  // Generate secrets summary for build preset
   let secretsSummary: string | undefined;
   if (validatedConfig.kind === 'build' && validatedConfig.options) {
     secretsSummary = generateSecretsSummary(
       (validatedConfig.options as WorkflowOptions & { build?: BuildOptions })
         .build || ({} as BuildOptions)
     );
+  } else if (validatedConfig.kind === 'static-analysis') {
+    // Note: the validator currently strips `staticAnalysis` from options (bug H).
+    // Read from the original cfg to ensure notification settings are visible.
+    secretsSummary = generateStaticAnalysisSecretsSummary(
+      cfg.options?.staticAnalysis
+    );
   }
 
-  return {
-    yaml: validatedYaml,
-    secretsSummary,
-  };
+  return { yamlStr, secretsSummary };
+}
+
+/**
+ * Generate a workflow YAML from config
+ * @param cfg The workflow configuration
+ * @returns Workflow YAML as string
+ */
+export function generateWorkflow(cfg: WorkflowConfig): {
+  yaml: string;
+  secretsSummary?: string;
+} {
+  const { yamlStr, secretsSummary } = buildWorkflowCore(cfg);
+  const validatedYaml = validateGeneratedYaml(yamlStr, false) as string;
+  return { yaml: validatedYaml, secretsSummary };
 }
 
 /**
@@ -168,34 +147,11 @@ export function generateWorkflow(cfg: WorkflowConfig): {
 export async function generateWorkflowForCli(
   cfg: WorkflowConfig
 ): Promise<{ yaml: string; secretsSummary?: string }> {
-  // Validate the config before proceeding
-  const validatedConfig = validateConfig(cfg);
-
-  const options: WorkflowOptions = validatedConfig.options ?? {};
-  const builder = builders[validatedConfig.kind];
-
-  if (!builder) {
-    throw new Error(
-      `Unsupported pipeline kind: ${validatedConfig.kind}. ` +
-        `Available presets: ${getAvailablePresets().join(', ')}`
-    );
-  }
-
-  const obj = builder(options);
-  // Disable YAML anchors/references which GitHub Actions doesn't support
-  let yamlStr = yaml.dump(obj, {
-    lineWidth: 120,
-    noRefs: true, // Prevent the creation of anchors and references
-  });
-  yamlStr = injectSecrets(yamlStr);
-
-  // Add spacing after each step for better readability
-  yamlStr = addStepSpacing(yamlStr);
+  const { yamlStr, secretsSummary } = buildWorkflowCore(cfg);
 
   // Validate the generated YAML with CLI-specific enhancements
   // This will automatically run Bitrise CLI validation for Bitrise configs
   // and yamllint validation for other platforms (like GitHub Actions)
-  // Skip validation for tests to avoid yamllint errors
   let validatedYaml = yamlStr;
   try {
     const validationResult = validateGeneratedYaml(yamlStr, true, true);
@@ -207,19 +163,7 @@ export async function generateWorkflowForCli(
     console.warn('Skipping YAML validation:', e);
   }
 
-  // Generate secrets summary for build preset
-  let secretsSummary: string | undefined;
-  if (validatedConfig.kind === 'build' && validatedConfig.options) {
-    secretsSummary = generateSecretsSummary(
-      (validatedConfig.options as WorkflowOptions & { build?: BuildOptions })
-        .build || ({} as BuildOptions)
-    );
-  }
-
-  return {
-    yaml: validatedYaml,
-    secretsSummary,
-  };
+  return { yaml: validatedYaml, secretsSummary };
 }
 
 /**

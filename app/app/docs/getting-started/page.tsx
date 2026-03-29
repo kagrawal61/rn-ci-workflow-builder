@@ -3,10 +3,24 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Getting Started — React Native CI/CD Workflow Builder',
+  title: 'Getting Started',
   description:
-    'Set up your first CI/CD workflow for your React Native app in minutes using our visual builder.',
+    'Set up your first CI/CD workflow for your React Native or Expo app in minutes. Choose a preset, configure options, generate YAML, and drop it into your repo.',
   alternates: { canonical: '/docs/getting-started' },
+  openGraph: {
+    title: 'Getting Started | Mobile CI Builder',
+    description:
+      'Set up your first CI/CD workflow for your React Native or Expo app in minutes. No manual YAML writing required.',
+    url: 'https://www.mobilecibuilder.com/docs/getting-started',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Getting Started | Mobile CI Builder',
+    description:
+      'Set up your first CI/CD workflow for your React Native or Expo app in minutes.',
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function GettingStartedPage() {
@@ -49,19 +63,37 @@ export default function GettingStartedPage() {
         </h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">75-85%</div>
-            <div className="text-sm text-blue-700 dark:text-blue-300">Setup Time Reduction</div>
-            <div className="text-xs text-muted-foreground mt-1">1-2 hours vs 2-4 days</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              75-85%
+            </div>
+            <div className="text-sm text-blue-700 dark:text-blue-300">
+              Setup Time Reduction
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              1-2 hours vs 2-4 days
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">$1.2K-4.8K</div>
-            <div className="text-sm text-blue-700 dark:text-blue-300">Cost Savings</div>
-            <div className="text-xs text-muted-foreground mt-1">Per project (12-48 hours saved)</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              $1.2K-4.8K
+            </div>
+            <div className="text-sm text-blue-700 dark:text-blue-300">
+              Cost Savings
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              Per project (12-48 hours saved)
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">No YAML</div>
-            <div className="text-sm text-blue-700 dark:text-blue-300">Learning Required</div>
-            <div className="text-xs text-muted-foreground mt-1">Visual form interface</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              No YAML
+            </div>
+            <div className="text-sm text-blue-700 dark:text-blue-300">
+              Learning Required
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              Visual form interface
+            </div>
           </div>
         </div>
         <div className="mt-4 text-center">

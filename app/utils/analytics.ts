@@ -8,18 +8,18 @@ export const AnalyticsEvents = {
   WORKFLOW_GENERATED: 'workflow_generated',
   WORKFLOW_DOWNLOADED: 'workflow_downloaded',
   WORKFLOW_COPIED: 'workflow_copied',
-  
+
   // Form Interaction Events
   FORM_FIELD_CHANGED: 'form_field_changed',
   PLATFORM_CHANGED: 'platform_changed',
   PRESET_CHANGED: 'preset_changed',
-  
+
   // Navigation Events
   TAB_CHANGED: 'tab_changed',
   DOCS_VIEWED: 'docs_viewed',
-  
+
   // UI Interaction Events
-  THEME_CHANGED: 'theme_changed'
+  THEME_CHANGED: 'theme_changed',
 };
 
 type WorkflowGeneratedProps = {

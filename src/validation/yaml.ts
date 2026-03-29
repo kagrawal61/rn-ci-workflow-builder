@@ -397,9 +397,14 @@ export async function validateWithAct(yamlFilePath: string): Promise<void> {
       console.log('act output:\n' + stdout.trim());
     }
   } catch (error: unknown) {
-    const execError = error as { stdout?: unknown; stderr?: unknown; message?: unknown };
-    const detail =
-      String(execError.stderr ?? execError.stdout ?? execError.message ?? '').trim();
+    const execError = error as {
+      stdout?: unknown;
+      stderr?: unknown;
+      message?: unknown;
+    };
+    const detail = String(
+      execError.stderr ?? execError.stdout ?? execError.message ?? ''
+    ).trim();
     throw new Error(`act validation failed${detail ? `\n\n${detail}` : ''}`);
   }
 }
@@ -449,16 +454,19 @@ export async function validateWithActionlint(
   }
 
   try {
-    const { stdout, stderr } = await execAsync(
-      `actionlint "${yamlFilePath}"`
-    );
+    const { stdout, stderr } = await execAsync(`actionlint "${yamlFilePath}"`);
     console.log('✅ actionlint validation passed');
     if (stdout.trim()) console.log('actionlint output:', stdout.trim());
     if (stderr.trim()) console.log('actionlint warnings:', stderr.trim());
   } catch (error: unknown) {
-    const execError = error as { stdout?: unknown; stderr?: unknown; message?: unknown };
-    const detail =
-      String(execError.stdout ?? execError.stderr ?? execError.message ?? '').trim();
+    const execError = error as {
+      stdout?: unknown;
+      stderr?: unknown;
+      message?: unknown;
+    };
+    const detail = String(
+      execError.stdout ?? execError.stderr ?? execError.message ?? ''
+    ).trim();
 
     if (detail.includes('Please install') || detail.includes('not found')) {
       throw error;
@@ -510,7 +518,7 @@ export function validateGeneratedYaml(
   enableBitriseCliValidation: boolean = false,
   enableYamllintValidation: boolean = false,
   enableActionlintValidation: boolean = false,
-  enableActValidation: boolean = false,
+  enableActValidation: boolean = false
 ): string | Promise<string> {
   try {
     // Try to parse the YAML to make sure it's valid
@@ -533,7 +541,9 @@ export function validateGeneratedYaml(
     // GitHub Actions path: yamllint → actionlint → act (each optional, chained)
     if (!isBitriseConfig) {
       const anyAsyncEnabled =
-        enableYamllintValidation || enableActionlintValidation || enableActValidation;
+        enableYamllintValidation ||
+        enableActionlintValidation ||
+        enableActValidation;
 
       if (anyAsyncEnabled) {
         return validateGitHubActionsAsync(
@@ -560,13 +570,22 @@ async function validateGitHubActionsAsync(
   yamlStr: string,
   enableYamllint: boolean,
   enableActionlint: boolean,
-  enableAct: boolean,
+  enableAct: boolean
 ): Promise<string> {
   if (enableYamllint) {
-    await validateYamlContentWithYamllint(yamlStr, 'temp-gh-yamllint.yml', true, 'relaxed');
+    await validateYamlContentWithYamllint(
+      yamlStr,
+      'temp-gh-yamllint.yml',
+      true,
+      'relaxed'
+    );
   }
   if (enableActionlint) {
-    await validateGitHubActionsYamlWithActionlint(yamlStr, 'temp-gh-actionlint.yml', true);
+    await validateGitHubActionsYamlWithActionlint(
+      yamlStr,
+      'temp-gh-actionlint.yml',
+      true
+    );
   }
   if (enableAct) {
     await validateGitHubActionsYamlWithAct(yamlStr, 'temp-gh-act.yml');

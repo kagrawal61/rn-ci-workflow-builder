@@ -96,6 +96,7 @@ temp/
 
 # GitHub folders
 .github/workflows/*
+!.github/workflows/ci.yml
 
 # CI/CD artifacts
 bitrise.yml

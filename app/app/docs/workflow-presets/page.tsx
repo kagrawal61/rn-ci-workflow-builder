@@ -4,10 +4,24 @@ import { Check, AlertCircle, Box, Smartphone } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Workflow Presets — React Native CI/CD Workflow Builder',
+  title: 'Workflow Presets',
   description:
-    'Explore the available CI/CD workflow presets — static analysis and build — and choose the right template for your React Native project.',
+    'Explore the static analysis and build workflow presets for React Native and Expo — TypeScript, ESLint, Prettier, Jest, Android APK/AAB, and iOS builds on GitHub Actions and Bitrise.',
   alternates: { canonical: '/docs/workflow-presets' },
+  openGraph: {
+    title: 'Workflow Presets | Mobile CI Builder',
+    description:
+      'Static analysis and build presets for React Native and Expo on GitHub Actions and Bitrise.',
+    url: 'https://www.mobilecibuilder.com/docs/workflow-presets',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Workflow Presets | Mobile CI Builder',
+    description:
+      'Static analysis and build presets for React Native and Expo on GitHub Actions and Bitrise.',
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function WorkflowPresetsPage() {

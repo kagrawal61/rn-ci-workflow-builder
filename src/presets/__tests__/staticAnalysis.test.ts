@@ -79,7 +79,18 @@ describe('buildStaticAnalysisPipeline', () => {
       expect(steps.some((s: any) => s.name === 'Setup Node')).toBe(true);
     });
 
-    it('uses the first nodeVersion for setup-node', () => {
+    it('uses the single nodeVersion directly for setup-node when only one version provided', () => {
+      const result = buildStaticAnalysisPipeline({
+        ...defaultOptions,
+        nodeVersions: [18],
+      });
+      const steps = result.jobs.static_analysis.steps;
+      const nodeStep = steps.find((s: any) => s.name === 'Setup Node') as any;
+
+      expect(nodeStep?.with?.['node-version']).toBe(18);
+    });
+
+    it('uses matrix expression for setup-node when multiple versions provided', () => {
       const result = buildStaticAnalysisPipeline({
         ...defaultOptions,
         nodeVersions: [18, 20],
@@ -87,7 +98,29 @@ describe('buildStaticAnalysisPipeline', () => {
       const steps = result.jobs.static_analysis.steps;
       const nodeStep = steps.find((s: any) => s.name === 'Setup Node') as any;
 
-      expect(nodeStep?.with?.['node-version']).toBe(18);
+      expect(nodeStep?.with?.['node-version']).toBe(
+        '${{ matrix.node-version }}'
+      );
+    });
+
+    it('adds strategy.matrix when multiple versions provided', () => {
+      const result = buildStaticAnalysisPipeline({
+        ...defaultOptions,
+        nodeVersions: [18, 20],
+      });
+      const job = result.jobs.static_analysis as any;
+
+      expect(job.strategy?.matrix?.['node-version']).toEqual([18, 20]);
+    });
+
+    it('does not add strategy when only one version provided', () => {
+      const result = buildStaticAnalysisPipeline({
+        ...defaultOptions,
+        nodeVersions: [20],
+      });
+      const job = result.jobs.static_analysis as any;
+
+      expect(job.strategy).toBeUndefined();
     });
   });
 
@@ -146,7 +179,9 @@ describe('buildStaticAnalysisPipeline', () => {
   describe('analysis checks', () => {
     it('includes all four checks by default', () => {
       const result = buildStaticAnalysisPipeline(defaultOptions);
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).toContain('TypeScript');
       expect(stepNames).toContain('ESLint');
@@ -159,7 +194,9 @@ describe('buildStaticAnalysisPipeline', () => {
         ...defaultOptions,
         staticAnalysis: { typescript: false },
       });
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).not.toContain('TypeScript');
     });
@@ -169,7 +206,9 @@ describe('buildStaticAnalysisPipeline', () => {
         ...defaultOptions,
         staticAnalysis: { eslint: false },
       });
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).not.toContain('ESLint');
     });
@@ -179,7 +218,9 @@ describe('buildStaticAnalysisPipeline', () => {
         ...defaultOptions,
         staticAnalysis: { prettier: false },
       });
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).not.toContain('Prettier');
     });
@@ -189,7 +230,9 @@ describe('buildStaticAnalysisPipeline', () => {
         ...defaultOptions,
         staticAnalysis: { unitTests: false },
       });
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).not.toContain('Unit tests');
     });
@@ -204,7 +247,9 @@ describe('buildStaticAnalysisPipeline', () => {
           unitTests: false,
         },
       });
-      const stepNames = result.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = result.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).not.toContain('TypeScript');
       expect(stepNames).not.toContain('ESLint');
@@ -222,7 +267,12 @@ describe('buildStaticAnalysisPipeline', () => {
 
       // Verify no slack-related steps
       expect(
-        steps.every((s: any) => !String(s.name ?? '').toLowerCase().includes('slack'))
+        steps.every(
+          (s: any) =>
+            !String(s.name ?? '')
+              .toLowerCase()
+              .includes('slack')
+        )
       ).toBe(true);
     });
 
@@ -234,7 +284,12 @@ describe('buildStaticAnalysisPipeline', () => {
       const steps = result.jobs.static_analysis.steps;
 
       expect(
-        steps.every((s: any) => !String(s.name ?? '').toLowerCase().includes('slack'))
+        steps.every(
+          (s: any) =>
+            !String(s.name ?? '')
+              .toLowerCase()
+              .includes('slack')
+        )
       ).toBe(true);
     });
   });

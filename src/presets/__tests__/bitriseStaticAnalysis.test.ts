@@ -106,6 +106,38 @@ describe('buildBitriseStaticAnalysisPipeline', () => {
       expect(hasNvm).toBe(true);
     });
 
+    it('defaults nvm node_version to 20 when nodeVersions not provided', () => {
+      const result = buildBitriseStaticAnalysisPipeline(defaultOptions);
+      const steps = result.workflows['rn-static-analysis'].steps;
+      const nvmStep = steps.find((s: any) => 'nvm@1' in s) as any;
+      const nodeVersion = nvmStep?.['nvm@1']?.inputs?.[0]?.node_version;
+
+      expect(nodeVersion).toBe('20');
+    });
+
+    it('uses the first nodeVersions entry for nvm node_version', () => {
+      const result = buildBitriseStaticAnalysisPipeline({
+        ...defaultOptions,
+        nodeVersions: [18],
+      });
+      const steps = result.workflows['rn-static-analysis'].steps;
+      const nvmStep = steps.find((s: any) => 'nvm@1' in s) as any;
+      const nodeVersion = nvmStep?.['nvm@1']?.inputs?.[0]?.node_version;
+
+      expect(nodeVersion).toBe('18');
+    });
+
+    it('reflects nodeVersions in nvm step title', () => {
+      const result = buildBitriseStaticAnalysisPipeline({
+        ...defaultOptions,
+        nodeVersions: [22],
+      });
+      const steps = result.workflows['rn-static-analysis'].steps;
+      const nvmStep = steps.find((s: any) => 'nvm@1' in s) as any;
+
+      expect(nvmStep?.['nvm@1']?.title).toBe('Setup Node.js 22');
+    });
+
     it('includes restore-cache step', () => {
       const result = buildBitriseStaticAnalysisPipeline(defaultOptions);
       const steps = result.workflows['rn-static-analysis'].steps;
@@ -340,8 +372,8 @@ describe('buildBitriseStaticAnalysisPipeline', () => {
         ...defaultOptions,
         triggers: { push: { branches: ['develop', 'main'] } },
       });
-      const branches = result.trigger_map!
-        .filter((t: any) => 'push_branch' in t)
+      const branches = result
+        .trigger_map!.filter((t: any) => 'push_branch' in t)
         .map((t: any) => t.push_branch);
 
       expect(branches).toContain('develop');

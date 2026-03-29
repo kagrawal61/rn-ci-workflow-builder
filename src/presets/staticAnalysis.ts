@@ -46,13 +46,17 @@ export function buildStaticAnalysisPipeline(
     }
   }
 
+  const isMultiVersion = nodeVersions.length > 1;
+
   const testSteps: GitHubStep[] = [
     { name: 'Checkout', uses: 'actions/checkout@v4' },
     {
       name: 'Setup Node',
       uses: 'actions/setup-node@v4',
       with: {
-        'node-version': nodeVersions[0] || 20,
+        'node-version': isMultiVersion
+          ? '${{ matrix.node-version }}'
+          : nodeVersions[0] || 20,
         cache: packageManager === 'yarn' ? 'yarn' : 'npm',
       },
     },
@@ -110,6 +114,9 @@ export function buildStaticAnalysisPipeline(
   const testJob: GitHubJob = {
     name: 'Run Static Analysis',
     'runs-on': runsOn,
+    ...(isMultiVersion
+      ? { strategy: { matrix: { 'node-version': nodeVersions } } }
+      : {}),
     steps: testSteps,
   };
 

@@ -70,7 +70,7 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
       requiredSecrets.push('FIREBASE_TOKEN');
     }
   }
-  
+
   // Add Expo-specific secrets when Expo is selected
   if (opts.framework === 'expo') {
     if (!requiredSecrets.includes('EXPO_TOKEN')) {
@@ -137,13 +137,12 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
       buildJob.steps = platformHelpers.createExpoBuildSteps(
         setupSteps,
         packageManager,
-        '',
         build
       );
-      
+
       // For Expo, update the job name to remove variant info since we don't use variants
       buildJob.name = `Build Expo ${platform.charAt(0).toUpperCase()}${platform.slice(1)}`;
-      
+
       // Add storage steps if configured
       if (build.storage) {
         const storageSteps = storageHelpers.createExpoStorageSteps(build);
@@ -154,19 +153,12 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
       if (platform === 'android') {
         buildJob.steps = platformHelpers.createAndroidBuildSteps(
           setupSteps,
-          packageManager,
-          '',
           build
         );
       } else if (platform === 'ios') {
-        buildJob.steps = platformHelpers.createIOSBuildSteps(
-          setupSteps,
-          packageManager,
-          '',
-          build
-        );
+        buildJob.steps = platformHelpers.createIOSBuildSteps(setupSteps, build);
       }
-      
+
       // Add storage steps if configured
       if (build.storage) {
         const storageSteps =
@@ -240,7 +232,7 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
     permissions,
     jobs,
   };
-  
+
   // Add Expo-specific environment variables to the workflow
   if (opts.framework === 'expo') {
     workflow.env = {
@@ -249,6 +241,6 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
       EXPO_TOKEN: '${{ secrets.EXPO_TOKEN }}',
     };
   }
-  
+
   return workflow;
 }

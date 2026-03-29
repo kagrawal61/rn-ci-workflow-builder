@@ -187,12 +187,7 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="github">GitHub Actions</SelectItem>
-                  <SelectItem value="bitrise" disabled={true}>
-                    Bitrise
-                    <span className="ml-2 rounded-full bg-amber-200 px-2 py-0.5 text-xs font-medium text-amber-800">
-                      Coming Soon
-                    </span>
-                  </SelectItem>
+                  <SelectItem value="bitrise">Bitrise</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
@@ -229,10 +224,10 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   <SelectValue placeholder="Select framework" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="react-native-cli">React Native CLI</SelectItem>
-                  <SelectItem value="expo">
-                    Expo
+                  <SelectItem value="react-native-cli">
+                    React Native CLI
                   </SelectItem>
+                  <SelectItem value="expo">Expo</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
@@ -395,7 +390,9 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                 {/* Static Analysis Notification */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="static-analysis-notification">Notifications</Label>
+                    <Label htmlFor="static-analysis-notification">
+                      Notifications
+                    </Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -589,7 +586,11 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                     <Label htmlFor="platform-android">Android only</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="ios" id="platform-ios" disabled={true} />
+                    <RadioGroupItem
+                      value="ios"
+                      id="platform-ios"
+                      disabled={true}
+                    />
                     <Label htmlFor="platform-ios" className="flex items-center">
                       iOS only
                       <span className="ml-2 rounded-full bg-amber-200 px-2 py-0.5 text-xs font-medium text-amber-800">
@@ -660,16 +661,18 @@ export function WorkflowForm({ values, onChange }: WorkflowFormProps) {
                   </Select>
                 </div>
               )}
-              
+
               {/* Expo note - Only shown when Expo is selected */}
               {values.framework === 'expo' && (
                 <div className="rounded-md bg-muted p-3 text-xs">
                   <p className="mb-1 font-medium">Expo Build Configuration</p>
                   <p className="mb-1 text-muted-foreground">
-                    For Expo builds, production builds are used by default for optimal performance.
+                    For Expo builds, production builds are used by default for
+                    optimal performance.
                   </p>
                   <p className="text-muted-foreground">
-                    The workflow will generate both APK and AAB formats when selected.
+                    The workflow will generate both APK and AAB formats when
+                    selected.
                   </p>
                 </div>
               )}

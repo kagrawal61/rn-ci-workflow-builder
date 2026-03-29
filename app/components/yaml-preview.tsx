@@ -11,7 +11,10 @@ import {
 import { useTheme } from 'next-themes';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
-import { trackWorkflowCopied, trackWorkflowDownloaded } from '@/utils/analytics';
+import {
+  trackWorkflowCopied,
+  trackWorkflowDownloaded,
+} from '@/utils/analytics';
 
 interface YamlPreviewProps {
   yamlContent: string;
@@ -33,32 +36,23 @@ export function YamlPreview({
     setMounted(true);
   }, []);
 
-  // Validate and format YAML
-  const formattedYaml = (() => {
-    try {
-      // Parse and stringify to ensure proper formatting
-      return yamlContent;
-    } catch (error) {
-      console.error('Invalid YAML:', error);
-      return yamlContent; // Return original if there's a parsing error
-    }
-  })();
-
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(formattedYaml).then(
+    navigator.clipboard.writeText(yamlContent).then(
       () => {
         setCopied(true);
         toast.success('YAML copied to clipboard!');
-        
+
         // Track copy event
         const platform = fileName.includes('bitrise') ? 'bitrise' : 'github';
-        const preset = fileName.toLowerCase().includes('build') ? 'build' : 'static-analysis';
+        const preset = fileName.toLowerCase().includes('build')
+          ? 'build'
+          : 'static-analysis';
         trackWorkflowCopied({
           platform,
           preset,
-          fileName
+          fileName,
         });
-        
+
         setTimeout(() => setCopied(false), 2000);
       },
       err => {
@@ -70,7 +64,7 @@ export function YamlPreview({
 
   // Download YAML file
   const downloadYaml = () => {
-    const blob = new Blob([formattedYaml], { type: 'text/yaml' });
+    const blob = new Blob([yamlContent], { type: 'text/yaml' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -80,14 +74,16 @@ export function YamlPreview({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast.success(`Downloaded ${fileName}`);
-    
+
     // Track download event
     const platform = fileName.includes('bitrise') ? 'bitrise' : 'github';
-    const preset = fileName.toLowerCase().includes('build') ? 'build' : 'static-analysis';
+    const preset = fileName.toLowerCase().includes('build')
+      ? 'build'
+      : 'static-analysis';
     trackWorkflowDownloaded({
       platform,
       preset,
-      fileName
+      fileName,
     });
   };
 
@@ -160,7 +156,7 @@ export function YamlPreview({
             },
           }}
         >
-          {formattedYaml}
+          {yamlContent}
         </SyntaxHighlighter>
       </div>
 

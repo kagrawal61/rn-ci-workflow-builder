@@ -6,6 +6,7 @@
  */
 import * as yaml from 'js-yaml';
 import { generateWorkflow } from '../index';
+import { PipelineKind } from '../types';
 
 describe('Integration: Full Workflow Generation Pipeline', () => {
   // ─── GitHub Actions: Static Analysis ─────────────────────────────────────
@@ -14,7 +15,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('generates valid parseable YAML with yarn', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'github', packageManager: 'yarn', nodeVersions: [20] },
+        options: {
+          platform: 'github',
+          packageManager: 'yarn',
+          nodeVersions: [20],
+        },
       });
 
       expect(typeof yamlStr).toBe('string');
@@ -32,7 +37,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('generates valid parseable YAML with npm', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'github', packageManager: 'npm', nodeVersions: [18] },
+        options: {
+          platform: 'github',
+          packageManager: 'npm',
+          nodeVersions: [18],
+        },
       });
 
       const parsed = yaml.load(yamlStr) as Record<string, any>;
@@ -62,7 +71,12 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
         kind: 'static-analysis',
         options: {
           platform: 'github',
-          staticAnalysis: { typescript: false, eslint: true, prettier: true, unitTests: true },
+          staticAnalysis: {
+            typescript: false,
+            eslint: true,
+            prettier: true,
+            unitTests: true,
+          },
         },
       });
 
@@ -80,7 +94,9 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
       });
 
       const parsed = yaml.load(yamlStr) as Record<string, any>;
-      const stepNames = parsed.jobs.static_analysis.steps.map((s: any) => s.name);
+      const stepNames = parsed.jobs.static_analysis.steps.map(
+        (s: any) => s.name
+      );
 
       expect(stepNames).toContain('TypeScript');
       expect(stepNames).toContain('ESLint');
@@ -91,7 +107,11 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('output structure matches snapshot', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
-        options: { platform: 'github', packageManager: 'yarn', nodeVersions: [20] },
+        options: {
+          platform: 'github',
+          packageManager: 'yarn',
+          nodeVersions: [20],
+        },
       });
 
       expect(yaml.load(yamlStr)).toMatchSnapshot();
@@ -102,7 +122,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
 
   describe('GitHub Actions — Build (Android)', () => {
     const androidConfig = {
-      kind: 'build',
+      kind: 'build' as PipelineKind,
       options: {
         platform: 'github' as const,
         packageManager: 'yarn' as const,
@@ -154,7 +174,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
   describe('GitHub Actions — Build (Both platforms)', () => {
     it('generates both build-android and build-ios jobs', () => {
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           build: {
@@ -176,7 +196,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
 
     it('output structure matches snapshot', () => {
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           build: {
@@ -197,7 +217,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
   describe('GitHub Actions — Build (Release)', () => {
     it('generates a build workflow for release variant', () => {
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           build: {
@@ -229,8 +249,12 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
       expect(parsed.format_version).toBe(13);
       expect(parsed.workflows).toBeDefined();
       expect(parsed.workflows['rn-static-analysis']).toBeDefined();
-      expect(Array.isArray(parsed.workflows['rn-static-analysis'].steps)).toBe(true);
-      expect(parsed.workflows['rn-static-analysis'].steps.length).toBeGreaterThan(0);
+      expect(Array.isArray(parsed.workflows['rn-static-analysis'].steps)).toBe(
+        true
+      );
+      expect(
+        parsed.workflows['rn-static-analysis'].steps.length
+      ).toBeGreaterThan(0);
     });
 
     it('output structure matches snapshot', () => {
@@ -247,7 +271,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
 
   describe('Bitrise — Build', () => {
     const bitriseAndroidConfig = {
-      kind: 'build',
+      kind: 'build' as PipelineKind,
       options: {
         platform: 'bitrise' as const,
         build: {
@@ -282,7 +306,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
   describe('GitHub Actions — Expo Build', () => {
     it('generates a workflow for expo android build', () => {
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           framework: 'expo',
@@ -317,10 +341,10 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     });
   });
 
-  // ─── nodeVersions: currently ignores all but first (bug 1.2 documented) ──
+  // ─── nodeVersions: matrix emitted for multiple versions (bug 1.2 fixed) ──
 
-  describe('nodeVersions handling (bug 1.2 — matrix not emitted)', () => {
-    it('uses only the first nodeVersion in the setup step (current broken behavior)', () => {
+  describe('nodeVersions handling', () => {
+    it('emits matrix strategy and uses matrix expression when multiple nodeVersions provided', () => {
       const { yaml: yamlStr } = generateWorkflow({
         kind: 'static-analysis',
         options: {
@@ -330,14 +354,27 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
       });
 
       const parsed = yaml.load(yamlStr) as Record<string, any>;
-      const setupNode = parsed.jobs.static_analysis.steps.find(
-        (s: any) => s.name === 'Setup Node'
-      );
+      const job = parsed.jobs.static_analysis;
+      const setupNode = job.steps.find((s: any) => s.name === 'Setup Node');
 
-      // Bug 1.2: only first node version used, no matrix strategy emitted
-      // After fix: should have strategy.matrix.node: [18, 20, 22]
-      expect(setupNode?.with?.['node-version']).toBe(18);
-      expect(parsed.jobs.static_analysis.strategy).toBeUndefined();
+      expect(job.strategy?.matrix?.['node-version']).toEqual([18, 20, 22]);
+      expect(setupNode?.with?.['node-version']).toBe(
+        '${{ matrix.node-version }}'
+      );
+    });
+
+    it('uses a direct version value (no matrix) when a single nodeVersion is provided', () => {
+      const { yaml: yamlStr } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'github', nodeVersions: [20] },
+      });
+
+      const parsed = yaml.load(yamlStr) as Record<string, any>;
+      const job = parsed.jobs.static_analysis;
+      const setupNode = job.steps.find((s: any) => s.name === 'Setup Node');
+
+      expect(job.strategy).toBeUndefined();
+      expect(setupNode?.with?.['node-version']).toBe(20);
     });
   });
 
@@ -380,7 +417,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
   describe('npm package manager in build preset', () => {
     it('generates a valid build workflow using npm', () => {
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           packageManager: 'npm',
@@ -405,7 +442,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
       // Bug C: validateBuildSchema drops androidOutputType.
       // After PR 2 fix, the AAB gradle task should appear in the generated steps.
       const { yaml: yamlStr } = generateWorkflow({
-        kind: 'build',
+        kind: 'build' as PipelineKind,
         options: {
           platform: 'github',
           build: {
@@ -424,19 +461,82 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     });
   });
 
+  // ─── Secrets summary: static-analysis (bug 1.5) ──────────────────────────
+
+  describe('Secrets summary — Static Analysis (bug 1.5)', () => {
+    it('returns a non-undefined secretsSummary containing SLACK_WEBHOOK when notification is slack', () => {
+      const { secretsSummary } = generateWorkflow({
+        kind: 'static-analysis',
+        options: {
+          platform: 'github',
+          staticAnalysis: { notification: 'slack' },
+        },
+      });
+
+      expect(secretsSummary).toBeDefined();
+      expect(secretsSummary).toContain('SLACK_WEBHOOK');
+    });
+
+    it('returns a non-undefined secretsSummary containing SLACK_WEBHOOK when notification is both', () => {
+      const { secretsSummary } = generateWorkflow({
+        kind: 'static-analysis',
+        options: {
+          platform: 'github',
+          staticAnalysis: { notification: 'both' },
+        },
+      });
+
+      expect(secretsSummary).toBeDefined();
+      expect(secretsSummary).toContain('SLACK_WEBHOOK');
+    });
+
+    it('returns undefined secretsSummary when notification is none', () => {
+      const { secretsSummary } = generateWorkflow({
+        kind: 'static-analysis',
+        options: {
+          platform: 'github',
+          staticAnalysis: { notification: 'none' },
+        },
+      });
+
+      expect(secretsSummary).toBeUndefined();
+    });
+
+    it('returns undefined secretsSummary when no staticAnalysis options are provided', () => {
+      const { secretsSummary } = generateWorkflow({
+        kind: 'static-analysis',
+        options: { platform: 'github' },
+      });
+
+      expect(secretsSummary).toBeUndefined();
+    });
+
+    it('returns undefined secretsSummary when notification is pr-comment', () => {
+      const { secretsSummary } = generateWorkflow({
+        kind: 'static-analysis',
+        options: {
+          platform: 'github',
+          staticAnalysis: { notification: 'pr-comment' },
+        },
+      });
+
+      expect(secretsSummary).toBeUndefined();
+    });
+  });
+
   // ─── Error cases ──────────────────────────────────────────────────────────
 
   describe('Error handling', () => {
     it('throws for an unknown preset kind', () => {
       expect(() =>
-        generateWorkflow({ kind: 'nonexistent-preset' })
+        generateWorkflow({ kind: 'nonexistent-preset' as PipelineKind })
       ).toThrow();
     });
 
     it('throws when build options are missing for build preset', () => {
       expect(() =>
         generateWorkflow({
-          kind: 'build',
+          kind: 'build' as PipelineKind,
           options: { platform: 'github' },
         })
       ).toThrow();
@@ -445,7 +545,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('throws for invalid platform in build options', () => {
       expect(() =>
         generateWorkflow({
-          kind: 'build',
+          kind: 'build' as PipelineKind,
           options: {
             platform: 'github',
             build: {
@@ -462,7 +562,7 @@ describe('Integration: Full Workflow Generation Pipeline', () => {
     it('throws for invalid storage value', () => {
       expect(() =>
         generateWorkflow({
-          kind: 'build',
+          kind: 'build' as PipelineKind,
           options: {
             platform: 'github',
             build: {

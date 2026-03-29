@@ -4,10 +4,24 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Core Concepts — React Native CI/CD Workflow Builder',
+  title: 'Core Concepts',
   description:
-    'Understand the fundamental concepts behind the React Native CI workflow generator — pipelines, presets, platforms, and configuration.',
+    'Understand how the React Native CI/CD workflow generator works — presets, platforms, pipeline kinds, and the configuration model behind GitHub Actions and Bitrise generation.',
   alternates: { canonical: '/docs/core-concepts' },
+  openGraph: {
+    title: 'Core Concepts | Mobile CI Builder',
+    description:
+      'Understand presets, platforms, and the configuration model behind React Native CI/CD workflow generation.',
+    url: 'https://www.mobilecibuilder.com/docs/core-concepts',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Core Concepts | Mobile CI Builder',
+    description:
+      'Understand presets, platforms, and the configuration model behind React Native CI/CD workflow generation.',
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function CoreConceptsPage() {

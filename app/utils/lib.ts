@@ -4,26 +4,29 @@
  */
 import * as yaml from 'js-yaml';
 
-import { injectSecrets, validateWorkflowConfig } from '../../src/helpers';
+import {
+  addStepSpacing,
+  injectSecrets,
+  validateWorkflowConfig,
+} from '../../src/helpers';
 import { generateSecretsSummary } from '../../src/helpers/secretsManager';
 import { buildBitriseBuildPipeline } from '../../src/presets/bitriseBuildPreset';
 import { buildBitriseStaticAnalysisPipeline } from '../../src/presets/bitriseStaticAnalysis';
 import { buildBuildPipeline } from '../../src/presets/buildPreset';
 import { buildStaticAnalysisPipeline } from '../../src/presets/staticAnalysis';
-import { 
-  WorkflowConfig, 
-  WorkflowOptions, 
-  BitriseConfig, 
-  GitHubWorkflow 
+import { BuildOptions, StaticAnalysisOptions } from '../../src/presets/types';
+import {
+  WorkflowConfig,
+  WorkflowOptions,
+  BitriseConfig,
+  GitHubWorkflow,
 } from '../../src/types';
 
 // Map of pipeline builders (copied from generator.ts but without Node.js dependencies)
 // Support both GitHub Actions and Bitrise configurations
 const builders: Record<
   string,
-  (
-    opts: WorkflowOptions
-  ) => GitHubWorkflow | BitriseConfig
+  (opts: WorkflowOptions) => GitHubWorkflow | BitriseConfig
 > = {};
 
 /**
@@ -33,9 +36,7 @@ const builders: Record<
  */
 export function registerBuilder(
   kind: string,
-  builder: (
-    opts: WorkflowOptions
-  ) => GitHubWorkflow | BitriseConfig
+  builder: (opts: WorkflowOptions) => GitHubWorkflow | BitriseConfig
 ): void {
   builders[kind] = builder;
 }
@@ -76,26 +77,33 @@ export function generateWorkflow(cfg: WorkflowConfig): {
     noRefs: true, // Prevent the creation of anchors and references
   });
   yamlStr = injectSecrets(yamlStr);
+  yamlStr = addStepSpacing(yamlStr);
 
-  // Generate secrets summary for build preset
+  // Generate secrets summary
   let secretsSummary: string | undefined;
-  if (
-    validatedConfig.kind === 'build' &&
-    validatedConfig.options &&
-    validatedConfig.options.build
-  ) {
+  if (validatedConfig.kind === 'build' && validatedConfig.options?.build) {
     try {
-      // Use the imported generateSecretsSummary function
-      if (validatedConfig.options && validatedConfig.options.build) {
-        // Make sure to include framework from options
-        const buildOptions = {
-          ...validatedConfig.options.build,
-          framework: validatedConfig.options.framework
-        };
-        secretsSummary = generateSecretsSummary(buildOptions);
-      }
+      const buildOptions: BuildOptions = {
+        ...validatedConfig.options.build,
+        framework: validatedConfig.options.framework,
+      };
+      secretsSummary = generateSecretsSummary(buildOptions);
     } catch (err) {
       console.error('Error generating secrets summary:', err);
+    }
+  } else if (validatedConfig.kind === 'static-analysis') {
+    // Validator strips staticAnalysis from options (bug H) — read from original cfg
+    const notification = (
+      cfg.options?.staticAnalysis as StaticAnalysisOptions | undefined
+    )?.notification;
+    if (notification === 'slack' || notification === 'both') {
+      try {
+        secretsSummary = generateSecretsSummary({
+          notification,
+        } as BuildOptions);
+      } catch (err) {
+        console.error('Error generating secrets summary:', err);
+      }
     }
   }
 

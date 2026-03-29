@@ -20,7 +20,10 @@ describe('validateBuildSecrets', () => {
 
     it('passes when extra secrets are present', () => {
       expect(() =>
-        validateBuildSecrets({ ...baseOptions, secrets: ['EXTRA_SECRET'] }, baseBuild)
+        validateBuildSecrets(
+          { ...baseOptions, secrets: ['EXTRA_SECRET'] },
+          baseBuild
+        )
       ).not.toThrow();
     });
 
@@ -180,7 +183,10 @@ describe('validateBuildSecrets', () => {
   describe('slack notification', () => {
     it('throws when SLACK_WEBHOOK is missing', () => {
       expect(() =>
-        validateBuildSecrets(baseOptions, { ...baseBuild, notification: 'slack' })
+        validateBuildSecrets(baseOptions, {
+          ...baseBuild,
+          notification: 'slack',
+        })
       ).toThrow('SLACK_WEBHOOK');
     });
 
@@ -195,19 +201,28 @@ describe('validateBuildSecrets', () => {
 
     it('requires SLACK_WEBHOOK for both notification type', () => {
       expect(() =>
-        validateBuildSecrets(baseOptions, { ...baseBuild, notification: 'both' })
+        validateBuildSecrets(baseOptions, {
+          ...baseBuild,
+          notification: 'both',
+        })
       ).toThrow('SLACK_WEBHOOK');
     });
 
     it('passes for pr-comment notification with no secrets', () => {
       expect(() =>
-        validateBuildSecrets(baseOptions, { ...baseBuild, notification: 'pr-comment' })
+        validateBuildSecrets(baseOptions, {
+          ...baseBuild,
+          notification: 'pr-comment',
+        })
       ).not.toThrow();
     });
 
     it('passes for none notification with no secrets', () => {
       expect(() =>
-        validateBuildSecrets(baseOptions, { ...baseBuild, notification: 'none' })
+        validateBuildSecrets(baseOptions, {
+          ...baseBuild,
+          notification: 'none',
+        })
       ).not.toThrow();
     });
   });

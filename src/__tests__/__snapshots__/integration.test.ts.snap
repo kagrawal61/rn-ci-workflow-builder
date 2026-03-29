@@ -250,10 +250,10 @@ exports[`Integration: Full Workflow Generation Pipeline Bitrise — Static Analy
           "nvm@1": {
             "inputs": [
               {
-                "node_version": "18",
+                "node_version": "20",
               },
             ],
-            "title": "Setup Node.js 18",
+            "title": "Setup Node.js 20",
           },
         },
         {
@@ -437,7 +437,6 @@ cd android
 }
 cd ..
 
-
 echo "✅ Android build completed successfully"
 
 # Verify the expected outputs based on output type
@@ -606,7 +605,6 @@ cd android
   exit 1
 }
 cd ..
-
 
 echo "✅ Android build completed successfully"
 

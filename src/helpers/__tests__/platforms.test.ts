@@ -18,8 +18,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -55,8 +53,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -75,8 +71,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -96,8 +90,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -115,8 +107,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -137,8 +127,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createAndroidBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -167,8 +155,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -208,8 +194,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -227,8 +211,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -250,8 +232,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -271,8 +251,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 
@@ -290,8 +268,6 @@ describe('Platform Helpers', () => {
 
       const steps = platformHelpers.createIOSBuildSteps(
         mockSetupSteps,
-        'npm',
-        '',
         buildOptions
       );
 

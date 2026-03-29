@@ -160,8 +160,13 @@ program
         const isGitHubPlatform =
           !config.options?.platform || config.options?.platform === 'github';
 
-        if (isGitHubPlatform && (options.validateActionlint || options.validateAct)) {
-          const { validateWithActionlint, validateWithAct } = await import('./validation/yaml');
+        if (
+          isGitHubPlatform &&
+          (options.validateActionlint || options.validateAct)
+        ) {
+          const { validateWithActionlint, validateWithAct } = await import(
+            './validation/yaml'
+          );
 
           if (options.validateActionlint) {
             console.log('🔍 Running actionlint static analysis...');
@@ -292,7 +297,9 @@ program
   )
   .action(async (file = '.github/workflows/build.yaml', options) => {
     try {
-      const { validateWithActionlint, validateWithAct } = await import('./validation/yaml');
+      const { validateWithActionlint, validateWithAct } = await import(
+        './validation/yaml'
+      );
 
       if (!fs.existsSync(file)) {
         console.error(`❌ Error: File not found: ${file}`);

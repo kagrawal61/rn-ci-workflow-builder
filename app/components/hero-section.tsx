@@ -1,9 +1,9 @@
 'use client';
 
-import { PROJECT_DESCRIPTION, PROJECT_NAME } from "@/config/constants";
-import { motion } from "framer-motion";
-import { Clock, Code, FileJson, Github, LayoutGrid, Rocket, Zap } from "lucide-react";
-import { Button } from "./ui/button";
+import { PROJECT_DESCRIPTION, PROJECT_NAME } from '@/config/constants';
+import { motion } from 'framer-motion';
+import { Clock, Code, FileJson, LayoutGrid, Rocket, Zap } from 'lucide-react';
+import { Button } from './ui/button';
 
 export function HeroSection() {
   return (
@@ -51,7 +51,15 @@ export function HeroSection() {
           whileInView={{ scale: [0.98, 1] }}
           viewport={{ once: true }}
         >
-          {PROJECT_DESCRIPTION} <span className="font-semibold text-green-500">Generate production-ready workflows instantly </span> and  <span className="font-semibold text-primary">save $2,000–$6,000 per project</span> — no more time wasted on manual configuration.
+          {PROJECT_DESCRIPTION}{' '}
+          <span className="font-semibold text-green-500">
+            Generate production-ready workflows instantly{' '}
+          </span>{' '}
+          and{' '}
+          <span className="font-semibold text-primary">
+            save $2,000–$6,000 per project
+          </span>{' '}
+          — no more time wasted on manual configuration.
         </motion.p>
 
         <motion.div
@@ -82,17 +90,6 @@ export function HeroSection() {
           >
             <a href="/docs">Read Documentation</a>
           </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="h-12 px-8 transition-all hover:scale-105 flex items-center gap-2"
-            asChild
-          >
-            <a href="https://github.com/kagrawal61/rn-ci-workflow-builder" target="_blank" rel="noopener noreferrer">
-              <Github className="h-4 w-4" />
-              <span>View on GitHub</span>
-            </a>
-          </Button>
         </motion.div>
 
         <motion.div
@@ -114,24 +111,36 @@ export function HeroSection() {
               }}
               whileHover={{ y: -5 }}
             >
-              <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${
-                feature.color === 'blue' ? 'from-blue-200/60 to-blue-400/20 dark:from-blue-900/30 dark:to-blue-800/20' : 
-                feature.color === 'green' ? 'from-green-200/60 to-green-400/20 dark:from-green-900/30 dark:to-green-800/20' : 
-                'from-purple-200/60 to-purple-400/20 dark:from-purple-900/30 dark:to-purple-800/20'
-              } p-3`}>
-                <feature.icon className={`h-6 w-6 ${
-                  feature.color === 'blue' ? 'text-blue-600 dark:text-blue-400' : 
-                  feature.color === 'green' ? 'text-green-600 dark:text-green-400' : 
-                  'text-purple-600 dark:text-purple-400'
-                }`} />
+              <div
+                className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${
+                  feature.color === 'blue'
+                    ? 'from-blue-200/60 to-blue-400/20 dark:from-blue-900/30 dark:to-blue-800/20'
+                    : feature.color === 'green'
+                      ? 'from-green-200/60 to-green-400/20 dark:from-green-900/30 dark:to-green-800/20'
+                      : 'from-purple-200/60 to-purple-400/20 dark:from-purple-900/30 dark:to-purple-800/20'
+                } p-3`}
+              >
+                <feature.icon
+                  className={`h-6 w-6 ${
+                    feature.color === 'blue'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : feature.color === 'green'
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-purple-600 dark:text-purple-400'
+                  }`}
+                />
               </div>
               <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
               <p className="text-muted-foreground">{feature.description}</p>
-              <div className={`mt-4 h-1 w-12 rounded-full bg-gradient-to-r ${
-                feature.color === 'blue' ? 'from-blue-500 to-blue-400' : 
-                feature.color === 'green' ? 'from-green-500 to-green-400' : 
-                'from-purple-500 to-purple-400'
-              }`}></div>
+              <div
+                className={`mt-4 h-1 w-12 rounded-full bg-gradient-to-r ${
+                  feature.color === 'blue'
+                    ? 'from-blue-500 to-blue-400'
+                    : feature.color === 'green'
+                      ? 'from-green-500 to-green-400'
+                      : 'from-purple-500 to-purple-400'
+                }`}
+              ></div>
             </motion.div>
           ))}
         </motion.div>

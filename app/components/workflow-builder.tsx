@@ -32,7 +32,7 @@ export function WorkflowBuilder() {
 
       // Platform selection
       platform: 'github',
-      
+
       // Framework selection
       framework: 'expo',
 
@@ -89,7 +89,7 @@ export function WorkflowBuilder() {
       typescriptCheck: true,
       eslintCheck: true,
       prettierCheck: true,
-      unitTestsCheck: true
+      unitTestsCheck: true,
     };
   });
 
@@ -100,17 +100,20 @@ export function WorkflowBuilder() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState('configure');
 
-  // Generate YAML when form values change or on initial load
+  // Generate YAML when form values change, debounced to avoid regenerating on every keystroke
   useEffect(() => {
-    try {
-      const config = createConfigFromFormValues(formValues);
-      const result = generateWorkflowYaml(config);
-      setYamlContent(result.yaml);
-      setSecretsSummary(result.secretsSummary);
-    } catch (error) {
-      console.error('Error generating YAML:', error);
-      // Keep the previous valid YAML
-    }
+    const timer = setTimeout(() => {
+      try {
+        const config = createConfigFromFormValues(formValues);
+        const result = generateWorkflowYaml(config);
+        setYamlContent(result.yaml);
+        setSecretsSummary(result.secretsSummary);
+      } catch (error) {
+        console.error('Error generating YAML:', error);
+        // Keep the previous valid YAML
+      }
+    }, 300);
+    return () => clearTimeout(timer);
   }, [formValues]);
 
   const handleFormChange = (newValues: Record<string, unknown>) => {
@@ -156,18 +159,19 @@ export function WorkflowBuilder() {
       setYamlContent(result.yaml);
       setSecretsSummary(result.secretsSummary);
       setActiveTab('preview');
-      
+
       // Track workflow generation event
       trackWorkflowGenerated({
         platform: formValues.platform || 'github',
         preset: formValues.preset || 'build',
         framework: formValues.framework || 'expo',
         buildPlatform: formValues.buildPlatform,
-        buildVariant: formValues.buildVariant
+        buildVariant: formValues.buildVariant,
       });
-      
+
       // Scroll to the top of the workflow builder section when switching tabs
-      const workflowBuilderSection = document.getElementById('workflow-builder');
+      const workflowBuilderSection =
+        document.getElementById('workflow-builder');
       if (workflowBuilderSection) {
         workflowBuilderSection.scrollIntoView({ behavior: 'smooth' });
       }
@@ -197,7 +201,7 @@ export function WorkflowBuilder() {
 
         <Tabs
           value={activeTab}
-          onValueChange={(tab) => {
+          onValueChange={tab => {
             setActiveTab(tab);
             // Track tab change
             trackTabChanged({ tab });
@@ -254,9 +258,12 @@ export function WorkflowBuilder() {
                 onClick={() => {
                   setActiveTab('configure');
                   // Scroll to the top of the workflow builder section when switching tabs
-                  const workflowBuilderSection = document.getElementById('workflow-builder');
+                  const workflowBuilderSection =
+                    document.getElementById('workflow-builder');
                   if (workflowBuilderSection) {
-                    workflowBuilderSection.scrollIntoView({ behavior: 'smooth' });
+                    workflowBuilderSection.scrollIntoView({
+                      behavior: 'smooth',
+                    });
                   }
                 }}
                 className="flex items-center gap-2"
@@ -282,20 +289,34 @@ export function WorkflowBuilder() {
                 <Database className="h-5 w-5 text-primary" />
                 Next Steps
               </h3>
-              <ol className="list-inside list-decimal space-y-2 text-muted-foreground">
-                <li>
-                  Copy the generated workflow to a <code>.yml</code> file in
-                  your repository
-                </li>
-                <li>
-                  Place it in the <code>.github/workflows/</code> directory
-                </li>
-                <li>Commit and push to your GitHub repository</li>
-                <li>
-                  GitHub Actions will automatically run your workflow based on
-                  the triggers
-                </li>
-              </ol>
+              {formValues.platform === 'bitrise' ? (
+                <ol className="list-inside list-decimal space-y-2 text-muted-foreground">
+                  <li>
+                    Copy the generated YAML to a <code>bitrise.yml</code> file
+                    in your repository root
+                  </li>
+                  <li>Commit and push to your repository</li>
+                  <li>
+                    Bitrise will detect the <code>bitrise.yml</code> and run
+                    your workflow based on the configured triggers
+                  </li>
+                </ol>
+              ) : (
+                <ol className="list-inside list-decimal space-y-2 text-muted-foreground">
+                  <li>
+                    Copy the generated workflow to a <code>.yml</code> file in
+                    your repository
+                  </li>
+                  <li>
+                    Place it in the <code>.github/workflows/</code> directory
+                  </li>
+                  <li>Commit and push to your GitHub repository</li>
+                  <li>
+                    GitHub Actions will automatically run your workflow based on
+                    the triggers
+                  </li>
+                </ol>
+              )}
             </div>
           </TabsContent>
         </Tabs>

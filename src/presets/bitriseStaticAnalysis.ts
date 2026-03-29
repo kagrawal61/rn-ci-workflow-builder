@@ -7,6 +7,7 @@ export function buildBitriseStaticAnalysisPipeline(
     triggers,
     env,
     packageManager = 'yarn',
+    nodeVersions,
     framework = 'react-native-cli', // Default to React Native CLI if not specified
     staticAnalysis = {
       typescript: true,
@@ -22,7 +23,7 @@ export function buildBitriseStaticAnalysisPipeline(
     { NODE_OPTIONS: '--max_old_space_size=4096' },
     { YARN_ENABLE_IMMUTABLE_INSTALLS: '1' },
   ];
-  
+
   // Add Expo-specific environment variables if using Expo
   if (framework === 'expo') {
     defaultEnvs.push({ NODE_OPTIONS: '--openssl-legacy-provider' });
@@ -75,10 +76,10 @@ export function buildBitriseStaticAnalysisPipeline(
     },
     {
       'nvm@1': {
-        title: 'Setup Node.js 18',
+        title: `Setup Node.js ${String(nodeVersions?.[0] ?? 20)}`,
         inputs: [
           {
-            node_version: '18',
+            node_version: String(nodeVersions?.[0] ?? 20),
           },
         ],
       },
@@ -183,23 +184,26 @@ ${packageManager === 'yarn' ? 'yarn test --ci' : 'npm test -- --ci'}`,
   }
 
   // Expo-specific steps
-  const expoSteps: BitriseStep[] = framework === 'expo' ? [
-    {
-      'script@1': {
-        title: 'Install EAS CLI',
-        inputs: [
+  const expoSteps: BitriseStep[] =
+    framework === 'expo'
+      ? [
           {
-            content: `#!/usr/bin/env bash
+            'script@1': {
+              title: 'Install EAS CLI',
+              inputs: [
+                {
+                  content: `#!/usr/bin/env bash
 set -euo pipefail
 
 ${packageManager === 'yarn' ? 'yarn global add eas-cli@latest' : 'npm install -g eas-cli@latest'}
 echo "EAS CLI installed:"
 eas --version`,
+                },
+              ],
+            },
           },
-        ],
-      },
-    },
-  ] : [];
+        ]
+      : [];
 
   // Combine all steps
   const workflowSteps = [
@@ -252,15 +256,19 @@ eas --version`,
 
   // Set workflow name based on framework
   const workflowName = 'rn-static-analysis';
-  const workflowTitle = opts.name || 
-    (framework === 'expo' ? 'Expo Static Analysis' : 'React Native Static Analysis');
-  const workflowDescription = framework === 'expo'
-    ? 'Run static analysis for Expo app including TypeScript, ESLint, Prettier, and unit tests'
-    : 'Run static analysis including TypeScript, ESLint, Prettier, and unit tests';
-  
+  const workflowTitle =
+    opts.name ||
+    (framework === 'expo'
+      ? 'Expo Static Analysis'
+      : 'React Native Static Analysis');
+  const workflowDescription =
+    framework === 'expo'
+      ? 'Run static analysis for Expo app including TypeScript, ESLint, Prettier, and unit tests'
+      : 'Run static analysis including TypeScript, ESLint, Prettier, and unit tests';
+
   // Set project type based on framework
   const projectType = framework === 'expo' ? 'expo' : 'react-native';
-    
+
   return {
     format_version: 13,
     default_step_lib_source:

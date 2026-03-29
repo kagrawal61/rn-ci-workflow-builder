@@ -1,5 +1,13 @@
-import { AndroidOutputType, BuildOptions, NotificationType, Platform, StaticAnalysisOptions, StorageSolution, Variant } from '../../src/presets/types';
-import { CIPlatform, PackageManager } from '../../src/types';
+import {
+  AndroidOutputType,
+  BuildOptions,
+  NotificationType,
+  Platform,
+  StaticAnalysisOptions,
+  StorageSolution,
+  Variant,
+} from '../../src/presets/types';
+import { CIPlatform, PackageManager, PipelineKind } from '../../src/types';
 import { generateWorkflow, getAvailablePresets, WorkflowConfig } from './lib';
 
 // Helper to create a default static analysis configuration
@@ -66,7 +74,9 @@ export const createDefaultBuildConfig = (): WorkflowConfig => {
 };
 
 // Helper to generate workflow YAML
-export const generateWorkflowYaml = (config: WorkflowConfig): { yaml: string; secretsSummary?: string } => {
+export const generateWorkflowYaml = (
+  config: WorkflowConfig
+): { yaml: string; secretsSummary?: string } => {
   return generateWorkflow(config);
 };
 
@@ -77,14 +87,18 @@ export const getPresetKinds = (): string[] => {
 };
 
 // Create a config from form values
-export const createConfigFromFormValues = (formValues: Record<string, unknown>): WorkflowConfig => {
+export const createConfigFromFormValues = (
+  formValues: Record<string, unknown>
+): WorkflowConfig => {
   // Create a properly typed configuration object to avoid type errors
   const config: Required<WorkflowConfig> = {
-    kind: (formValues.preset as string) || 'static-analysis',
+    kind: ((formValues.preset as string) || 'static-analysis') as PipelineKind,
     options: {
       name: '',
       platform: (formValues.platform as CIPlatform) || 'github',
-      framework: (formValues.framework as 'react-native-cli' | 'expo') || 'react-native-cli',
+      framework:
+        (formValues.framework as 'react-native-cli' | 'expo') ||
+        'react-native-cli',
       triggers: {},
       nodeVersions: [],
       packageManager: 'yarn',
@@ -115,7 +129,9 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
         ?.split(',')
         .map((b: string) => b.trim()) || ['main'],
       ignorePaths:
-        (formValues.ignorePaths as string)?.split(',').map((p: string) => p.trim()) || [],
+        (formValues.ignorePaths as string)
+          ?.split(',')
+          .map((p: string) => p.trim()) || [],
     };
   }
 
@@ -132,7 +148,9 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
   }
 
   if (formValues.enableScheduleTrigger && formValues.cronExpression) {
-    config.options.triggers.schedule = [{ cron: formValues.cronExpression as string }];
+    config.options.triggers.schedule = [
+      { cron: formValues.cronExpression as string },
+    ];
   }
 
   // Handle Node.js version (single version)
@@ -163,22 +181,26 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
     const buildConfig: BuildOptions = {
       // Override any iOS or both selection to use Android-only for now
       // This will be removed when iOS support is ready
-      platform: (formValues.buildPlatform as string) === 'ios' || (formValues.buildPlatform as string) === 'both' 
-        ? 'android' 
-        : (formValues.buildPlatform as Platform) || 'android',
+      platform:
+        (formValues.buildPlatform as string) === 'ios' ||
+        (formValues.buildPlatform as string) === 'both'
+          ? 'android'
+          : (formValues.buildPlatform as Platform) || 'android',
       variant: (formValues.buildVariant as Variant) || 'release',
       storage: (formValues.buildStorage as StorageSolution) || 'github',
-      notification: (formValues.buildNotification as NotificationType) || 'pr-comment',
+      notification:
+        (formValues.buildNotification as NotificationType) || 'pr-comment',
       includeStaticAnalysis:
         typeof formValues.includeStaticAnalysis === 'boolean'
           ? formValues.includeStaticAnalysis
           : true,
-      androidOutputType: (formValues.androidOutputType as AndroidOutputType) || 'apk', // 'apk', 'aab', or 'both'
+      androidOutputType:
+        (formValues.androidOutputType as AndroidOutputType) || 'apk', // 'apk', 'aab', or 'both'
     };
 
     // Add the build config to options
     config.options.build = buildConfig;
-    
+
     // Add static analysis options if include static analysis is enabled
     if (buildConfig.includeStaticAnalysis) {
       config.options.staticAnalysis = {
@@ -195,7 +217,9 @@ export const createConfigFromFormValues = (formValues: Record<string, unknown>):
       eslint: formValues.eslintCheck === false ? false : true,
       prettier: formValues.prettierCheck === false ? false : true,
       unitTests: formValues.unitTestsCheck === false ? false : true,
-      notification: (formValues.staticAnalysisNotification as NotificationType) || 'pr-comment',
+      notification:
+        (formValues.staticAnalysisNotification as NotificationType) ||
+        'pr-comment',
     };
 
     // Add the static analysis config to options
