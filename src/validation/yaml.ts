@@ -900,6 +900,21 @@ export async function validateYamlContentWithYamllint(
 }
 
 /**
+ * Returns true if the object looks like a Codemagic config
+ * (workflows whose values contain 'instance_type' or 'scripts', not Bitrise 'steps')
+ */
+function isCodemagicConfig(obj: Record<string, unknown>): boolean {
+  const workflows = obj.workflows;
+  if (!workflows || typeof workflows !== 'object') return false;
+  return Object.values(workflows as Record<string, unknown>).some(
+    wf =>
+      typeof wf === 'object' &&
+      wf !== null &&
+      ('instance_type' in wf || 'scripts' in wf)
+  );
+}
+
+/**
  * Validates that the YAML object structure follows GitHub Actions schema
  * @param parsedYaml Parsed YAML object
  */
@@ -913,17 +928,30 @@ function validateWorkflowStructure(parsedYaml: unknown): void {
     throw new Error('Generated workflow is not a valid object');
   }
 
-  // Detect if this is a Bitrise configuration or GitHub Actions workflow
-  if (
-    typeof parsedYaml === 'object' &&
-    parsedYaml &&
-    'format_version' in parsedYaml
-  ) {
-    // This is a Bitrise configuration
-    validateBitriseStructure(parsedYaml as Record<string, unknown>);
-  } else if (typeof parsedYaml === 'object' && parsedYaml) {
-    // This is a GitHub Actions workflow
-    validateGitHubActionsStructure(parsedYaml as Record<string, unknown>);
+  const obj = parsedYaml as Record<string, unknown>;
+
+  // Detect platform by distinctive top-level keys
+  if ('format_version' in obj) {
+    // Bitrise configuration
+    validateBitriseStructure(obj);
+  } else if ('stages' in obj && !('jobs' in obj)) {
+    // GitLab CI — must have at least one stage
+    if (!Array.isArray(obj.stages) || obj.stages.length === 0) {
+      throw new Error('GitLab CI configuration must have at least one stage');
+    }
+  } else if ('version' in obj && typeof obj.version === 'number' && obj.version >= 2) {
+    // CircleCI config (version: 2 or 2.1)
+    if (!obj.jobs || typeof obj.jobs !== 'object') {
+      throw new Error('CircleCI configuration must have at least one job');
+    }
+  } else if ('workflows' in obj && !('format_version' in obj) && isCodemagicConfig(obj)) {
+    // Codemagic configuration (workflows with instance_type or scripts — not Bitrise step format)
+    if (!obj.workflows || typeof obj.workflows !== 'object' || Object.keys(obj.workflows).length === 0) {
+      throw new Error('Codemagic configuration must have at least one workflow');
+    }
+  } else {
+    // GitHub Actions workflow
+    validateGitHubActionsStructure(obj);
   }
 }
 
