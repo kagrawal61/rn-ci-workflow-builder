@@ -5,10 +5,24 @@ import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Configuration Reference — React Native CI/CD Workflow Builder',
+  title: 'Configuration Reference',
   description:
-    'Complete reference for all workflow configuration options including package manager, platform targets, Node version, and more.',
+    'Complete reference for all React Native CI/CD workflow configuration options — triggers, Node.js versions, package manager, platform targets, build variants, storage, and notifications.',
   alternates: { canonical: '/docs/configuration' },
+  openGraph: {
+    title: 'Configuration Reference | Mobile CI Builder',
+    description:
+      'All workflow configuration options — triggers, Node.js versions, package manager, platform targets, build variants, and more.',
+    url: 'https://www.mobilecibuilder.com/docs/configuration',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Configuration Reference | Mobile CI Builder',
+    description:
+      'All workflow configuration options — triggers, Node.js versions, package manager, platform targets, build variants, and more.',
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function ConfigurationPage() {

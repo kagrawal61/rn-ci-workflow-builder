@@ -3,10 +3,24 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Getting Started — React Native CI/CD Workflow Builder',
+  title: 'Getting Started',
   description:
-    'Set up your first CI/CD workflow for your React Native app in minutes using our visual builder.',
+    'Set up your first CI/CD workflow for your React Native or Expo app in minutes. Choose a preset, configure options, generate YAML, and drop it into your repo.',
   alternates: { canonical: '/docs/getting-started' },
+  openGraph: {
+    title: 'Getting Started | Mobile CI Builder',
+    description:
+      'Set up your first CI/CD workflow for your React Native or Expo app in minutes. No manual YAML writing required.',
+    url: 'https://www.mobilecibuilder.com/docs/getting-started',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Getting Started | Mobile CI Builder',
+    description:
+      'Set up your first CI/CD workflow for your React Native or Expo app in minutes.',
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function GettingStartedPage() {

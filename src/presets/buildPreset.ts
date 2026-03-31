@@ -137,7 +137,6 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
       buildJob.steps = platformHelpers.createExpoBuildSteps(
         setupSteps,
         packageManager,
-        '',
         build
       );
 
@@ -154,17 +153,10 @@ export function buildBuildPipeline(opts: WorkflowOptions): GitHubWorkflow {
       if (platform === 'android') {
         buildJob.steps = platformHelpers.createAndroidBuildSteps(
           setupSteps,
-          packageManager,
-          '',
           build
         );
       } else if (platform === 'ios') {
-        buildJob.steps = platformHelpers.createIOSBuildSteps(
-          setupSteps,
-          packageManager,
-          '',
-          build
-        );
+        buildJob.steps = platformHelpers.createIOSBuildSteps(setupSteps, build);
       }
 
       // Add storage steps if configured

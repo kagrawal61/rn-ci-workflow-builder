@@ -600,7 +600,6 @@ cd android
 }
 cd ..
 
-
 echo "✅ Android build completed successfully"
 
 # Verify the expected outputs based on output type
@@ -769,7 +768,6 @@ cd android
   exit 1
 }
 cd ..
-
 
 echo "✅ Android build completed successfully"
 

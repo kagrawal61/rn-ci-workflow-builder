@@ -1,10 +1,24 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Secrets Management — React Native CI/CD Workflow Builder',
+  title: 'Secrets Management',
   description:
-    'Securely handle API keys, signing certificates, and deployment credentials in your React Native CI/CD workflow configurations.',
+    'Securely handle API keys, signing certificates, Firebase credentials, and deployment tokens in GitHub Actions and Bitrise workflows for React Native apps.',
   alternates: { canonical: '/docs/secrets-management' },
+  openGraph: {
+    title: 'Secrets Management | Mobile CI Builder',
+    description:
+      'Securely handle API keys, signing certificates, and deployment credentials in GitHub Actions and Bitrise workflows.',
+    url: 'https://www.mobilecibuilder.com/docs/secrets-management',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Secrets Management | Mobile CI Builder',
+    description:
+      'Securely handle API keys, signing certificates, and deployment credentials in GitHub Actions and Bitrise workflows.',
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function SecretsManagementPage() {
